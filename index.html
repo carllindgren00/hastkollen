@@ -165,6 +165,12 @@ details.race summary::-webkit-details-marker{display:none}
 .src a{color:var(--accent)}
 .disclaimer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;margin-top:8px;display:flex;flex-direction:column;gap:6px}
 .disclaimer p{margin:0}
+html,body{overscroll-behavior-y:contain}
+.ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:10;transform:translate(-50%,-70px);display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:99px;background:var(--surface);color:var(--fg);box-shadow:0 2px 10px rgba(0,0,0,.15);font-size:.82rem;font-weight:600;pointer-events:none;opacity:0}
+.ptr i{display:inline-block;width:14px;height:14px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%}
+.ptr.ready i{border-color:var(--accent)}
+.ptr.busy i{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .disclaimer strong{color:var(--fg)}
 .disclaimer a{color:var(--accent)}
 
@@ -213,6 +219,7 @@ details.race summary::-webkit-details-marker{display:none}
 </style>
 </head>
 <body>
+<div class="ptr" id="ptr" aria-live="polite"><i></i><span>Dra för att uppdatera</span></div>
 <div class="wrap">
   <div class="top">
     <div>
@@ -630,9 +637,29 @@ $("budget").addEventListener("input",renderSpel);$("facit").addEventListener("ch
 $("rlist").addEventListener("click",e=>{if(!e.target.closest("#moreRounds"))return;const l=$("rlist");l.dataset.all=l.dataset.all==="1"?"0":"1";renderHist()});
 const tabs={"t-spel":"p-spel","t-andel":"p-andel","t-hist":"p-hist","t-inst":"p-inst","t-logg":"p-logg"};
 Object.keys(tabs).forEach(t=>$(t).addEventListener("click",()=>{Object.entries(tabs).forEach(([b,p])=>{$(b).setAttribute("aria-selected",b===t);$(p).hidden=b!==t});if(t==="t-hist"&&histDirty)renderHist()}));
+// läget sparas inför dra-ned-uppdatering och läses in igen efteråt
+window.v85State=()=>({budget:$("budget").value,mode:MODE,minwin:MINWIN,tab:Object.keys(tabs).find(t=>$(t).getAttribute("aria-selected")==="true")});
+let saved=null;try{saved=JSON.parse(sessionStorage.getItem("v85-state"));sessionStorage.removeItem("v85-state")}catch(e){}
+if(saved){$("budget").value=saved.budget;MODE=saved.mode;V=MODE==="s"?0.8:+MODE;MINWIN=+saved.minwin}
 renderWeights();renderSpel();renderHist();
+if(saved&&saved.tab&&saved.tab!=="t-spel")$(saved.tab).click();
+if(saved)toast("Uppdaterad · "+$("dateline").textContent.split(" · ").pop());
 }).catch(()=>{const p=document.createElement("p");p.className="info";p.textContent="Kunde inte hämta datan. Kontrollera nätet och ladda om sidan.";document.querySelector(".wrap").prepend(p)});
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+// dra ned för att uppdatera: hämtar det senaste som GitHub Actions sparat från ATG
+(()=>{
+  const el=document.getElementById("ptr"),txt=el.querySelector("span"),LIMIT=70;
+  let y0=null,dy=0,busy=false;
+  const show=d=>{el.style.transform=`translate(-50%,${Math.min(d,LIMIT+20)-70}px)`;el.style.opacity=Math.min(1,d/LIMIT)};
+  addEventListener("touchstart",e=>{if(busy||scrollY>0||e.touches.length>1)return;y0=e.touches[0].clientY;dy=0},{passive:true});
+  addEventListener("touchmove",e=>{if(y0===null)return;dy=(e.touches[0].clientY-y0)*0.5;if(dy<=0){show(0);return}
+    show(dy);const ready=dy>=LIMIT;el.classList.toggle("ready",ready);txt.textContent=ready?"Släpp för att uppdatera":"Dra för att uppdatera"},{passive:true});
+  addEventListener("touchend",()=>{if(y0===null)return;y0=null;
+    if(dy<LIMIT){el.style.transition="transform .2s,opacity .2s";show(0);setTimeout(()=>el.style.transition="",200);return}
+    busy=true;el.classList.add("busy");txt.textContent="Uppdaterar…";show(LIMIT);
+    try{if(window.v85State)sessionStorage.setItem("v85-state",JSON.stringify(v85State()))}catch(e){}
+    location.reload()});
+})();
 </script>
 
 </body>
