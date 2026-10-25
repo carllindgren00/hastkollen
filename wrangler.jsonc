@@ -1,8 +1,12 @@
-// Cloudflare: publicera appen i public/ som statiska filer (ingen server-kod)
+// Cloudflare: lösenordsskyddet i src/index.js körs före varje fil i public/.
+// Lösenordet sätts som hemligheten APP_PASSWORD under Settings → Variables and Secrets.
 {
   "name": "hastkollen",
+  "main": "src/index.js",
   "compatibility_date": "2025-09-01",
   "assets": {
-    "directory": "./public"
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true
   }
 }

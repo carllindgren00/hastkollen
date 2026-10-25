@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>V85-kollen</title>
 <meta name="description" content="V85-kupong med modell, andelar och historik, med data från ATG.">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#f6f7f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#101411" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -362,10 +362,10 @@ html,body{overscroll-behavior-y:contain}
 </div>
 
 <script>
-fetch("data/v85.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error(r.status);
+fetch("data/v85.json",{cache:"no-cache"}).then(r=>{if(r.status===401){location.reload();throw new Error("inloggning")}if(!r.ok)throw new Error(r.status);
   // svaret kommer från mobilens cache när nätet eller inloggningen inte släppte igenom en färsk hämtning
   if(r.headers.get("x-v85-cache")){const p=document.createElement("p");p.className="info";
-    p.textContent="Visar sparad data. Har inloggningen gått ut? Dra ned för att uppdatera och logga in igen.";document.querySelector(".wrap").prepend(p)}
+    p.textContent="Visar sparad data, eftersom ny data inte gick att hämta. Dra ned för att uppdatera.";document.querySelector(".wrap").prepend(p)}
   return r.json()}).then(D=>{
 const PRICE=0.5, K8=0.3*0.65*PRICE; // andel av insatsen som går till 8 rätt, per rad
 const rounds=D.rounds, cur=D.cur;
