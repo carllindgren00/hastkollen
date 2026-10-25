@@ -2,7 +2,7 @@
 
 Webbapp för V85: modell, kupong, andelar och historik med data från ATG.
 
-Appen: https://carllindgren00.github.io/hastkollen/ (öppna i mobilen och välj "Lägg till på hemskärmen").
+Appen ligger på Cloudflare Pages bakom Cloudflare Access, så bara godkända e-postadresser kommer in. Öppna den i mobilen och välj "Lägg till på hemskärmen".
 
 ## Så fungerar det
 

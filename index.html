@@ -362,7 +362,11 @@ html,body{overscroll-behavior-y:contain}
 </div>
 
 <script>
-fetch("data/v85.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(D=>{
+fetch("data/v85.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error(r.status);
+  // svaret kommer från mobilens cache när nätet eller inloggningen inte släppte igenom en färsk hämtning
+  if(r.headers.get("x-v85-cache")){const p=document.createElement("p");p.className="info";
+    p.textContent="Visar sparad data. Har inloggningen gått ut? Dra ned för att uppdatera och logga in igen.";document.querySelector(".wrap").prepend(p)}
+  return r.json()}).then(D=>{
 const PRICE=0.5, K8=0.3*0.65*PRICE; // andel av insatsen som går till 8 rätt, per rad
 const rounds=D.rounds, cur=D.cur;
 // spelprocent normeras över de hästar som startar
