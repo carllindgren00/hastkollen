@@ -57,6 +57,9 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid
 .seg button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .panel{display:flex;flex-direction:column;gap:16px}
 .info{font-size:.85rem;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:0}
+.next{background:var(--gold-soft);border:1px solid var(--gold);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.next b{color:var(--fg);font-size:.95rem}
+.next span{font-size:.85rem;color:var(--fg);opacity:.8}
 
 .ticket{background:var(--surface);border-radius:var(--r);box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 24px rgba(20,40,28,.06);overflow:hidden}
 .ticket-head{padding:18px 18px 14px;display:flex;flex-direction:column;gap:14px}
@@ -238,6 +241,7 @@ html,body{overscroll-behavior-y:contain}
   </div>
 
   <section class="panel" id="p-spel">
+    <div class="next" id="nextBox" hidden><b id="nextTitle"></b><span id="nextText"></span></div>
     <p class="info" id="roundInfo"></p>
     <div class="ticket">
       <div class="ticket-head">
@@ -471,9 +475,13 @@ function payout(pick,F,pay){
 }
 const upd=new Date(D.updated).toLocaleString("sv-SE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
 
-$("dateline").textContent=cap(dname(cur.date))+" · "+cur.track+" · hämtat från ATG "+upd;
+$("dateline").textContent=(cur.done?"Förra omgången: ":"")+cap(dname(cur.date))+" · "+cur.track+" · hämtat från ATG "+upd;
+if(cur.done&&(D.waiting||D.next)){const w=D.waiting;
+  $("nextTitle").textContent="Nästa: "+(w?w.track+" ":"")+dname(w?w.date:D.next)+(w&&w.start?" kl "+w.start.slice(11,16):"");
+  $("nextText").textContent=w?"Startlistan är klar, men ATG har inte öppnat spelet än. Kupongen byggs när odds och spelprocent finns, oftast några dagar före loppen. Under tiden visas förra omgången, så du kan se hur modellen hade gått.":"Startlistan är inte publicerad än. Under tiden visas förra omgången, så du kan se hur modellen hade gått.";
+  $("nextBox").hidden=false}
 $("roundInfo").textContent=cur.done
-  ?`Senast körda omgången, ${cur.track} ${dname(cur.date)}, med slutodds och spelprocent från ATG. Slå på facit för att se hur kupongen hade gått.${D.waiting?` Startlistan för ${D.waiting.track} ${dname(D.waiting.date)} är klar. Den läggs in när ATG öppnar spelet och odds och spelprocent finns.`:D.next?` Nästa omgång, ${dname(D.next)}, läggs in när ATG publicerar startlistan.`:""}`
+  ?`Senast körda omgången, ${cur.track} ${dname(cur.date)}, med slutodds och spelprocent från ATG. Slå på facit för att se hur kupongen hade gått.`
   :`Kommande omgång, ${cur.track} ${dname(cur.date)}${cur.start?" kl "+cur.start.slice(11,16):""}. Odds och spelprocent hämtades från ATG ${upd} och ändras fram till start.`;
 if(!cur.done){$("facit").checked=false;$("facit").parentElement.hidden=true}
 $("presets").innerHTML=[100,250,500,1000].map(v=>`<button type="button" data-v="${v}">${v} kr</button>`).join("");

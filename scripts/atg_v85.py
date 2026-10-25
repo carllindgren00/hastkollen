@@ -94,7 +94,7 @@ def build(cache, today):
             continue
         if not (g.get("pools") or {}).get("V85"):
             # startlistan är ute men spelet har inte öppnat: inga odds eller V85-procent än
-            waiting = {"date": date, "track": g["races"][0]["track"]["name"]}
+            waiting = {"date": date, "track": g["races"][0]["track"]["name"], "start": g["races"][0].get("startTime")}
             continue
         pool = g["pools"]["V85"]
         res = (pool.get("result") or {}).get("payouts") or {}
