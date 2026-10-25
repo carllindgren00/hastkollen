@@ -20,4 +20,6 @@ python3 -m http.server
 
 Öppna sedan http://localhost:8000.
 
-ATG:s API är inofficiellt och kan ändras utan förvarning.
+ATG:s API är inofficiellt och kan ändras utan förvarning. Appen har ingen koppling till ATG.
+
+**Spela bara för pengar du har råd att förlora.** Det här är ett privat analysverktyg, inga speltips, och modellen ger ingen garanti att vinna. 18-årsgräns för spel. Pausa allt spel på [spelpaus.se](https://www.spelpaus.se), stöd och råd hos [Stödlinjen](https://www.stodlinjen.se), 020-81 91 00.
