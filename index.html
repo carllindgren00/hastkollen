@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>V85-kollen</title>
+<meta name="description" content="V85-kupong med modell, andelar och historik, med data från ATG.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#f6f7f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101411" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="V85-kollen">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+img{max-width:100%}
+/* Layout: en kolumn — kupong överst, avdelningar som utfällbara kort, historik och inställningar i egna flikar */
+:root{
+  --bg:#f6f7f5; --surface:#ffffff; --sunk:#eef1ed; --fg:#17201a; --muted:#6b776e; --line:#e3e7e2;
+  --accent:#1e6a46; --accent-ink:#ffffff; --accent-soft:#e3efe7;
+  --gold:#8f6400; --gold-soft:#f7eed9; --warn:#a33b2b; --warn-soft:#f8e4df;
+  --sans:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101411; --surface:#171d19; --sunk:#1e2621; --fg:#e8ede9; --muted:#8e9b92; --line:#252e28;
+  --accent:#56c28a; --accent-ink:#0b1810; --accent-soft:#1c3226;
+  --gold:#e3b552; --gold-soft:#2f2718; --warn:#ef8a78; --warn-soft:#3a2420; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101411; --surface:#171d19; --sunk:#1e2621; --fg:#e8ede9; --muted:#8e9b92; --line:#252e28;
+  --accent:#56c28a; --accent-ink:#0b1810; --accent-soft:#1c3226;
+  --gold:#e3b552; --gold-soft:#2f2718; --warn:#ef8a78; --warn-soft:#3a2420; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:640px;margin:0 auto;padding-block:24px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.015em;text-wrap:balance;line-height:1.15}
+h1{font-size:1.9rem}
+h2{font-size:1.15rem}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.sub{color:var(--muted);font-size:.9rem;margin:2px 0 0}
+.tag{font:500 .7rem var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:4px 8px;border-radius:99px;white-space:nowrap}
+button{font-family:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:flex;background:var(--sunk);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;min-width:0;border:0;background:transparent;color:var(--muted);font-weight:600;font-size:.92rem;padding:9px 4px;border-radius:9px}
+@media (max-width:420px){.seg button{font-size:.82rem}}
+.t{font:500 .72rem var(--mono);padding:2px 6px;border-radius:5px;background:var(--sunk);color:var(--muted)}
+.t.pre{background:var(--accent-soft);color:var(--accent)}
+.seg button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.panel{display:flex;flex-direction:column;gap:16px}
+.info{font-size:.85rem;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:0}
+
+.ticket{background:var(--surface);border-radius:var(--r);box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 24px rgba(20,40,28,.06);overflow:hidden}
+.ticket-head{padding:18px 18px 14px;display:flex;flex-direction:column;gap:14px}
+.budget-row{display:flex;justify-content:space-between;align-items:baseline}
+.budget-row label{font-size:.85rem;color:var(--muted)}
+.budget-val{font:600 1.6rem var(--mono);font-variant-numeric:tabular-nums}
+.presets{display:flex;gap:6px;flex-wrap:wrap}
+.presets button{flex:1;min-width:56px;border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:99px;padding:7px 4px;font:500 .85rem var(--mono)}
+.presets button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+input[type=range]{width:100%;accent-color:var(--accent);margin:0}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.kpis div{padding:12px 18px;display:flex;flex-direction:column;gap:2px}
+.kpis div+div{border-left:1px solid var(--line)}
+.kpis span:first-child{font-size:.75rem;color:var(--muted)}
+.kpis span:last-child{font:600 1.05rem var(--mono);font-variant-numeric:tabular-nums}
+.legs{border-top:1px solid var(--line);padding:8px 10px}
+.leg{display:grid;grid-template-columns:46px 1fr auto;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;width:100%;border:0;background:transparent;text-align:left;color:inherit}
+.leg:hover{background:var(--sunk)}
+.leg .avd{font:500 .78rem var(--mono);color:var(--muted)}
+.nums{display:flex;gap:5px;flex-wrap:wrap}
+.num{display:inline-grid;place-items:center;min-width:28px;height:28px;padding:0 4px;border-radius:8px;background:var(--accent-soft);color:var(--accent);font:600 .85rem var(--mono)}
+.num.spik{background:var(--accent);color:var(--accent-ink)}
+.mark{font:600 .8rem var(--mono);width:22px;text-align:center}
+.mark.ok{color:var(--accent)}
+.mark.miss{color:var(--warn)}
+.result{border-top:1px solid var(--line);padding:12px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.result b{font:600 1.05rem var(--mono)}
+.result span{font-size:.85rem;color:var(--muted)}
+.result.win{background:var(--accent-soft)}
+.ticket-foot{display:flex;gap:8px;padding:12px 18px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.btn{flex:1;border:0;border-radius:10px;padding:11px;font-weight:600;font-size:.92rem;min-width:110px}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:var(--sunk);color:var(--fg)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:.88rem;color:var(--muted);cursor:pointer}
+.toggle input{accent-color:var(--accent);width:18px;height:18px}
+.toast{font-size:.82rem;color:var(--accent);text-align:center;min-height:1.2em;margin:-8px 0 0}
+.section-title{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:4px}
+.hint{font-size:.82rem;color:var(--muted)}
+
+details.race{background:var(--surface);border-radius:var(--r);border:1px solid var(--line)}
+details.race[open]{box-shadow:0 6px 24px rgba(20,40,28,.06)}
+details.race summary{list-style:none;display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;padding:14px 16px;cursor:pointer}
+details.race summary::-webkit-details-marker{display:none}
+.avd-badge{width:40px;height:40px;border-radius:12px;background:var(--sunk);display:grid;place-items:center;font:600 1rem var(--mono)}
+.race-info{min-width:0}
+.race-info h3{font-size:1rem}
+.race-info p{margin:0;font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status{font-size:.75rem;font-weight:600;padding:4px 9px;border-radius:99px;white-space:nowrap}
+.status.spik{background:var(--accent);color:var(--accent-ink)}
+.status.gard{background:var(--accent-soft);color:var(--accent)}
+.status.oppen{background:var(--sunk);color:var(--muted)}
+.horses{border-top:1px solid var(--line);padding:6px 8px 10px}
+.horse{display:grid;grid-template-columns:32px 1fr 92px 24px;gap:10px;align-items:center;width:100%;border:0;background:transparent;color:inherit;text-align:left;padding:9px 8px;border-radius:10px}
+.horse:hover{background:var(--sunk)}
+.horse:disabled{cursor:default;opacity:.45}
+.horse:disabled:hover{background:transparent}
+.hnr{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;font:600 .88rem var(--mono);background:var(--sunk);color:var(--muted)}
+.horse.in .hnr{background:var(--accent);color:var(--accent-ink)}
+.hname{min-width:0}
+.hname b{display:block;font-weight:600;font-size:.93rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.horse:not(.in) .hname b{font-weight:500;color:var(--muted)}
+.hname span{font-size:.76rem;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.badge{font:600 .64rem var(--mono);border-radius:4px;padding:1px 5px;letter-spacing:.04em}
+.badge.value{color:var(--gold);background:var(--gold-soft)}
+.badge.won{color:var(--accent-ink);background:var(--accent)}
+.badge.kusk{color:var(--accent);background:var(--accent-soft)}
+.meter{display:flex;flex-direction:column;gap:4px;font-variant-numeric:tabular-nums}
+.meter .lbl{display:flex;justify-content:space-between;font:500 .78rem var(--mono)}
+.meter .lbl em{font-style:normal;color:var(--muted)}
+.track{height:5px;border-radius:3px;background:var(--sunk);position:relative;overflow:hidden}
+.track i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:3px}
+.track u{position:absolute;top:-1px;bottom:-1px;width:2px;background:var(--fg);opacity:.35}
+.lock{font-size:.85rem;color:var(--muted);text-align:center}
+.horse.forced .lock{color:var(--accent)}
+.horse.out .lock{color:var(--warn)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.76rem;color:var(--muted);padding:4px 8px 0}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:14px;height:5px;border-radius:3px;background:var(--accent)}
+.legend u{display:inline-block;width:2px;height:10px;background:var(--fg);opacity:.35}
+
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:14px}
+.card p{margin:0;color:var(--muted);font-size:.88rem}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bars .row{display:grid;grid-template-columns:104px 1fr 84px;gap:10px;align-items:center;font-size:.86rem}
+.bars .row b{font:600 .84rem var(--mono);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.bars .track{height:10px;border-radius:5px}
+.rlist{display:flex;flex-direction:column}
+.rrow{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:10px 0;border-top:1px solid var(--line)}
+.rrow:first-child{border-top:0}
+.rrow h3{font-size:.95rem}
+.rrow .when{font-size:.78rem;color:var(--muted)}
+.rrow .pay{font:600 .95rem var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.rrow .odds{grid-column:1/-1;display:flex;gap:4px;flex-wrap:wrap}
+.o{font:500 .72rem var(--mono);padding:2px 6px;border-radius:5px;background:var(--sunk);color:var(--muted)}
+.o.fav{background:var(--accent-soft);color:var(--accent)}
+.o.skr{background:var(--gold-soft);color:var(--gold);font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stats div{background:var(--sunk);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column}
+.stats span:first-child{font-size:.74rem;color:var(--muted)}
+.stats span:last-child{font:600 1.15rem var(--mono);font-variant-numeric:tabular-nums}
+.weights{display:flex;flex-direction:column;gap:16px}
+.w label{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:6px}
+.w label output{font:500 .85rem var(--mono);color:var(--muted)}
+.w small{display:block;color:var(--muted);font-size:.78rem;margin-top:4px}
+.src{font-size:.78rem;color:var(--muted)}
+.src a{color:var(--accent)}
+
+@media (max-width:420px){
+  .kpis div{padding:10px 12px}
+  .horse{grid-template-columns:30px 1fr 78px 20px;gap:8px}
+  .stats{gap:6px}.stats div{padding:8px}
+  .bars .row{grid-template-columns:92px 1fr 80px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+.mode{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:10px}
+.mode button{flex:1;border:0;background:transparent;color:var(--muted);font-weight:600;font-size:.84rem;padding:8px 4px;border-radius:7px}
+.mode button[aria-checked="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.modehint{margin:-4px 0 0;font-size:.8rem;color:var(--muted)}
+.minwin{display:flex;flex-direction:column;gap:6px}
+.minwin>span{font-size:.85rem;color:var(--muted)}
+.minwin .presets button{white-space:nowrap;min-width:0;font-size:.78rem;padding:7px 2px}
+.mode button{min-width:0}
+@media (max-width:420px){.mode button{font-size:.78rem}}
+.kpis.four{grid-template-columns:repeat(4,1fr)}
+.kpis span:first-child{line-height:1.25}
+.kpis .good,.tbl .good{color:var(--accent)}
+.kpis .bad{color:var(--warn)}
+.badge.over{color:var(--warn);background:var(--warn-soft)}
+.hname .tr{font-size:.72rem;opacity:.85}
+.fields{display:flex;flex-direction:column;gap:14px}
+.field{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:.9rem}
+.field input{width:96px;font:500 1rem var(--mono);padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);text-align:right}
+.small{font-size:.8rem!important}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ccol{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ccol.hi{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.ccol h3{font-size:1rem}
+.ccol dl{margin:0;display:flex;flex-direction:column;gap:8px}
+.ccol dl div{display:flex;flex-direction:column}
+.ccol dt{font-size:.74rem;color:var(--muted)}
+.ccol dd{margin:0;font:600 1rem var(--mono);font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto}
+.tbl table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.tbl th{font-size:.74rem;color:var(--muted);font-weight:600;text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:8px;border-bottom:1px solid var(--line);font-size:.85rem;white-space:nowrap}
+.tbl td b{font:600 .9rem var(--mono);display:block}
+.tbl td small{color:var(--muted);font-family:var(--mono);font-size:.74rem}
+@media (max-width:520px){.kpis.four{grid-template-columns:1fr 1fr}.kpis.four div:nth-child(3){border-left:0}.kpis.four div:nth-child(n+3){border-top:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>V85-kollen</h1>
+      <p class="sub" id="dateline"></p>
+    </div>
+    <span class="tag">ATG-data</span>
+  </div>
+
+  <div class="seg" role="tablist">
+    <button role="tab" id="t-spel" aria-selected="true">Spel</button>
+    <button role="tab" id="t-andel" aria-selected="false">Andelar</button>
+    <button role="tab" id="t-hist" aria-selected="false">Historik</button>
+    <button role="tab" id="t-inst" aria-selected="false">Modell</button>
+    <button role="tab" id="t-logg" aria-selected="false">Logg</button>
+  </div>
+
+  <section class="panel" id="p-spel">
+    <p class="info" id="roundInfo"></p>
+    <div class="ticket">
+      <div class="ticket-head">
+        <div class="budget-row"><label for="budget">Din budget</label><span class="budget-val" id="budgetOut"></span></div>
+        <div class="presets" id="presets"></div>
+        <input type="range" id="budget" min="50" max="2000" step="25" value="250" aria-label="Budget i kronor">
+        <div class="mode" role="radiogroup" aria-label="Spelstil">
+          <button type="button" data-v="0" role="radio">Max chans</button>
+          <button type="button" data-v="0.5" role="radio">Balans</button>
+          <button type="button" data-v="0.8" role="radio">Jaga värde</button>
+          <button type="button" data-v="s" role="radio">Storvinst</button>
+        </div>
+        <p class="modehint" id="modeHint"></p>
+        <div class="minwin" id="minwin" hidden><span>Minsta vinst vid 8 rätt</span><div class="presets" id="minPresets"></div></div>
+      </div>
+      <div class="kpis four">
+        <div><span>Kostnad</span><span id="sCost"></span></div>
+        <div><span>Chans 8 rätt</span><span id="sHit"></span></div>
+        <div><span>Snittvinst vid 8 rätt</span><span id="sPay"></span></div>
+        <div><span id="sValLbl">Värde mot snittet</span><span id="sVal"></span></div>
+      </div>
+      <div class="legs" id="legs"></div>
+      <div class="result" id="result" hidden></div>
+      <div class="ticket-foot">
+        <label class="toggle" for="facit"><input type="checkbox" id="facit" checked>Visa facit</label>
+        <button class="btn ghost" id="reset">Återställ</button>
+        <button class="btn ghost" id="save" hidden>Spara rader</button>
+        <button class="btn primary" id="copy">Kopiera kupong</button>
+      </div>
+    </div>
+    <p class="toast" id="toast" aria-live="polite"></p>
+    <div class="section-title"><h2>Avdelningarna</h2><span class="hint">Tryck på en häst för att ta med eller ta bort den</span></div>
+    <div class="panel" id="races"></div>
+  </section>
+
+  <section class="panel" id="p-andel" hidden>
+    <div class="card">
+      <h2>Andel i ett större system</h2>
+      <p>Flera spelare delar på ett stort system. Du betalar en del av kostnaden och får samma del av vinsten. Modellen bygger systemet på samma sätt som din egen kupong.</p>
+      <div class="fields">
+        <div class="w"><label for="aRows">Systemets storlek<output id="aRowsOut"></output></label><input type="range" id="aRows" min="1000" max="40000" step="500" value="10000"></div>
+        <div class="field"><label for="aShares">Antal andelar</label><input type="number" id="aShares" min="2" max="500" step="1" value="40"></div>
+        <div class="field"><label for="aFee">Avgift per andel (kr)</label><input type="number" id="aFee" min="0" step="1" value="0"></div>
+      </div>
+      <p class="small">Ombud och andelstjänster tar ofta en avgift per andel. Fyll i den om du vet vad den är.</p>
+    </div>
+    <div class="compare" id="compare"></div>
+    <p class="info" id="andelNote"></p>
+  </section>
+
+  <section class="panel" id="p-hist" hidden>
+    <div class="card">
+      <h2>Test på årets omgångar</h2>
+      <p id="testIntro"></p>
+      <div class="tbl"><table id="testTbl"></table></div>
+      <p class="small">Storvinst har inte tagit 8 rätt i år. Pengarna kom från 6 och 7 rätt i omgångar där skrällar vann, och de betalar bra eftersom få spelat dem. Inställningarna valdes på samma omgångar som testet, så siffrorna är troligen för höga. 60 omgångar räcker inte för att säga att modellen slår spelet. ATG betalar i snitt tillbaka 65 % av insatsen, så allt över det är bättre än snittspelaren. Slutodds och slutlig spelprocent finns först precis före start, så testet är lite snällare mot modellen än verkligheten. Några enstaka storvinster kan också dra upp en hel rad.</p>
+    </div>
+    <div class="card">
+      <h2>Vinnarnas odds</h2>
+      <p id="oddsIntro"></p>
+      <div class="bars" id="oddsBars"></div>
+    </div>
+    <div class="card">
+      <h2>Kuskar med flest V85-segrar</h2>
+      <p>Räknat på årets omgångar.</p>
+      <div class="bars" id="kuskBars"></div>
+    </div>
+    <div class="card">
+      <h2>Omgångarna</h2>
+      <p>Vinnarnas odds per avdelning och vad 8 rätt betalade. Gult betyder vinnare med odds över 10.</p>
+      <div class="stats" id="payStats"></div>
+      <div class="rlist" id="rlist"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-logg" hidden>
+    <div class="card">
+      <h2>Odds före start</h2>
+      <p>Testet på Historik använder slutodds, som du inte har när du lämnar in kupongen. Här sparas ATG:s odds och spelprocent flera gånger varje lördag och söndag innan första start. Efter några veckor kan modellen testas med de siffror du faktiskt hade.</p>
+    </div>
+    <div class="card">
+      <h2>Sparade omgångar</h2>
+      <div class="rlist" id="loggList"><p id="loggStatus">Läser loggen…</p></div>
+      <p class="small">Grönt = sparat före första start. Siffran är minuter kvar till start.</p>
+    </div>
+    <div class="card">
+      <h2>Skript</h2>
+      <p>Skripten körs av GitHub Actions och ligger i repot.</p>
+      <p class="src"><a href="https://github.com/carllindgren00/hastkollen/blob/main/scripts/atg_v85.py" target="_blank" rel="noopener">atg_v85.py</a> hämtar årets omgångar och nästa startlista · <a href="https://github.com/carllindgren00/hastkollen/blob/main/scripts/atg_snapshot.py" target="_blank" rel="noopener">atg_snapshot.py</a> sparar dagens odds</p>
+    </div>
+  </section>
+
+  <section class="panel" id="p-inst" hidden>
+    <div class="card">
+      <h2>Så tänker modellen</h2>
+      <p><strong>Vinstchans</strong> räknas från vinnaroddsen. Där spelar fler proffs, så oddsen är en skarpare bedömning än V85-procenten.</p>
+      <p><strong>Värde</strong> är vinstchansen delad med spelprocenten på V85. En häst som vinner i 20 % av fallen men bara är spelad av 8 % ger mycket mer pengar när den vinner, eftersom färre delar på potten.</p>
+      <p><strong>Utdelningen</strong> uppskattas från spelprocenten och ATG:s regler, där 65 % går tillbaka till spelarna och 30 % av det till 8 rätt. På den senaste omgången räknade formeln fram 75 300 kr, och verkligheten blev 75 808 kr.</p>
+      <p><strong>Storvinst</strong> väljer enskilda rader i stället för ett helt system. Varje tänkbar rad får en poäng av chansen gånger värdet, och de rader som skulle betala för lite vid 8 rätt tas bort. Rader med bara favoriter försvinner alltså, och pengarna går till rader som betalar stort när de går in. Du träffar mer sällan, men när du träffar är det på riktigt.</p>
+      <p><strong>Kalibrering.</strong> På årets 480 lopp vann stora skrällar mer sällan än oddsen säger (1,1 % mot 1,6 %). Därför är oddsvikten 1,1 i stället för 1,0. Underspelade hästar vann ändå klart oftare än spelprocenten antyder, och det är det värdet modellen jagar.</p>
+      <p><strong>Värde mot snittet</strong> jämför kupongens förväntade 8-rätts-utdelning per krona med vad en genomsnittlig spelare får. Över 1,0 betyder att du får mer tillbaka per krona än snittet när du träffar.</p>
+    </div>
+    <div class="card">
+      <h2>Vikter</h2>
+      <div class="weights" id="weights"></div>
+    </div>
+    <div class="card">
+      <h2>Om datan</h2>
+      <p>All data kommer från ATG: startlistor, vinnarodds, V85-procent, tränare, skor, resultat och utdelning för alla V85-omgångar i år. Form är hästens starter i år, med antal segrar, andraplatser och tredjeplatser.</p><p>GitHub Actions hämtar datan från ATG varje vardagskväll och flera gånger på helgen och sparar den i repot. Tiden högst upp visar när den hämtades.</p>
+      <p class="src">Källa: <a href="https://www.atg.se/V85" target="_blank" rel="noopener">atg.se/V85</a></p>
+    </div>
+  </section>
+</div>
+
+<script>
+fetch("data/v85.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(D=>{
+const PRICE=0.5, K8=0.3*0.65*PRICE; // andel av insatsen som går till 8 rätt, per rad
+const rounds=D.rounds, cur=D.cur;
+// spelprocent normeras över de hästar som startar
+const withStreck=hs=>{const ss=hs.reduce((a,h)=>a+(h.s||0),0);hs.forEach(h=>h.streck=Math.max(0.001,(h.s||0.1)/ss));return hs};
+const field=cur.field.map(leg=>{
+  const run=leg.h.filter(h=>h[3]>0);
+  return {avd:leg.avd,len:leg.len,winners:leg.w,scratched:leg.h.filter(h=>!(h[3]>0)).map(h=>h[0]),
+    horses:withStreck(run.map(h=>({nr:h[0],namn:h[1],kusk:h[2],odds:h[3],tranare:h[4],s:h[5],info:h[6],sko:h[7],form:h[8]})))};
+});
+const hist=rounds.map(r=>({r,legs:r.legs.map(l=>({winners:l.w.map(w=>w[0]),horses:withStreck(l.h.filter(h=>h[1]>0).map(h=>({nr:h[0],odds:h[1],s:h[2]})))}))}));
+const prior=rounds.filter(r=>r.id!==cur.id).slice(0,12);
+const kuskWins={};prior.forEach(r=>r.legs.forEach(l=>l.w.forEach(w=>{kuskWins[w[2]]=(kuskWins[w[2]]||0)+1})));
+
+const W={odds:1.1,kusk:0};
+let V=0.5; // värdejakt
+let MODE="0.5"; // "s" = storvinst med radval
+let MINWIN=50000;
+const SBETA=0.8; // hur hårt storvinst väger värde mot chans
+const wInfo={odds:["Lita på oddsen","1,0 följer oddsen rakt av. 1,1 passade årets lopp bäst, eftersom stora skrällar vann lite mer sällan än oddsen säger."],kusk:["Kuskform (extra)","Tillägg för kuskar med många segrar de senaste 12 omgångarna. Oddsen räknar redan med kusken, så håll den låg."]};
+function marketProbs(leg){const inv=leg.horses.map(h=>1/h.odds);const s=inv.reduce((a,b)=>a+b,0);return inv.map(x=>x/s)}
+function modelProbs(leg){
+  const m=marketProbs(leg);
+  const sc=leg.horses.map((h,j)=>Math.pow(m[j],W.odds)*Math.pow(1+0.07*(kuskWins[h.kusk]||0),W.kusk));
+  const s=sc.reduce((a,b)=>a+b,0);return sc.map(x=>x/s);
+}
+// värdekvot med golv och tak: spelprocent under 1 % och kvoter över 3 är för osäkra att lita på
+const ratio=(p,s)=>Math.min(3,Math.max(0.2,p/Math.max(s,0.01)));
+// q = vikt för urval: chans gånger värde upphöjt till V
+function buildSystem(probs,budget,lock,v,F=field){
+  const q=probs.map((p,i)=>p.map((x,j)=>x*Math.pow(ratio(x,F[i].horses[j].streck),v)));
+  const pick=q.map((p,i)=>{
+    const forced=p.map((x,j)=>j).filter(j=>lock[i][j]===1);if(forced.length)return forced;
+    const cand=p.map((x,j)=>j).filter(j=>lock[i][j]!==-1).sort((a,b)=>p[b]-p[a]);return [cand[0]];
+  });
+  const cov=pick.map((s,i)=>s.reduce((a,j)=>a+q[i][j],0));
+  let rows=pick.reduce((a,s)=>a*s.length,1);
+  for(;;){
+    let best=-1,bj=-1,bg=0;
+    for(let i=0;i<q.length;i++){
+      if(lock[i].some(x=>x===1))continue;
+      const cand=q[i].map((x,j)=>j).filter(j=>!pick[i].includes(j)&&lock[i][j]!==-1).sort((a,b)=>q[i][b]-q[i][a]);
+      if(!cand.length)continue;
+      const nr=rows/pick[i].length*(pick[i].length+1);if(nr*PRICE>budget)continue;
+      const g=Math.log((cov[i]+q[i][cand[0]])/cov[i])/Math.log(nr/rows);
+      if(g>bg){bg=g;best=i;bj=cand[0]}
+    }
+    if(best<0)break;
+    rows=rows/pick[best].length*(pick[best].length+1);pick[best].push(bj);cov[best]+=q[best][bj];
+  }
+  return evaluate(probs,pick,rows,F);
+}
+function evaluate(probs,pick,rows,F=field){
+  let hit=1,ev=1;
+  pick.forEach((s,i)=>{let a=0,b=0;s.forEach(j=>{const p=probs[i][j];a+=p;b+=p*ratio(p,F[i].horses[j].streck)/p});hit*=a;ev*=b});
+  const exp8=K8*ev; // förväntad 8-rätts-utdelning i kr för hela kupongen
+  return {pick,rows,hit,exp8,payIfHit:exp8/hit,index:(exp8/(rows*PRICE))/(0.3*0.65)};
+}
+const medTurn=(()=>{const t=rounds.map(r=>r.turnover).filter(Boolean).sort((a,b)=>a-b);return t[t.length>>1]||78e6})();
+const TURN=cur.turnover>1e6?cur.turnover:medTurn;
+// utdelning per rad vid 8 rätt: 8-rättspotten delad på alla rader som har samma vinnare
+const rowPay=(S,T)=>Math.min(0.195*T,K8/S);
+// de bästa raderna efter poäng (chans × värde^beta), bland dem som betalar minst minpay
+function buildRows(probs,budget,lock,beta,minpay,F=field,T=TURN){
+  const n=Math.max(1,Math.floor(budget/PRICE));
+  const L=probs.map((p,i)=>{let c=p.map((x,j)=>j).filter(j=>lock[i][j]!==-1);const f=c.filter(j=>lock[i][j]===1);if(f.length)c=f;
+    return c.map(j=>({j,p:p[j],s:F[i].horses[j].streck,sc:Math.log(p[j])+beta*Math.log(ratio(p[j],F[i].horses[j].streck))})).sort((a,b)=>b.sc-a.sc).slice(0,10)});
+  // max-heap över [poäng, index, S, P]; nyckeln packar index i bas 10 eftersom varje avdelning har högst 10 kandidater
+  const heap=[],up=i=>{while(i){const u=(i-1)>>1;if(heap[u][0]>=heap[i][0])break;[heap[u],heap[i]]=[heap[i],heap[u]];i=u}};
+  const pop=()=>{const top=heap[0],last=heap.pop();if(heap.length){heap[0]=last;let i=0;for(;;){const a=2*i+1,b=a+1;let m=i;if(a<heap.length&&heap[a][0]>heap[m][0])m=a;if(b<heap.length&&heap[b][0]>heap[m][0])m=b;if(m===i)break;[heap[m],heap[i]]=[heap[i],heap[m]];i=m}}return top};
+  const pw=L.map((x,i)=>Math.pow(10,i));
+  const start=L.map(()=>0),seen=new Set([0]);
+  heap.push([L.reduce((a,x)=>a+x[0].sc,0),start,L.reduce((a,x)=>a*x[0].s,1),L.reduce((a,x)=>a*x[0].p,1)]);
+  const rows=[];let pops=0;
+  while(heap.length&&rows.length<n&&pops<40000){
+    const [v,ix,S,P]=pop();pops++;
+    if(rowPay(S,T)>=minpay)rows.push({js:ix.map((k,i)=>L[i][k].j),P,S});
+    const key=ix.reduce((a,k,i)=>a+k*pw[i],0);
+    for(let i=0;i<ix.length;i++){const k=ix[i];if(k+1>=L[i].length||seen.has(key+pw[i]))continue;
+      seen.add(key+pw[i]);const nx=ix.slice();nx[i]=k+1;const o=L[i][k],m=L[i][k+1];
+      heap.push([v-o.sc+m.sc,nx,S/o.s*m.s,P/o.p*m.p]);up(heap.length-1)}
+  }
+  const pick=probs.map((p,i)=>[...new Set(rows.map(r=>r.js[i]))]);
+  let hit=0,exp8=0;rows.forEach(r=>{hit+=r.P;exp8+=r.P*rowPay(r.S,T)});
+  const full=pick.reduce((a,x)=>a*x.length,1);
+  return {pick,rows:rows.length,list:rows.map(r=>r.js),full,hit,exp8,payIfHit:hit?exp8/hit:0,index:rows.length?(exp8/(rows.length*PRICE))/(0.3*0.65):0};
+}
+function payoutRows(list,F,pay,T){
+  const p8=pay[8]||0.195*T;let tot=0,best=0;
+  list.forEach(js=>{const k=js.reduce((a,j,i)=>a+(F[i].winners.includes(F[i].horses[j].nr)?1:0),0);best=Math.max(best,k);if(k>=5)tot+=k===8?p8:(pay[k]||0)});
+  return {tot,best};
+}
+const emptyLock=()=>field.map(l=>l.horses.map(()=>0));
+let lock=emptyLock();
+const open=new Set([0]);
+const $=id=>document.getElementById(id);
+const fmt=(n,d=0)=>n.toLocaleString("sv-SE",{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct=p=>p<0.001?"<0,1 %":fmt(p*100,p<0.1?1:0)+" %";
+const kr=n=>fmt(n)+" kr";
+const krShort=n=>n>=1e6?fmt(n/1e6,1)+" Mkr":n>=1e4?fmt(n/1000,0)+" tkr":kr(Math.round(n));
+const odds1=p=>p>=0.01?"1 på "+fmt(1/p,0):"1 på "+fmt(1/p,0);
+const dname=iso=>{const d=new Date(iso+"T12:00:00");return d.toLocaleDateString("sv-SE",{weekday:"long",day:"numeric",month:"long"})};
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const ratt=(pick,F=field)=>pick.reduce((a,s,i)=>a+(s.some(j=>F[i].winners.includes(F[i].horses[j].nr))?1:0),0);
+// vad kupongen betalade: antal rader med k rätt räknas avdelning för avdelning, gånger utdelningen per rad
+function payout(pick,F,pay){
+  let c=[1];
+  pick.forEach((s,i)=>{const h=s.filter(j=>F[i].winners.includes(F[i].horses[j].nr)).length,m=s.length-h;
+    const n=Array(c.length+1).fill(0);c.forEach((x,k)=>{n[k]+=x*m;n[k+1]+=x*h});c=n});
+  let tot=0;for(let k=5;k<=8;k++)tot+=(c[k]||0)*(pay[k]||0);return tot;
+}
+const upd=new Date(D.updated).toLocaleString("sv-SE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+
+$("dateline").textContent=cap(dname(cur.date))+" · "+cur.track+" · hämtat från ATG "+upd;
+$("roundInfo").textContent=cur.done
+  ?`Senast körda omgången, ${cur.track} ${dname(cur.date)}, med slutodds och spelprocent från ATG. Slå på facit för att se hur kupongen hade gått.${D.waiting?` Startlistan för ${D.waiting.track} ${dname(D.waiting.date)} är klar. Den läggs in när ATG öppnar spelet och odds och spelprocent finns.`:D.next?` Nästa omgång, ${dname(D.next)}, läggs in när ATG publicerar startlistan.`:""}`
+  :`Kommande omgång, ${cur.track} ${dname(cur.date)}${cur.start?" kl "+cur.start.slice(11,16):""}. Odds och spelprocent hämtades från ATG ${upd} och ändras fram till start.`;
+if(!cur.done){$("facit").checked=false;$("facit").parentElement.hidden=true}
+$("presets").innerHTML=[100,250,500,1000].map(v=>`<button type="button" data-v="${v}">${v} kr</button>`).join("");
+$("presets").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("budget").value=b.dataset.v;renderSpel()});
+const modeHints={"0":"Tar med de hästar som ger störst chans att träffa, oavsett hur många andra som spelat dem.","0.5":"Väger chans mot värde. Tar gärna med underspelade hästar om de har rimlig chans.","0.8":"Letar underspelade hästar. Lägre chans att träffa, men betydligt mer pengar när det slår in."};
+modeHints.s="Väljer enskilda rader med underspelade hästar och tar bort rader som skulle betala för lite. Du träffar sällan, men när du gör det är det stort.";
+document.querySelector(".mode").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;MODE=b.dataset.v;V=MODE==="s"?0.8:+MODE;renderSpel()});
+const minOpts=[[0,"Ingen"],[50000,"50 tkr"],[100000,"100 tkr"],[250000,"250 tkr"],[1000000,"1 Mkr"]];
+$("minPresets").innerHTML=minOpts.map(([v,l])=>`<button type="button" data-v="${v}">${l}</button>`).join("");
+$("minPresets").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;MINWIN=+b.dataset.v;renderSpel();clearTimeout(hT);hT=setTimeout(renderHist,50)});
+let hT;
+
+let current=null;
+function renderSpel(){
+  const budget=+$("budget").value;const facit=$("facit").checked;
+  $("budgetOut").textContent=kr(budget);
+  [...$("presets").children].forEach(b=>b.setAttribute("aria-pressed",+b.dataset.v===budget));
+  const RS=MODE==="s";
+  document.querySelectorAll(".mode button").forEach(b=>b.setAttribute("aria-checked",b.dataset.v===MODE));
+  $("minwin").hidden=!RS;[...$("minPresets").children].forEach(b=>b.setAttribute("aria-pressed",+b.dataset.v===MINWIN));
+  const probs=field.map(modelProbs);const sys=RS?buildRows(probs,budget,lock,SBETA,MINWIN):buildSystem(probs,budget,lock,V);current=sys;
+  $("modeHint").textContent=modeHints[MODE]+(RS?(sys.rows>=Math.floor(budget/PRICE)?` ${fmt(sys.rows)} rader valda av ${fmt(sys.full)} i ett helt system med samma hästar. Kupongen visar hästarna som finns med på någon rad.`:sys.rows?` Bara ${fmt(sys.rows)} bra rader klarar minsta vinsten, så kupongen kostar mindre än budgeten.`:" Inga rader klarar minsta vinsten. Sänk den eller höj budgeten."):"");
+  $("save").hidden=!(RS&&DL&&sys.rows);
+  const cost=sys.rows*PRICE;
+  $("sCost").textContent=fmt(cost,cost%1?2:0)+" kr";$("sHit").textContent=pct(sys.hit);
+  $("sPay").textContent=krShort(sys.payIfHit);
+  $("sValLbl").textContent=RS?"Rader":"Värde mot snittet";
+  if(RS){$("sVal").textContent=fmt(sys.rows);$("sVal").className=""}
+  else{$("sVal").textContent=fmt(sys.index,1)+"×";$("sVal").className=sys.index>=1.1?"good":sys.index<0.9?"bad":""}
+  $("legs").innerHTML=sys.pick.map((p,i)=>{const L=field[i];const nums=p.map(j=>L.horses[j].nr).sort((a,b)=>a-b);
+    const ok=nums.some(n=>L.winners.includes(n));
+    return `<button class="leg" data-avd="${i}"><span class="avd">Avd ${i+1}</span><span class="nums">${nums.map(n=>`<span class="num ${p.length===1?"spik":""}">${n}</span>`).join("")}</span><span class="mark ${facit?(ok?"ok":"miss"):""}">${facit?(ok?"✓":"✕"):""}</span></button>`}).join("");
+  const res=$("result");res.hidden=!facit;
+  if(facit){let r,back;if(RS){const o=payoutRows(sys.list,field,cur.pay,TURN);r=o.best;back=o.tot}else{r=ratt(sys.pick);back=payout(sys.pick,field,cur.pay)}
+    res.className="result"+(back>0?" win":"");
+    res.innerHTML=`<div><b>${r} rätt</b> <span>av 8</span></div><span>${back>0?`Kupongen hade gett <b>${kr(Math.round(back))}</b>`:"Ingen utdelning"}</span>`;}
+  $("races").innerHTML=field.map((r,i)=>{
+    const pr=probs[i];const inSet=new Set(sys.pick[i]);const n=inSet.size;
+    const st=n===1?["spik","Spik"]:n>=5?["oppen",n+" hästar"]:["gard",n+" hästar"];
+    const idx=r.horses.map((h,j)=>j).sort((a,b)=>pr[b]-pr[a]);const top=Math.max(...pr,...r.horses.map(h=>h.streck));
+    const meta=[r.len,r.horses.length+" startande",r.scratched.length?("struken: "+r.scratched.join(", ")):null].filter(Boolean).join(" · ");
+    return `<details class="race" data-i="${i}" ${open.has(i)?"open":""}><summary><span class="avd-badge">${r.avd}</span><span class="race-info"><h3>Avdelning ${r.avd}</h3><p>${meta}</p></span><span class="status ${st[0]}">${st[1]}</span></summary>
+    <div class="horses"><div class="legend"><span><i></i>Vinstchans</span><span><u></u>Spelad på V85</span></div>
+    ${idx.map(j=>{const h=r.horses[j];const v=pr[j]/h.streck;const Lk=lock[i][j];const won=facit&&r.winners.includes(h.nr);
+      const badge=v>=1.3&&pr[j]>=0.05&&h.streck>=0.01?`<em class="badge value">VÄRDE ${fmt(v,1)}×</em>`:(v<=0.75&&h.streck>=0.15?`<em class="badge over">ÖVERSPELAD</em>`:"");
+      return `<button class="horse ${inSet.has(j)?"in":""} ${Lk===1?"forced":Lk===-1?"out":""}" data-i="${i}" data-j="${j}" aria-pressed="${inSet.has(j)}">
+      <span class="hnr">${h.nr}</span>
+      <span class="hname"><b>${h.namn}</b><span>${h.kusk} · odds ${fmt(h.odds,2)}${badge?" "+badge:""}${won?` <em class="badge won">VANN</em>`:""}</span><span class="tr">${[h.tranare,h.info,h.sko,h.form?"i år "+h.form:""].filter(Boolean).join(" · ")}</span></span>
+      <span class="meter"><span class="lbl">${pct(pr[j])}<em>${pct(h.streck)}</em></span><span class="track"><i style="width:${pr[j]/top*100}%"></i><u style="left:${Math.min(98,h.streck/top*100)}%"></u></span></span>
+      <span class="lock" aria-hidden="true">${Lk===1?"●":Lk===-1?"✕":""}</span></button>`}).join("")}
+    </div></details>`}).join("");
+  renderAndel();
+}
+
+function renderAndel(){
+  const rowsT=+$("aRows").value;const shares=Math.max(2,Math.round(+$("aShares").value||2));const fee=Math.max(0,+$("aFee").value||0);
+  $("aRowsOut").textContent=fmt(rowsT)+" rader · "+kr(rowsT*PRICE);
+  const probs=field.map(modelProbs);const big=buildSystem(probs,rowsT*PRICE,emptyLock(),V);
+  const myCost=big.rows*PRICE/shares+fee;
+  const own=buildSystem(probs,Math.max(PRICE,myCost),emptyLock(),V);
+  const andelExp=big.exp8/shares, ownExp=own.exp8;
+  const times=big.hit/own.hit;
+  $("compare").innerHTML=`
+   <div class="ccol"><h3>Egen kupong</h3><dl>
+     <div><dt>Kostnad</dt><dd>${kr(Math.round(own.rows*PRICE))}</dd></div>
+     <div><dt>Rader</dt><dd>${fmt(own.rows)}</dd></div>
+     <div><dt>Chans 8 rätt</dt><dd>${pct(own.hit)}</dd></div>
+     <div><dt>Snittvinst vid 8 rätt</dt><dd>${krShort(own.payIfHit)}</dd></div>
+     <div><dt>Förväntat tillbaka på 8 rätt</dt><dd>${kr(Math.round(ownExp))}</dd></div></dl></div>
+   <div class="ccol hi"><h3>Andel 1 av ${shares}</h3><dl>
+     <div><dt>Kostnad</dt><dd>${kr(Math.round(myCost))}</dd></div>
+     <div><dt>Rader i systemet</dt><dd>${fmt(big.rows)}</dd></div>
+     <div><dt>Chans 8 rätt</dt><dd>${pct(big.hit)}</dd></div>
+     <div><dt>Din del vid 8 rätt</dt><dd>${krShort(big.payIfHit/shares)}</dd></div>
+     <div><dt>Förväntat tillbaka på 8 rätt</dt><dd>${kr(Math.round(andelExp))}</dd></div></dl></div>`;
+  const evr=andelExp/ownExp;
+  $("andelNote").textContent=times>1.05
+    ?`Med andelen är chansen till 8 rätt ungefär ${fmt(times,1)} gånger så stor för samma pengar, men vinsten delas på ${shares}. ${evr>1.1?"Det stora systemet får också med fler underspelade hästar, så det du får tillbaka i snitt blir högre.":evr<0.9?"Det du får tillbaka i snitt blir lägre, mest på grund av avgiften.":"Det du får tillbaka i snitt blir ungefär detsamma."} Andelar passar om du vill träffa oftare och kan nöja dig med mindre vinster.`
+    :`Med de här inställningarna blir andelen inte bättre än en egen kupong. Prova ett större system eller färre andelar.`;
+}
+
+let histDirty=true;
+function renderHist(){if($("p-hist").hidden){histDirty=true;return}histDirty=false;
+  const modes=[[0,"Max chans"],[0.5,"Balans"],[0.8,"Jaga värde"],["s","Storvinst"]];const budgets=[100,250,500,1000];
+  $("testIntro").textContent=`Modellen byggde en kupong för varje budget och spelstil i alla ${hist.length} V85-omgångar i år, med slutodds och spelprocent från ATG. Siffran visar hur mycket som kom tillbaka per insatt krona, och hur många gånger kupongen tog 8 rätt. Storvinst använder minsta vinst ${minOpts.find(o=>o[0]===MINWIN)[1].toLowerCase()}.`;
+  $("testTbl").innerHTML=`<thead><tr><th>Budget</th>${modes.map(m=>`<th>${m[1]}</th>`).join("")}</tr></thead><tbody>`+
+    budgets.map(b=>`<tr><td>${kr(b)}</td>${modes.map(([v])=>{let cost=0,back=0,n8=0;
+      hist.forEach(({r,legs})=>{const pr=legs.map(modelProbs);const lk=legs.map(l=>l.horses.map(()=>0));
+        if(v==="s"){const s=buildRows(pr,b,lk,SBETA,MINWIN,legs,r.turnover);const o=payoutRows(s.list,legs,r.pay,r.turnover);cost+=s.rows*PRICE;back+=o.tot;if(o.best===8)n8++;return}
+        const s=buildSystem(pr,b,lk,v,legs);cost+=s.rows*PRICE;back+=payout(s.pick,legs,r.pay);if(ratt(s.pick,legs)===8)n8++});
+      return `<td><b class="${back/cost>=1?"good":""}">${fmt(back/cost*100)} %</b><small>${n8}× 8 rätt</small></td>`}).join("")}</tr>`).join("")+`</tbody>`;
+  const all=[];rounds.forEach(r=>r.legs.forEach(l=>l.w.forEach(w=>all.push(w[3]))));
+  const dh=rounds.reduce((a,r)=>a+r.legs.filter(l=>l.w.length>1).length,0);
+  const bands=[["Under 3",0,3],["3–6",3,6],["6–10",6,10],["10–20",10,20],["Över 20",20,1e9]];
+  const counts=bands.map(b=>all.filter(o=>o>=b[1]&&o<b[2]).length);const mx=Math.max(...counts);
+  $("oddsIntro").textContent=`${rounds.length} omgångar, ${rounds.length*8} lopp, från ${dname(rounds[rounds.length-1].date)} till ${dname(rounds[0].date)}.${dh?` ${dh} lopp slutade i dött lopp, så det finns ${all.length} vinnare.`:""}`;
+  $("oddsBars").innerHTML=bands.map((b,k)=>`<div class="row"><span>${b[0]}</span><span class="track"><i style="width:${counts[k]/mx*100}%"></i></span><b>${counts[k]} st</b></div>`).join("")+
+    `<p style="margin-top:4px">${pct(counts[0]/all.length)} av vinnarna hade odds under 3 och ${pct((counts[3]+counts[4])/all.length)} hade odds över 10. Det är de loppen som avgör hur mycket 8 rätt betalar.</p>`;
+  const kw={};rounds.forEach(r=>r.legs.forEach(l=>l.w.forEach(w=>{kw[w[2]]=(kw[w[2]]||0)+1})));
+  const top=Object.entries(kw).sort((a,b)=>b[1]-a[1]).slice(0,6);const km=top[0][1];
+  $("kuskBars").innerHTML=top.map(([k,v])=>`<div class="row"><span>${k.replace(/^(\S+)\s/,(m,a)=>a[0]+". ")}</span><span class="track"><i style="width:${v/km*100}%"></i></span><b>${v} segrar</b></div>`).join("");
+  const pays=rounds.map(r=>r.pay["8"]).filter(Boolean).sort((a,b)=>a-b);const med=pays.length%2?pays[(pays.length-1)/2]:(pays[pays.length/2-1]+pays[pays.length/2])/2;
+  const jp=rounds.length-pays.length;
+  $("payStats").innerHTML=`<div><span>Lägsta 8 rätt</span><span>${krShort(pays[0])}</span></div><div><span>Median</span><span>${krShort(med)}</span></div><div><span>Högsta</span><span>${krShort(pays[pays.length-1])}</span></div>`+
+    (jp?`<p style="grid-column:1/-1;margin:0">${jp} omgångar hade ingen med 8 rätt, då gick potten vidare som jackpot.</p>`:"");
+  const showAll=$("rlist").dataset.all==="1";
+  $("rlist").innerHTML=rounds.slice(0,showAll?rounds.length:12).map(r=>{
+    const os=r.legs.map(l=>l.w.map(w=>w[3]));
+    return `<div class="rrow"><div><h3>${r.track}</h3><span class="when">${cap(dname(r.date))}</span></div><div class="pay">${r.pay["8"]?kr(r.pay["8"]):"Jackpot"}</div>
+    <div class="odds">${os.map(o=>`<span class="o ${o.some(x=>x>=10)?"skr":o.every(x=>x<3)?"fav":""}">${o.map(x=>fmt(x,x<10?2:1)).join("/")}</span>`).join("")}</div></div>`}).join("")+
+    (rounds.length>12?`<button class="btn ghost" id="moreRounds" style="margin-top:10px">${showAll?"Visa färre":"Visa alla "+rounds.length}</button>`:"");
+}
+function renderWeights(){
+  $("weights").innerHTML=Object.keys(W).map(k=>`<div class="w"><label for="w-${k}">${wInfo[k][0]}<output id="o-${k}">${fmt(W[k],1)}</output></label><input type="range" id="w-${k}" min="0" max="2" step="0.1" value="${W[k]}"><small>${wInfo[k][1]}</small></div>`).join("");
+  Object.keys(W).forEach(k=>$("w-"+k).addEventListener("input",e=>{W[k]=+e.target.value;$("o-"+k).textContent=fmt(W[k],1);renderSpel();renderHist()}));
+}
+
+$("races").addEventListener("toggle",e=>{const d=e.target;if(!d.matches||!d.matches("details"))return;const i=+d.dataset.i;d.open?open.add(i):open.delete(i)},true);
+$("races").addEventListener("click",e=>{
+  const b=e.target.closest(".horse");if(!b)return;const i=+b.dataset.i,j=+b.dataset.j;
+  const inSet=current.pick[i].includes(j);const L=lock[i][j];
+  lock[i][j]=L!==0?0:(inSet?-1:1);
+  if(lock[i].every(x=>x===-1))lock[i][j]=0;
+  renderSpel();
+});
+$("legs").addEventListener("click",e=>{const b=e.target.closest(".leg");if(!b)return;const i=+b.dataset.avd;open.add(i);renderSpel();
+  const d=document.querySelector(`details.race[data-i="${i}"]`);if(d)d.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth",block:"start"})});
+$("reset").addEventListener("click",()=>{lock=emptyLock();renderSpel();toast("Kupongen är återställd till modellens förslag")});
+const rowsText=()=>current.list.map(js=>js.map((j,i)=>field[i].horses[j].nr).join(",")).join("\n");
+const DL=true;
+// loggen: odds som GitHub Actions sparat före start
+fetch("data/snapshots/index.json",{cache:"no-cache"}).then(r=>r.ok?r.json():[]).catch(()=>[]).then(all=>{
+  const g={};all.forEach(x=>{if(x&&x.game)(g[x.game]=g[x.game]||{x,s:[]}).s.push(x)});
+  const games=Object.values(g).sort((a,b)=>b.x.date.localeCompare(a.x.date));
+  const list=$("loggList");list.textContent="";
+  if(!games.length){const p=document.createElement("p");p.textContent="Inget sparat än. Oddsen sparas lördag och söndag förmiddag.";list.append(p);return}
+  games.forEach(({x,s})=>{
+    s.sort((a,b)=>b.minsToStart-a.minsToStart);
+    const row=document.createElement("div");row.className="rrow";
+    const left=document.createElement("div");const h=document.createElement("h3");h.textContent=x.track;
+    const w=document.createElement("span");w.className="when";w.textContent=cap(dname(x.date));left.append(h,w);
+    const n=document.createElement("div");n.className="pay";n.textContent=s.length+" st";
+    const t=document.createElement("div");t.className="odds";
+    s.forEach(y=>{const e=document.createElement("span");e.className="t"+(y.minsToStart>0?" pre":"");
+      e.textContent=y.minsToStart>0?y.minsToStart+" min":String(y.taken).slice(11,16);t.append(e)});
+    row.append(left,n,t);list.append(row)});
+});
+$("save").addEventListener("click",()=>{if(!current.list)return;
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([rowsText()+"\n"],{type:"text/plain"}));
+  a.download=`v85-${cur.date}-${current.rows}-rader.txt`;document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast("Raderna är sparade")});
+$("copy").addEventListener("click",()=>{
+  if(current.list){const txt=`V85 ${cur.track}, ${current.rows} rader:\n`+rowsText();
+    try{navigator.clipboard.writeText(txt).then(()=>toast(`${current.rows} rader är kopierade, en rad per avdelningsföljd`),()=>toast("Kunde inte kopiera"))}catch(err){toast("Kunde inte kopiera")}return}
+  const txt="V85 "+cur.track+" — "+current.pick.map((p,i)=>`Avd ${i+1}: ${p.map(j=>field[i].horses[j].nr).sort((a,b)=>a-b).join(",")}`).join(" | ")+` (${current.rows} rader)`;
+  try{navigator.clipboard.writeText(txt).then(()=>toast("Kupongen är kopierad"),()=>toast(txt))}catch(err){toast(txt)}
+});
+let tt;function toast(m){$("toast").textContent=m;clearTimeout(tt);tt=setTimeout(()=>$("toast").textContent="",4000)}
+$("budget").addEventListener("input",renderSpel);$("facit").addEventListener("change",renderSpel);
+["aRows","aShares","aFee"].forEach(id=>$(id).addEventListener("input",renderAndel));
+$("rlist").addEventListener("click",e=>{if(!e.target.closest("#moreRounds"))return;const l=$("rlist");l.dataset.all=l.dataset.all==="1"?"0":"1";renderHist()});
+const tabs={"t-spel":"p-spel","t-andel":"p-andel","t-hist":"p-hist","t-inst":"p-inst","t-logg":"p-logg"};
+Object.keys(tabs).forEach(t=>$(t).addEventListener("click",()=>{Object.entries(tabs).forEach(([b,p])=>{$(b).setAttribute("aria-selected",b===t);$(p).hidden=b!==t});if(t==="t-hist"&&histDirty)renderHist()}));
+renderWeights();renderSpel();renderHist();
+}).catch(()=>{const p=document.createElement("p");p.className="info";p.textContent="Kunde inte hämta datan. Kontrollera nätet och ladda om sidan.";document.querySelector(".wrap").prepend(p)});
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+
+</body>
+</html>
