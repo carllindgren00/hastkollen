@@ -1,9 +1,0 @@
-# Filer som inte ska publiceras på Cloudflare
-.git
-.github
-.cache
-scripts
-README.md
-wrangler.jsonc
-.gitignore
-.assetsignore

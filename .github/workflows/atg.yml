@@ -37,16 +37,16 @@ jobs:
 
       - name: Spara odds före start
         if: (github.event_name == 'schedule' && github.event.schedule != '17 18 * * 1-5') || inputs.snapshot
-        run: python3 -I scripts/atg_snapshot.py data/snapshots
+        run: python3 -I scripts/atg_snapshot.py public/data/snapshots
 
       - name: Hämta omgångar och startlista
-        run: python3 -I scripts/atg_v85.py .cache data/v85.json
+        run: python3 -I scripts/atg_v85.py .cache public/data/v85.json
 
       - name: Spara i repot
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data
+          git add public/data
           if git diff --cached --quiet; then echo "Inget nytt från ATG."; exit 0; fi
           git commit -m "ATG-data $(date -u +%Y-%m-%dT%H:%MZ)"
           git push

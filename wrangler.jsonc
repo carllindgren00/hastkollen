@@ -1,8 +1,8 @@
-// Cloudflare: publicera appen som statiska filer (ingen server-kod)
+// Cloudflare: publicera appen i public/ som statiska filer (ingen server-kod)
 {
   "name": "hastkollen",
   "compatibility_date": "2025-09-01",
   "assets": {
-    "directory": "."
+    "directory": "./public"
   }
 }

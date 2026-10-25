@@ -6,7 +6,8 @@ Appen ligger på Cloudflare Pages bakom Cloudflare Access, så bara godkända e-
 
 ## Så fungerar det
 
-- `index.html` är hela appen. Den läser `data/v85.json` och `data/snapshots/index.json`.
+- `public/` är det som publiceras. `public/index.html` är hela appen och läser `public/data/v85.json` och `public/data/snapshots/index.json`.
+- `wrangler.jsonc` talar om för Cloudflare att bara `public/` ska publiceras.
 - `scripts/atg_v85.py` hämtar årets V85-omgångar och nästa startlista från ATG:s öppna API.
 - `scripts/atg_snapshot.py` sparar dagens vinnarodds och V85-procent, för att senare kunna testa modellen med de odds man faktiskt hade före start.
 - `.github/workflows/atg.yml` kör skripten på schema och sparar datan i repot. Den kan också köras för hand under Actions → "Hämta från ATG" → Run workflow.
@@ -14,8 +15,8 @@ Appen ligger på Cloudflare Pages bakom Cloudflare Access, så bara godkända e-
 ## Köra lokalt
 
 ```sh
-python3 scripts/atg_v85.py .cache data/v85.json
-python3 -m http.server
+python3 scripts/atg_v85.py .cache public/data/v85.json
+python3 -m http.server -d public
 ```
 
 Öppna sedan http://localhost:8000.
