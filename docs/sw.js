@@ -1,5 +1,5 @@
 // Nätet först, så att färsk ATG-data alltid vinner. Cachen används bara när hämtningen
-// misslyckas: offline, eller när Cloudflare-inloggningen gått ut och skickar till inloggningssidan.
+// misslyckas, till exempel offline.
 const CACHE = "v85-kollen-v2";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "data/v85.json"];
 
@@ -13,7 +13,7 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   const req = e.request, url = new URL(req.url);
   if (req.method !== "GET" || url.origin !== location.origin) return;
-  // sidladdningar går rakt till nätet, så att Cloudflare kan visa inloggningen när den behövs
+  // sidladdningar går rakt till nätet och faller tillbaka på sparad app offline
   if (req.mode === "navigate") {
     e.respondWith(fetch(req).catch(() => caches.match("index.html")));
     return;

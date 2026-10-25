@@ -1,6 +1,6 @@
 """Hämtar V85-data från ATG och skriver den JSON som V85-kollen läser.
 
-Användning: python3 scripts/atg_v85.py <cachekatalog> public/data/v85.json
+Användning: python3 scripts/atg_v85.py <cachekatalog> docs/data/v85.json
 Avslutade omgångar cachas; kommande/pågående hämtas alltid om.
 """
 import datetime as dt, json, os, sys, time, urllib.request
