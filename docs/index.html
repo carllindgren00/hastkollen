@@ -168,6 +168,16 @@ details.race summary::-webkit-details-marker{display:none}
 .src a{color:var(--accent)}
 .disclaimer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;margin-top:8px;display:flex;flex-direction:column;gap:6px}
 .disclaimer p{margin:0}
+.lockscreen{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.lockscreen form{width:100%;max-width:340px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px}
+.lockscreen img{border-radius:14px}
+.lockscreen h1{font-size:1.6rem}
+.lockscreen p{margin:0;color:var(--muted);font-size:.9rem}
+.lockscreen input{font:500 1.05rem var(--mono);letter-spacing:.06em;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);width:100%;text-transform:uppercase}
+.lockscreen button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:12px;background:var(--accent);color:var(--accent-ink)}
+.lockscreen button:disabled{opacity:.6}
+.lockscreen .err{color:var(--warn);min-height:1.2em}
+.lockscreen small{color:var(--muted);font-size:.78rem}
 html,body{overscroll-behavior-y:contain}
 .ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:10;transform:translate(-50%,-70px);display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:99px;background:var(--surface);color:var(--fg);box-shadow:0 2px 10px rgba(0,0,0,.15);font-size:.82rem;font-weight:600;pointer-events:none;opacity:0}
 .ptr i{display:inline-block;width:14px;height:14px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%}
@@ -223,6 +233,17 @@ html,body{overscroll-behavior-y:contain}
 </head>
 <body>
 <div class="ptr" id="ptr" aria-live="polite"><i></i><span>Dra för att uppdatera</span></div>
+<section class="lockscreen" id="lock" hidden>
+  <form>
+    <img src="icons/icon-192.png" alt="" width="56" height="56">
+    <h1>V85-kollen</h1>
+    <p>Skriv din kod för att låsa upp appen.</p>
+    <input name="code" type="password" autocomplete="current-password" autocapitalize="characters" spellcheck="false" aria-label="Kod" required>
+    <p class="err" id="lockErr" role="alert"></p>
+    <button type="submit">Lås upp</button>
+    <small>Datan är krypterad och kan bara läsas med en kod. Den här enheten förblir upplåst i 30 dagar.</small>
+  </form>
+</section>
 <div class="wrap">
   <div class="top">
     <div>
@@ -358,22 +379,59 @@ html,body{overscroll-behavior-y:contain}
     <p><strong>Spela bara för pengar du har råd att förlora.</strong> V85-kollen är ett privat analysverktyg, inga speltips. Modellen bygger på historisk data och ger ingen garanti att vinna. Det mesta som satsas på V85 går förlorat, och i snitt betalas 65 % av insatsen tillbaka.</p>
     <p>18-årsgräns för spel. Behöver du pausa allt spel: <a href="https://www.spelpaus.se" target="_blank" rel="noopener">spelpaus.se</a>. Stöd och råd: <a href="https://www.stodlinjen.se" target="_blank" rel="noopener">Stödlinjen</a>, 020-81 91 00.</p>
     <p>Appen har ingen koppling till ATG. Data hämtas från ATG:s webbplats.</p>
+    <p><a href="#" id="logout">Lås appen</a> på den här enheten.</p>
   </footer>
 </div>
 
 <script>
-fetch("data/v85.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error(r.status);
+// Datan är krypterad. En kod låser upp den privata nyckeln (data/keys.json) här i webbläsaren;
+// nyckeln sparas på enheten i 30 dagar, koden sparas aldrig.
+const KEYSTORE="v85-key", KEEP=30*24*3600e3;
+const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const b64e=b=>{let s="";new Uint8Array(b).forEach(x=>s+=String.fromCharCode(x));return btoa(s)};
+const importPriv=der=>crypto.subtle.importKey("pkcs8",der,{name:"RSA-OAEP",hash:"SHA-256"},false,["decrypt"]);
+async function tryCode(code){
+  const kr=await fetch("data/keys.json",{cache:"no-cache"}).then(r=>r.json());
+  const base=await crypto.subtle.importKey("raw",new TextEncoder().encode(code),"PBKDF2",false,["deriveKey"]);
+  for(const k of kr.keys){
+    const kek=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64d(k.salt),iterations:k.iter,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["decrypt"]);
+    try{return await crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(k.iv)},kek,b64d(k.wrapped))}catch(e){}
+  }
+  return null;
+}
+function storedKey(){try{const s=JSON.parse(localStorage.getItem(KEYSTORE));if(s&&s.exp>Date.now())return b64d(s.pk)}catch(e){}return null}
+function unlock(){
+  const der=storedKey();if(der)return importPriv(der);
+  return new Promise(done=>{
+    const L=document.getElementById("lock"),F=L.querySelector("form"),E=document.getElementById("lockErr"),B=F.querySelector("button");
+    L.hidden=false;document.querySelector(".wrap").hidden=true;F.code.focus();
+    F.addEventListener("submit",async ev=>{ev.preventDefault();E.textContent="";B.disabled=true;B.textContent="Låser upp…";
+      let der=null;try{der=await tryCode(F.code.value.trim().toUpperCase())}catch(e){}
+      if(!der){E.textContent="Fel kod. Försök igen.";B.disabled=false;B.textContent="Lås upp";F.code.select();return}
+      try{localStorage.setItem(KEYSTORE,JSON.stringify({pk:b64e(der),exp:Date.now()+KEEP}))}catch(e){}
+      L.hidden=true;document.querySelector(".wrap").hidden=false;done(importPriv(der))});
+  });
+}
+async function openBox(pk,box){
+  const key=await crypto.subtle.decrypt({name:"RSA-OAEP"},pk,b64d(box.k));
+  const aes=await crypto.subtle.importKey("raw",key,"AES-GCM",false,["decrypt"]);
+  return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(box.iv)},aes,b64d(box.ct))));
+}
+document.getElementById("logout").addEventListener("click",e=>{e.preventDefault();try{localStorage.removeItem(KEYSTORE)}catch(x){}location.reload()});
+unlock().then(pk=>fetch("data/v85.enc",{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error(r.status);
   // svaret kommer från mobilens cache när nätet eller inloggningen inte släppte igenom en färsk hämtning
   if(r.headers.get("x-v85-cache")){const p=document.createElement("p");p.className="info";
     p.textContent="Visar sparad data, eftersom ny data inte gick att hämta. Dra ned för att uppdatera.";document.querySelector(".wrap").prepend(p)}
-  return r.json()}).then(D=>{
+  return r.json()}).then(box=>openBox(pk,box))).then(D=>{
 const PRICE=0.5, K8=0.3*0.65*PRICE; // andel av insatsen som går till 8 rätt, per rad
 const rounds=D.rounds, cur=D.cur;
 // spelprocent normeras över de hästar som startar
 const withStreck=hs=>{const ss=hs.reduce((a,h)=>a+(h.s||0),0);hs.forEach(h=>h.streck=Math.max(0.001,(h.s||0.1)/ss));return hs};
 const field=cur.field.map(leg=>{
   const run=leg.h.filter(h=>h[3]>0);
-  return {avd:leg.avd,len:leg.len,winners:leg.w,scratched:leg.h.filter(h=>!(h[3]>0)).map(h=>h[0]),
+  // hur mycket modellen litar på oddsen: efter pengarna i vinnarspelet (avgjorda omgångar: fullt)
+  const conf=cur.done||leg.vp==null?1:leg.vp/(leg.vp+1e5);
+  return {avd:leg.avd,len:leg.len,conf,vp:leg.vp,winners:leg.w,scratched:leg.h.filter(h=>!(h[3]>0)).map(h=>h[0]),
     horses:withStreck(run.map(h=>({nr:h[0],namn:h[1],kusk:h[2],odds:h[3],tranare:h[4],s:h[5],info:h[6],sko:h[7],form:h[8]})))};
 });
 const hist=rounds.map(r=>({r,legs:r.legs.map(l=>({winners:l.w.map(w=>w[0]),horses:withStreck(l.h.filter(h=>h[1]>0).map(h=>({nr:h[0],odds:h[1],s:h[2]})))}))}));
@@ -389,7 +447,8 @@ const wInfo={odds:["Lita på oddsen","1,0 följer oddsen rakt av. 1,1 passade å
 function marketProbs(leg){const inv=leg.horses.map(h=>1/h.odds);const s=inv.reduce((a,b)=>a+b,0);return inv.map(x=>x/s)}
 function modelProbs(leg){
   const m=marketProbs(leg);
-  const sc=leg.horses.map((h,j)=>Math.pow(m[j],W.odds)*Math.pow(1+0.07*(kuskWins[h.kusk]||0),W.kusk));
+  const c=leg.conf==null?1:leg.conf;
+  const sc=leg.horses.map((h,j)=>Math.pow(m[j],W.odds*c)*Math.pow(h.streck,1-c)*Math.pow(1+0.07*(kuskWins[h.kusk]||0),W.kusk));
   const s=sc.reduce((a,b)=>a+b,0);return sc.map(x=>x/s);
 }
 // värdekvot med golv och tak: spelprocent under 1 % och kvoter över 3 är för osäkra att lita på
@@ -484,6 +543,13 @@ if(cur.done&&(D.waiting||D.next)){const w=D.waiting;
   $("nextTitle").textContent="Nästa: "+(w?w.track+" ":"")+dname(w?w.date:D.next)+(w&&w.start?" kl "+w.start.slice(11,16):"");
   $("nextText").textContent=w?"Startlistan är klar, men ATG har inte öppnat spelet än. Kupongen byggs när odds och spelprocent finns, oftast några dagar före loppen. Under tiden visas förra omgången, så du kan se hur modellen hade gått.":"Startlistan är inte publicerad än. Under tiden visas förra omgången, så du kan se hur modellen hade gått.";
   $("nextBox").hidden=false}
+if(!cur.done&&cur.oddsOpen===false){$("nextTitle").textContent="Vinnaroddsen har inte öppnat än";
+  $("nextText").textContent="ATG brukar öppna vinnarspelet på tävlingsdagen. Tills dess räknar modellen bara på V85-procenten, så Jaga värde och Storvinst hittar inga underspelade hästar. Kom tillbaka när oddsen finns.";$("nextBox").hidden=false}
+else if(!cur.done&&field.some(l=>l.conf<0.5)){const vp=field.map(l=>l.vp||0).sort((a,b)=>a-b)[field.length>>1];
+  $("nextTitle").textContent="Oddsen är inte pålitliga än";
+  $("nextText").textContent=`Det ligger bara runt ${krShort(vp)} per lopp i vinnarspelet hittills, mot ungefär en miljon vid start. Modellen väger därför mest på V85-procenten och hittar få underspelade hästar. Kolla igen på tävlingsdagen, gärna efter lunch.`;$("nextBox").hidden=false}
+else if(!cur.done&&D.later&&D.later.length){const l=D.later[0];$("nextTitle").textContent="Därefter: "+l.track+" "+dname(l.date);
+  $("nextText").textContent="Den omgången läggs in här när "+cur.track+" är avgjord.";$("nextBox").hidden=false}
 $("roundInfo").textContent=cur.done
   ?`Senast körda omgången, ${cur.track} ${dname(cur.date)}, med slutodds och spelprocent från ATG. Slå på facit för att se hur kupongen hade gått.`
   :`Kommande omgång, ${cur.track} ${dname(cur.date)}${cur.start?" kl "+cur.start.slice(11,16):""}. Odds och spelprocent hämtades från ATG ${upd} och ändras fram till start.`;
@@ -617,7 +683,7 @@ $("reset").addEventListener("click",()=>{lock=emptyLock();renderSpel();toast("Ku
 const rowsText=()=>current.list.map(js=>js.map((j,i)=>field[i].horses[j].nr).join(",")).join("\n");
 const DL=true;
 // loggen: odds som GitHub Actions sparat före start
-fetch("data/snapshots/index.json",{cache:"no-cache"}).then(r=>r.ok?r.json():[]).catch(()=>[]).then(all=>{
+fetch("data/snapshots/files.json",{cache:"no-cache"}).then(r=>r.ok?r.json():[]).catch(()=>[]).then(all=>{
   const g={};all.forEach(x=>{if(x&&x.game)(g[x.game]=g[x.game]||{x,s:[]}).s.push(x)});
   const games=Object.values(g).sort((a,b)=>b.x.date.localeCompare(a.x.date));
   const list=$("loggList");list.textContent="";
@@ -656,7 +722,10 @@ if(saved){$("budget").value=saved.budget;MODE=saved.mode;V=MODE==="s"?0.8:+MODE;
 renderWeights();renderSpel();renderHist();
 if(saved&&saved.tab&&saved.tab!=="t-spel")$(saved.tab).click();
 if(saved)toast("Uppdaterad · "+$("dateline").textContent.split(" · ").pop());
-}).catch(()=>{const p=document.createElement("p");p.className="info";p.textContent="Kunde inte hämta datan. Kontrollera nätet och ladda om sidan.";document.querySelector(".wrap").prepend(p)});
+}).catch(err=>{
+  // nyckeln på enheten passar inte längre (koderna har bytts): be om koden igen
+  if(err&&err.name==="OperationError"&&storedKey()){try{localStorage.removeItem(KEYSTORE)}catch(x){}location.reload();return}
+  const p=document.createElement("p");p.className="info";p.textContent="Kunde inte hämta datan. Kontrollera nätet och ladda om sidan.";document.querySelector(".wrap").prepend(p)});
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 // dra ned för att uppdatera: hämtar det senaste som GitHub Actions sparat från ATG
 (()=>{

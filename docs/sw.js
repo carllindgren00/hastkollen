@@ -1,7 +1,7 @@
 // Nätet först, så att färsk ATG-data alltid vinner. Cachen används bara när hämtningen
 // misslyckas, till exempel offline.
-const CACHE = "v85-kollen-v2";
-const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "data/v85.json"];
+const CACHE = "v85-kollen-v3";
+const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "data/v85.enc", "data/keys.json"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).catch(() => {}).then(() => self.skipWaiting()));

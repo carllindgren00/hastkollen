@@ -1,6 +1,6 @@
 """Sparar ATG:s aktuella vinnarodds och V85-procent för dagens V85-omgång.
 
-Användning: python3 scripts/atg_snapshot.py docs/data/snapshots [--game V85_...]
+Användning: python3 scripts/atg_snapshot.py .work/snaps [--game V85_...]  (krypteras sedan med scripts/seal.py)
 Skriver en JSON-fil per omgång som ännu inte är avgjord och lägger till den i
 index.json, som sidans Logg-flik läser. Avd skrivs som "nr:odds:procent,...".
 """

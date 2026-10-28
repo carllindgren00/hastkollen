@@ -1,6 +1,6 @@
 """Hämtar V85-data från ATG och skriver den JSON som V85-kollen läser.
 
-Användning: python3 scripts/atg_v85.py <cachekatalog> docs/data/v85.json
+Användning: python3 scripts/atg_v85.py <cachekatalog> .work/v85.json  (krypteras sedan med scripts/seal.py)
 Avslutade omgångar cachas; kommande/pågående hämtas alltid om.
 """
 import datetime as dt, json, os, sys, time, urllib.request
@@ -85,7 +85,7 @@ def name(p):
 
 def build(cache, today):
     ids = game_ids(cache, today)
-    rounds, cur, waiting = [], None, None
+    rounds, last_done, open_games, waiting = [], None, [], None
     gids = [x for x in sorted(ids, key=lambda x: x[0]) if x[1]]
     with ThreadPoolExecutor(8) as ex:
         games = list(ex.map(lambda x: cached(cache, x[1], f"/games/{x[1]}", lambda d: d.get("status") == "results"), gids))
@@ -94,7 +94,7 @@ def build(cache, today):
             continue
         if not (g.get("pools") or {}).get("V85"):
             # startlistan är ute men spelet har inte öppnat: inga odds eller V85-procent än
-            waiting = {"date": date, "track": g["races"][0]["track"]["name"], "start": g["races"][0].get("startTime")}
+            waiting = waiting or {"date": date, "track": g["races"][0]["track"]["name"], "start": g["races"][0].get("startTime")}
             continue
         pool = g["pools"]["V85"]
         res = (pool.get("result") or {}).get("payouts") or {}
@@ -111,9 +111,15 @@ def build(cache, today):
             rounds.append({"id": gid, "date": date, "track": g["races"][0]["track"]["name"],
                            "pay": {k: (v.get("payout") or 0) / 100 or None for k, v in res.items()},
                            "turnover": pool.get("turnover", 0) / 100, "legs": legs})
-        cur = g  # senaste omgången med startlista, avslutad eller inte
+            last_done = g
+        else:
+            open_games.append(g)
+    # närmaste omgång som går att spela på; annars den senast avgjorda
+    cur = open_games[0] if open_games else last_done
+    if open_games:
+        waiting = None
     year = int(cur["races"][0]["date"][:4])
-    field = []
+    field, odds_open = [], True
     for r in cur["races"]:
         h = []
         for s in r["starts"]:
@@ -124,9 +130,18 @@ def build(cache, today):
             h.append([s["number"], hs["name"], name(s["driver"]),
                       0 if s.get("scratched") else odds(s), name(hs.get("trainer", {})),
                       streck(s), info, shoes(hs), form(hs, year)])
-        field.append({"avd": r["number"], "len": leg_len(r), "h": h,
+        # ATG visar 99,99 på alla hästar innan vinnarspelet öppnat; räkna då på V85-procenten
+        if all(x[3] >= 99.99 for x in h if x[3] > 0):
+            odds_open = False
+            for x in h:
+                if x[3] > 0:
+                    x[3] = round(min(999, 100 / max(x[5] or 0.1, 0.1)), 2)
+        # pengar i vinnarspelet: tidigt i veckan några hundralappar, vid start runt en miljon
+        vp = ((r.get("pools") or {}).get("vinnare") or {}).get("turnover")
+        field.append({"avd": r["number"], "len": leg_len(r), "h": h, "vp": None if vp is None else vp / 100,
                       "w": [s["number"] for s in r["starts"] if (s.get("result") or {}).get("place") == 1]})
     upcoming = [(d, st) for d, gid, st, t in ids if d > cur["races"][0]["date"][:10]]
+    later = [{"date": g["races"][0]["date"][:10], "track": g["races"][0]["track"]["name"]} for g in open_games[1:]]
     return {
         "updated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="minutes"),
         "rounds": rounds[::-1],
@@ -134,9 +149,10 @@ def build(cache, today):
                 "start": cur["races"][0].get("startTime"), "status": cur.get("status"),
                 "done": cur.get("status") == "results",
                 "pay": {k: (v.get("payout") or 0) / 100 or None for k, v in ((cur["pools"]["V85"].get("result") or {}).get("payouts") or {}).items()},
-                "turnover": cur["pools"]["V85"].get("turnover", 0) / 100, "field": field},
+                "turnover": cur["pools"]["V85"].get("turnover", 0) / 100, "oddsOpen": odds_open, "field": field},
         "next": upcoming[0][0] if upcoming else None,
         "waiting": waiting,
+        "later": later,
     }
 
 
