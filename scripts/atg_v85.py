@@ -27,7 +27,8 @@ def safe_get(path):
     try:
         return get(path)
     except Exception as e:
-        print("Kunde inte hämta", path, "-", e, file=sys.stderr)
+        # ::warning:: syns som en anteckning på körningen i GitHub
+        print(f"::warning::Kunde inte hämta {path}: {e}")
         return {}
 
 
@@ -128,6 +129,8 @@ def build(cache, today):
             open_games.append(g)
     # närmaste omgång som går att spela på; annars den senast avgjorda
     cur = open_games[0] if open_games else last_done
+    if cur is None:
+        sys.exit("::error::Fick ingen V85-omgång från ATG. ATG svarar troligen inte just nu.")
     if open_games:
         waiting = None
     year = int(cur["races"][0]["date"][:4])
