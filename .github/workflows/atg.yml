@@ -3,11 +3,9 @@ name: Hämta från ATG
 # GitHubs schema går i UTC. Svensk vintertid är UTC+1, sommartid UTC+2.
 on:
   schedule:
-    - cron: "17 18 * * 1-5"    # vardagar 19:17 vintertid: startlista och odds när spelet öppnar
-    - cron: "37 8 * * 6,0"     # lör/sön 09:37 vintertid: spara odds + uppdatera
-    - cron: "37 11 * * 6,0"    # 12:37
-    - cron: "17 12 * * 6,0"    # 13:17
-    - cron: "57 12 * * 6,0"    # 13:57, sista före start (15:00) vintertid
+    - cron: "17 18 * * 1-5"            # vardagar 19:17 vintertid: startlista och odds när spelet öppnar
+    - cron: "37 8 * * 6,0"             # lör/sön 09:37 vintertid: spara odds + uppdatera
+    - cron: "7,22,37,52 10-13 * * 6,0" # lör/sön var 15:e minut 11:07–14:52 vintertid, fram till start
   workflow_dispatch:
     inputs:
       snapshot:
