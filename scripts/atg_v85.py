@@ -22,12 +22,21 @@ def get(path):
             time.sleep(2 ** i)
 
 
+def safe_get(path):
+    # en enstaka hämtning som misslyckas ska inte stoppa hela körningen
+    try:
+        return get(path)
+    except Exception as e:
+        print("Kunde inte hämta", path, "-", e, file=sys.stderr)
+        return {}
+
+
 def cached(cache, name, path, keep):
     f = os.path.join(cache, name + ".json")
     if os.path.exists(f):
         return json.load(open(f))
-    d = get(path)
-    if keep(d):
+    d = safe_get(path)
+    if d and keep(d):
         json.dump(d, open(f, "w"))
     return d
 
@@ -49,7 +58,9 @@ def shoes(h):
     s = h.get("shoes") or {}
     if not s.get("reported"):
         return ""
-    f, b = s["front"]["hasShoe"], s["back"]["hasShoe"]
+    if not s.get("front") or not s.get("back"):
+        return ""
+    f, b = s["front"].get("hasShoe"), s["back"].get("hasShoe")
     txt = "Skor runt" if f and b else "Barfota runt" if not (f or b) else "Barfota bak" if f else "Barfota fram"
     return txt + (" (ändrat)" if s["front"].get("changed") or s["back"].get("changed") else "")
 
@@ -80,6 +91,7 @@ def leg_len(r):
 
 
 def name(p):
+    p = p or {}  # t.ex. kusk som inte är klar än
     return f"{p.get('firstName', '')} {p.get('lastName', '')}".strip()
 
 
@@ -104,7 +116,7 @@ def build(cache, today):
             for r in g["races"]:
                 run = [s for s in r["starts"] if not s.get("scratched")]
                 legs.append({
-                    "w": [[s["number"], s["horse"]["name"], name(s["driver"]), odds(s)]
+                    "w": [[s["number"], s["horse"]["name"], name(s.get("driver")), odds(s)]
                           for s in run if (s.get("result") or {}).get("place") == 1],
                     "h": [[s["number"], odds(s), streck(s)] for s in run],
                 })
@@ -124,10 +136,10 @@ def build(cache, today):
         h = []
         for s in r["starts"]:
             hs = s["horse"]
-            info = f"{hs['age']} år {SEX.get(hs['sex'], hs['sex'])}"
+            info = " ".join(x for x in [f"{hs['age']} år" if hs.get("age") else "", SEX.get(hs.get("sex"), hs.get("sex") or "")] if x)
             if s.get("distance", r["distance"]) != r["distance"]:
                 info += f" · +{s['distance'] - r['distance']} m"
-            h.append([s["number"], hs["name"], name(s["driver"]),
+            h.append([s["number"], hs["name"], name(s.get("driver")),
                       0 if s.get("scratched") else odds(s), name(hs.get("trainer", {})),
                       streck(s), info, shoes(hs), form(hs, year)])
         # ATG visar 99,99 på alla hästar innan vinnarspelet öppnat; räkna då på V85-procenten
