@@ -174,6 +174,12 @@ def build(cache, today):
 if __name__ == "__main__":
     cache, out = sys.argv[1], sys.argv[2]
     os.makedirs(cache, exist_ok=True)
-    data = build(cache, dt.date.today())
+    try:
+        data = build(cache, dt.date.today())
+    except Exception:
+        import traceback
+        # hela felet som en anteckning på körningen i GitHub
+        print("::error::" + traceback.format_exc().replace("\n", "%0A"))
+        raise
     json.dump(data, open(out, "w"), ensure_ascii=False, separators=(",", ":"))
     print(out, len(data["rounds"]), "omgångar; aktuell", data["cur"]["id"], data["cur"]["status"], "· nästa", data["next"])

@@ -48,6 +48,7 @@ jobs:
       - name: Hämta omgångar och startlista
         run: |
           # ett nytt försök efter en minut om ATG svarar fel
+          python3 --version
           python3 -I scripts/atg_v85.py .cache .work/v85.json || { sleep 60; python3 -I scripts/atg_v85.py .cache .work/v85.json; }
           python3 scripts/seal.py file .work/v85.json docs/data/v85.enc
 
