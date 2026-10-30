@@ -100,6 +100,7 @@ def build(cache, today):
     ids = game_ids(cache, today)
     rounds, last_done, open_games, waiting = [], None, [], None
     gids = [x for x in sorted(ids, key=lambda x: x[0]) if x[1]]
+    print(f"::notice::{len(ids)} V85-dagar i kalendern, {len(gids)} med omgångs-id")
     with ThreadPoolExecutor(8) as ex:
         games = list(ex.map(lambda x: cached(cache, x[1], f"/games/{x[1]}", lambda d: d.get("status") == "results"), gids))
     for (date, gid, status, tracks), g in zip(gids, games):
@@ -130,7 +131,8 @@ def build(cache, today):
     # närmaste omgång som går att spela på; annars den senast avgjorda
     cur = open_games[0] if open_games else last_done
     if cur is None:
-        sys.exit("::error::Fick ingen V85-omgång från ATG. ATG svarar troligen inte just nu.")
+        print(f"::error::Fick ingen V85-omgång från ATG ({len(ids)} omgångar i kalendern, {sum(1 for g in games if g.get('races'))} med lopp).")
+        sys.exit(1)
     if open_games:
         waiting = None
     year = int(cur["races"][0]["date"][:4])
