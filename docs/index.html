@@ -168,6 +168,12 @@ details.race summary::-webkit-details-marker{display:none}
 .src a{color:var(--accent)}
 .disclaimer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;margin-top:8px;display:flex;flex-direction:column;gap:6px}
 .disclaimer p{margin:0}
+.fetchnow{font:600 .78rem var(--sans);color:var(--accent);background:var(--accent-soft);border:0;padding:7px 12px;border-radius:99px;white-space:nowrap}
+.fetchnow:disabled{opacity:.75}
+.tokenrow{display:flex;gap:8px;flex-wrap:wrap}
+.tokenrow input{flex:1;min-width:180px;font:500 .9rem var(--mono);padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+.tokenrow .btn{flex:0 0 auto;min-width:0;padding:9px 14px}
+.card ol{margin:0;padding-left:20px;color:var(--muted);font-size:.86rem;display:flex;flex-direction:column;gap:4px}
 .lockscreen{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
 .lockscreen form{width:100%;max-width:340px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px}
 .lockscreen img{border-radius:14px}
@@ -250,7 +256,7 @@ html,body{overscroll-behavior-y:contain}
       <h1>V85-kollen</h1>
       <p class="sub" id="dateline"></p>
     </div>
-    <span class="tag">ATG-data</span>
+    <button type="button" class="fetchnow" id="fetchNow">↻ Hämta nu</button>
   </div>
 
   <div class="seg" role="tablist">
@@ -339,6 +345,23 @@ html,body{overscroll-behavior-y:contain}
   </section>
 
   <section class="panel" id="p-logg" hidden>
+    <div class="card" id="tokenCard">
+      <h2>Hämta nu-knappen</h2>
+      <p id="tokenStatus"></p>
+      <ol id="tokenHelp">
+        <li>Öppna <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a>.</li>
+        <li>Namn: <b>V85-kollen hämta nu</b>. Expiration: 1 år.</li>
+        <li>Repository access: <b>Only select repositories → hastkollen</b>.</li>
+        <li>Permissions → Repository permissions → <b>Actions: Read and write</b>. Inget annat.</li>
+        <li>Generate token, kopiera nyckeln och klistra in den här.</li>
+      </ol>
+      <div class="tokenrow">
+        <input id="tokenInput" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" aria-label="GitHub-nyckel">
+        <button class="btn primary" id="tokenSave" type="button">Spara</button>
+        <button class="btn ghost" id="tokenRemove" type="button" hidden>Ta bort</button>
+      </div>
+      <p class="small">Nyckeln sparas bara på den här enheten och kan bara starta hämtningen från ATG i repot hastkollen.</p>
+    </div>
     <div class="card">
       <h2>Odds före start</h2>
       <p>Testet på Historik använder slutodds, som du inte har när du lämnar in kupongen. Här sparas ATG:s odds och spelprocent flera gånger varje lördag och söndag innan första start. Efter några veckor kan modellen testas med de siffror du faktiskt hade.</p>
@@ -716,6 +739,49 @@ $("rlist").addEventListener("click",e=>{if(!e.target.closest("#moreRounds"))retu
 const tabs={"t-spel":"p-spel","t-andel":"p-andel","t-hist":"p-hist","t-inst":"p-inst","t-logg":"p-logg"};
 Object.keys(tabs).forEach(t=>$(t).addEventListener("click",()=>{Object.entries(tabs).forEach(([b,p])=>{$(b).setAttribute("aria-selected",b===t);$(p).hidden=b!==t});if(t==="t-hist"&&histDirty)renderHist()}));
 // läget sparas inför dra-ned-uppdatering och läses in igen efteråt
+// Hämta nu: startar GitHub-hämtningen med en nyckel som bara finns på den här enheten,
+// väntar tills ny data är publicerad och laddar sedan om appen
+const GH="https://api.github.com/repos/carllindgren00/hastkollen",TOKENSTORE="v85-gh-token";
+const ghToken=()=>{try{return localStorage.getItem(TOKENSTORE)||""}catch(e){return ""}};
+const gh=(path,opt={})=>fetch(GH+path,{...opt,headers:{"Accept":"application/vnd.github+json","Authorization":"Bearer "+ghToken(),"X-GitHub-Api-Version":"2022-11-28",...(opt.headers||{})}});
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function renderToken(){const has=!!ghToken();
+  $("tokenStatus").textContent=has?"Nyckeln är sparad på den här enheten. Tryck på Hämta nu högst upp när du vill ha färska odds.":"Med en GitHub-nyckel kan Hämta nu starta en hämtning från ATG direkt. Gör så här en gång per enhet:";
+  $("tokenHelp").hidden=has;$("tokenInput").hidden=has;$("tokenSave").hidden=has;$("tokenRemove").hidden=!has}
+$("tokenSave").addEventListener("click",async()=>{const t=$("tokenInput").value.trim();if(!t)return;
+  $("tokenSave").disabled=true;$("tokenSave").textContent="Kontrollerar…";
+  const r=await fetch(GH+"/actions/workflows/atg.yml",{headers:{"Accept":"application/vnd.github+json","Authorization":"Bearer "+t}}).catch(()=>null);
+  $("tokenSave").disabled=false;$("tokenSave").textContent="Spara";
+  if(!r||!r.ok){toast(r&&r.status===401?"Nyckeln fungerar inte. Kontrollera att du kopierade hela.":"Kunde inte kontrollera nyckeln. Försök igen.");return}
+  try{localStorage.setItem(TOKENSTORE,t)}catch(e){}$("tokenInput").value="";renderToken();toast("Nyckeln är sparad")});
+$("tokenRemove").addEventListener("click",()=>{try{localStorage.removeItem(TOKENSTORE)}catch(e){}renderToken();toast("Nyckeln är borttagen från den här enheten")});
+renderToken();
+let fetching=false;
+$("fetchNow").addEventListener("click",async()=>{
+  if(fetching)return;
+  if(!ghToken()){$("t-logg").click();$("tokenCard").scrollIntoView({behavior:"smooth",block:"start"});toast("Lägg in en GitHub-nyckel först");return}
+  const B=$("fetchNow"),step=t=>B.textContent=t;fetching=true;B.disabled=true;
+  const fail=m=>{toast(m);step("↻ Hämta nu");B.disabled=false;fetching=false};
+  try{
+    const before=await fetch("data/v85.enc",{cache:"no-store"}).then(r=>r.text()).catch(()=>"");
+    const t0=Date.now();step("Startar…");
+    const r=await gh("/actions/workflows/atg.yml/dispatches",{method:"POST",body:JSON.stringify({ref:"main"})});
+    if(r.status===401||r.status===403)return fail("GitHub-nyckeln fungerar inte längre. Lägg in en ny under Logg.");
+    if(!r.ok)return fail("Kunde inte starta hämtningen ("+r.status+").");
+    step("Hämtar från ATG…");let run=null;
+    for(let i=0;i<30;i++){await sleep(8000);
+      const j=await gh("/actions/runs?event=workflow_dispatch&per_page=5").then(x=>x.json()).catch(()=>null);
+      run=j&&j.workflow_runs&&j.workflow_runs.find(w=>new Date(w.created_at).getTime()>=t0-60000);
+      if(run&&run.status==="completed")break}
+    if(!run||run.status!=="completed")return fail("Hämtningen tar längre tid än vanligt. Dra ned om en stund.");
+    if(run.conclusion!=="success")return fail("Hämtningen misslyckades. Försök igen om en stund.");
+    step("Publicerar…");
+    for(let i=0;i<24;i++){await sleep(6000);
+      const now=await fetch("data/v85.enc",{cache:"no-store"}).then(r=>r.text()).catch(()=>before);
+      if(now&&now!==before){try{sessionStorage.setItem("v85-state",JSON.stringify(v85State()))}catch(e){}location.reload();return}}
+    fail("Ny data är hämtad men inte publicerad än. Dra ned om en minut.");
+  }catch(e){fail("Något gick fel. Kontrollera nätet och försök igen.")}
+});
 window.v85State=()=>({budget:$("budget").value,mode:MODE,minwin:MINWIN,tab:Object.keys(tabs).find(t=>$(t).getAttribute("aria-selected")==="true")});
 let saved=null;try{saved=JSON.parse(sessionStorage.getItem("v85-state"));sessionStorage.removeItem("v85-state")}catch(e){}
 if(saved){$("budget").value=saved.budget;MODE=saved.mode;V=MODE==="s"?0.8:+MODE;MINWIN=+saved.minwin}
