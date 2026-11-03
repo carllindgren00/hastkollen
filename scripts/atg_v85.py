@@ -123,7 +123,7 @@ def build(cache, today):
                 })
             rounds.append({"id": gid, "date": date, "track": g["races"][0]["track"]["name"],
                            "pay": {k: (v.get("payout") or 0) / 100 or None for k, v in res.items()},
-                           "turnover": pool.get("turnover", 0) / 100, "legs": legs})
+                           "turnover": pool.get("turnover", 0) / 100, "jp": pool.get("jackpotAmount"), "legs": legs})
             last_done = g
         else:
             open_games.append(g)
@@ -165,11 +165,35 @@ def build(cache, today):
                 "start": cur["races"][0].get("startTime"), "status": cur.get("status"),
                 "done": cur.get("status") == "results",
                 "pay": {k: (v.get("payout") or 0) / 100 or None for k, v in ((cur["pools"]["V85"].get("result") or {}).get("payouts") or {}).items()},
-                "turnover": cur["pools"]["V85"].get("turnover", 0) / 100, "oddsOpen": odds_open, "field": field},
+                "turnover": cur["pools"]["V85"].get("turnover", 0) / 100, "oddsOpen": odds_open,
+                # extra pengar i 8-rättspotten (jackpot från förra omgången eller ATG:s egna tillskott), i kronor
+                "jackpot": cur["pools"]["V85"].get("jackpotAmount"), "field": field},
         "next": upcoming[0][0] if upcoming else None,
         "waiting": waiting,
         "later": later,
     }
+
+
+def build_dd(today):
+    """Närmaste Dagens Dubbel som går att spela: båda loppens hästar och oddset för varje kombination."""
+    for day in [today + dt.timedelta(days=i) for i in range(8)]:
+        cal = safe_get(f"/calendar/day/{day}")
+        ids = [g["id"] for g in cal.get("games", {}).get("dd", []) if g.get("id") and g.get("status") == "bettable"]
+        for gid in ids:
+            g = safe_get(f"/games/{gid}")
+            pool = (g.get("pools") or {}).get("dd") or {}
+            if len(g.get("races") or []) != 2 or not pool.get("comboOdds"):
+                continue
+            legs = []
+            for r in g["races"]:
+                vp = ((r.get("pools") or {}).get("vinnare") or {}).get("turnover")
+                legs.append({"race": r["number"], "track": r["track"]["name"], "start": r.get("startTime"),
+                             "len": leg_len(r), "vp": None if vp is None else vp / 100,
+                             "h": [[s["number"], s["horse"]["name"], name(s.get("driver")),
+                                    0 if s.get("scratched") else odds(s)] for s in r["starts"]]})
+            return {"id": gid, "date": g["races"][0]["date"][:10], "turnover": pool.get("turnover", 0) / 100,
+                    "combo": pool["comboOdds"], "legs": legs}
+    return None
 
 
 if __name__ == "__main__":
@@ -178,6 +202,7 @@ if __name__ == "__main__":
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
     try:
         data = build(cache, dt.date.today())
+        data["dd"] = build_dd(dt.date.today())
     except Exception:
         import traceback
         # hela felet som en anteckning på körningen i GitHub

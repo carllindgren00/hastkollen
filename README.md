@@ -12,6 +12,7 @@ Datan är krypterad. Appen frågar efter en kod och låser upp datan i webbläsa
 - `scripts/seal.py` krypterar datan. GitHub Actions har bara den publika nyckeln (`docs/data/pubkey.pem`) och kan kryptera men aldrig läsa. Den privata nyckeln ligger i `docs/data/keys.json`, krypterad en gång per kod (PBKDF2 med 600 000 varv och AES-GCM). Inga koder finns i repot eller i GitHubs inställningar.
 - Byta koder: `printf 'kod1\nkod2\n' | python3 scripts/seal.py keygen docs/data`, och kryptera sedan om datan. Alla enheter får då skriva in en kod på nytt.
 - `scripts/atg_v85.py` hämtar årets V85-omgångar och nästa startlista från ATG:s öppna API.
+  Den hämtar också jackpot (extra pengar i 8-rättspotten) och närmaste Dagens Dubbel med oddset för varje kombination.
 - `scripts/atg_snapshot.py` sparar dagens vinnarodds och V85-procent, för att senare kunna testa modellen med de odds man faktiskt hade före start.
 - `.github/workflows/atg.yml` kör skripten på schema och sparar datan i repot. Den kan också köras för hand under Actions → "Hämta från ATG" → Run workflow.
 

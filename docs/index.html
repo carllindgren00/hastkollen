@@ -49,9 +49,10 @@ h2{font-size:1.15rem}
 .tag{font:500 .7rem var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:4px 8px;border-radius:99px;white-space:nowrap}
 button{font-family:inherit;cursor:pointer}
 button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.seg{display:flex;background:var(--sunk);border-radius:12px;padding:4px;gap:4px}
+.seg{display:flex;background:var(--sunk);border-radius:12px;padding:4px;gap:4px;overflow-x:auto;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
 .seg button{flex:1;min-width:0;border:0;background:transparent;color:var(--muted);font-weight:600;font-size:.92rem;padding:9px 4px;border-radius:9px}
-@media (max-width:420px){.seg button{font-size:.82rem}}
+@media (max-width:420px){.seg button{font-size:.82rem;flex:1 0 auto;padding:9px 10px}}
 .t{font:500 .72rem var(--mono);padding:2px 6px;border-radius:5px;background:var(--sunk);color:var(--muted)}
 .t.pre{background:var(--accent-soft);color:var(--accent)}
 .seg button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.08)}
@@ -156,6 +157,7 @@ details.race summary::-webkit-details-marker{display:none}
 .o{font:500 .72rem var(--mono);padding:2px 6px;border-radius:5px;background:var(--sunk);color:var(--muted)}
 .o.fav{background:var(--accent-soft);color:var(--accent)}
 .o.skr{background:var(--gold-soft);color:var(--gold);font-weight:600}
+.next.jp{background:var(--accent-soft);border-color:var(--accent)}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .stats div{background:var(--sunk);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column}
 .stats span:first-child{font-size:.74rem;color:var(--muted)}
@@ -234,6 +236,10 @@ html,body{overscroll-behavior-y:contain}
 .tbl td{padding:8px;border-bottom:1px solid var(--line);font-size:.85rem;white-space:nowrap}
 .tbl td b{font:600 .9rem var(--mono);display:block}
 .tbl td small{color:var(--muted);font-family:var(--mono);font-size:.74rem}
+.tbl b.good{color:var(--accent)}
+#p-dd .tbl td small{font-family:var(--sans);white-space:normal;display:block;max-width:150px}
+#p-dd .tbl td,#p-dd .tbl th{padding:7px 5px}
+#p-dd .tbl td:first-child{white-space:normal}
 @media (max-width:520px){.kpis.four{grid-template-columns:1fr 1fr}.kpis.four div:nth-child(3){border-left:0}.kpis.four div:nth-child(n+3){border-top:1px solid var(--line)}}
 </style>
 </head>
@@ -261,6 +267,7 @@ html,body{overscroll-behavior-y:contain}
 
   <div class="seg" role="tablist">
     <button role="tab" id="t-spel" aria-selected="true">Spel</button>
+    <button role="tab" id="t-dd" aria-selected="false">DD</button>
     <button role="tab" id="t-andel" aria-selected="false">Andelar</button>
     <button role="tab" id="t-hist" aria-selected="false">Historik</button>
     <button role="tab" id="t-inst" aria-selected="false">Modell</button>
@@ -268,6 +275,7 @@ html,body{overscroll-behavior-y:contain}
   </div>
 
   <section class="panel" id="p-spel">
+    <div class="next jp" id="jpBox" hidden><b id="jpTitle"></b><span id="jpText"></span></div>
     <div class="next" id="nextBox" hidden><b id="nextTitle"></b><span id="nextText"></span></div>
     <p class="info" id="roundInfo"></p>
     <div class="ticket">
@@ -302,6 +310,29 @@ html,body{overscroll-behavior-y:contain}
     <p class="toast" id="toast" aria-live="polite"></p>
     <div class="section-title"><h2>Avdelningarna</h2><span class="hint">Tryck på en häst för att ta med eller ta bort den</span></div>
     <div class="panel" id="races"></div>
+  </section>
+
+  <section class="panel" id="p-dd" hidden>
+    <div class="card">
+      <h2 id="ddTitle">Dagens Dubbel</h2>
+      <p id="ddMeta"></p>
+      <div class="next" id="ddWarn" hidden><b>Oddsen är tunna än</b><span id="ddWarnText"></span></div>
+      <div class="kpis four" id="ddKpis" style="border:1px solid var(--line);border-radius:12px">
+        <div><span>Kombinationer</span><span id="ddN"></span></div>
+        <div><span>Chans att träffa</span><span id="ddHit"></span></div>
+        <div><span>Väntat tillbaka</span><span id="ddEv"></span></div>
+        <div><span>Bästa värde</span><span id="ddBest"></span></div>
+      </div>
+      <p id="ddAdvice"></p>
+      <div class="tbl"><table id="ddTbl"></table></div>
+      <div class="ticket-foot" style="padding:0;border:0"><button class="btn primary" id="ddCopy" type="button">Kopiera förslaget</button></div>
+    </div>
+    <div class="card">
+      <h2>Så räknar den</h2>
+      <p>I Dagens Dubbel ska du pricka vinnarna i två lopp. ATG behåller 25 % av insatserna, mot 35 % på V85, och visar vad varje kombination betalar.</p>
+      <p><strong>Chansen</strong> för en kombination räknas från vinnaroddsen i de två loppen. <strong>Värde</strong> är chansen gånger oddset: 1,0 betyder att kombinationen betalar precis vad chansen motiverar, och över 1,0 att den betalar mer.</p>
+      <p><strong>Test på årets 299 Dagens Dubbel:</strong> att spela alla kombinationer med värde över 1,0, lika mycket på varje, gav 96 % tillbaka. Att spela alla kombinationer lika mycket gav 59 %. Testet använder slutodds, så verkligheten blir något sämre, och det är ingen garanti att vinna.</p>
+    </div>
   </section>
 
   <section class="panel" id="p-andel" hidden>
@@ -503,15 +534,20 @@ function buildSystem(probs,budget,lock,v,F=field){
 function evaluate(probs,pick,rows,F=field){
   let hit=1,ev=1;
   pick.forEach((s,i)=>{let a=0,b=0;s.forEach(j=>{const p=probs[i][j];a+=p;b+=p*ratio(p,F[i].horses[j].streck)/p});hit*=a;ev*=b});
-  const exp8=K8*ev; // förväntad 8-rätts-utdelning i kr för hela kupongen
+  const exp8=K8*ev*(F===field?JF:1); // förväntad 8-rätts-utdelning i kr för hela kupongen, med jackpot
   return {pick,rows,hit,exp8,payIfHit:exp8/hit,index:(exp8/(rows*PRICE))/(0.3*0.65)};
 }
 const medTurn=(()=>{const t=rounds.map(r=>r.turnover).filter(Boolean).sort((a,b)=>a-b);return t[t.length>>1]||78e6})();
-const TURN=cur.turnover>1e6?cur.turnover:medTurn;
+// extra pengar i 8-rättspotten (kr); omsättningen brukar bli högre när det finns jackpot
+const JP=cur.done?0:(cur.jackpot||0);
+const medJP=(()=>{const t=rounds.filter(r=>r.jp).map(r=>r.turnover).sort((a,b)=>a-b);return t.length?t[t.length>>1]:medTurn*1.25})();
+const TURN=Math.max(cur.turnover||0,JP?medJP:(cur.turnover>1e6?cur.turnover:medTurn));
+const JF=1+JP/(0.195*TURN); // så mycket större 8-rättspotten blir av jackpoten
 // utdelning per rad vid 8 rätt: 8-rättspotten delad på alla rader som har samma vinnare
-const rowPay=(S,T)=>Math.min(0.195*T,K8/S);
+const rowPay=(S,T,J=0)=>Math.min(0.195*T+J,K8/S*(1+J/(0.195*T)));
 // de bästa raderna efter poäng (chans × värde^beta), bland dem som betalar minst minpay
 function buildRows(probs,budget,lock,beta,minpay,F=field,T=TURN){
+  const J=F===field?JP:0;
   const n=Math.max(1,Math.floor(budget/PRICE));
   const L=probs.map((p,i)=>{let c=p.map((x,j)=>j).filter(j=>lock[i][j]!==-1);const f=c.filter(j=>lock[i][j]===1);if(f.length)c=f;
     return c.map(j=>({j,p:p[j],s:F[i].horses[j].streck,sc:Math.log(p[j])+beta*Math.log(ratio(p[j],F[i].horses[j].streck))})).sort((a,b)=>b.sc-a.sc).slice(0,10)});
@@ -524,14 +560,14 @@ function buildRows(probs,budget,lock,beta,minpay,F=field,T=TURN){
   const rows=[];let pops=0;
   while(heap.length&&rows.length<n&&pops<40000){
     const [v,ix,S,P]=pop();pops++;
-    if(rowPay(S,T)>=minpay)rows.push({js:ix.map((k,i)=>L[i][k].j),P,S});
+    if(rowPay(S,T,J)>=minpay)rows.push({js:ix.map((k,i)=>L[i][k].j),P,S});
     const key=ix.reduce((a,k,i)=>a+k*pw[i],0);
     for(let i=0;i<ix.length;i++){const k=ix[i];if(k+1>=L[i].length||seen.has(key+pw[i]))continue;
       seen.add(key+pw[i]);const nx=ix.slice();nx[i]=k+1;const o=L[i][k],m=L[i][k+1];
       heap.push([v-o.sc+m.sc,nx,S/o.s*m.s,P/o.p*m.p]);up(heap.length-1)}
   }
   const pick=probs.map((p,i)=>[...new Set(rows.map(r=>r.js[i]))]);
-  let hit=0,exp8=0;rows.forEach(r=>{hit+=r.P;exp8+=r.P*rowPay(r.S,T)});
+  let hit=0,exp8=0;rows.forEach(r=>{hit+=r.P;exp8+=r.P*rowPay(r.S,T,J)});
   const full=pick.reduce((a,x)=>a*x.length,1);
   return {pick,rows:rows.length,list:rows.map(r=>r.js),full,hit,exp8,payIfHit:hit?exp8/hit:0,index:rows.length?(exp8/(rows.length*PRICE))/(0.3*0.65):0};
 }
@@ -561,6 +597,10 @@ function payout(pick,F,pay){
 }
 const upd=new Date(D.updated).toLocaleString("sv-SE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
 
+if(JP){const rtp=Math.round(65+JP/TURN*100);
+  $("jpTitle").textContent=`Jackpot: ${fmt(JP/1e6,1)} Mkr extra i 8-rättspotten`;
+  $("jpText").textContent=`Räknat på en omsättning runt ${fmt(TURN/1e6,0)} Mkr får spelarna tillbaka cirka ${rtp} % av insatserna i stället för vanliga 65 %. Det är en bra omgång att spela på. Utdelningen i kupongen räknar med jackpoten.`;
+  $("jpBox").hidden=false}
 $("dateline").textContent=(cur.done?"Förra omgången: ":"")+cap(dname(cur.date))+" · "+cur.track+" · hämtat från ATG "+upd;
 if(cur.done&&(D.waiting||D.next)){const w=D.waiting;
   $("nextTitle").textContent="Nästa: "+(w?w.track+" ":"")+dname(w?w.date:D.next)+(w&&w.start?" kl "+w.start.slice(11,16):"");
@@ -657,6 +697,47 @@ function renderAndel(){
 }
 
 let histDirty=true;
+// Dagens Dubbel: chans per kombination från vinnaroddsen, jämförd med vad kombinationen betalar
+function renderDD(){
+  const dd=D.dd;$("t-dd").hidden=!dd;if(!dd)return;
+  const L=dd.legs.map(l=>({...l,run:l.h.filter(h=>h[3]>0)}));
+  // ATG:s kombinationsodds (i hundradelar); 99999 betyder att ingen spelat kombinationen
+  const co=(a,b)=>{const o=((dd.combo[a-1]||[])[b-1]||0)/100;return o>0&&o<999?o:0};
+  // när vinnarspelet är tunt litar modellen mer på vad Dagens Dubbel-spelarna själva tror
+  const probs=L.map((l,k)=>{
+    const conf=l.vp==null?1:l.vp/(l.vp+1e5);
+    const mk=l.run.map(h=>Math.pow(1/h[3],1.1));const smk=mk.reduce((a,b)=>a+b,0);
+    const dq=l.run.map(h=>L[1-k].run.reduce((a,g)=>{const o=k?co(g[0],h[0]):co(h[0],g[0]);return a+(o?1/o:0)},0));const sdq=dq.reduce((a,b)=>a+b,0)||1;
+    const sc=l.run.map((h,j)=>Math.pow(mk[j]/smk,conf)*Math.pow(Math.max(dq[j]/sdq,1e-4),1-conf));const t=sc.reduce((a,b)=>a+b,0);
+    return sc.map(x=>x/t)});
+  const combos=[];
+  L[0].run.forEach((a,i)=>L[1].run.forEach((b,j)=>{const o=co(a[0],b[0]);if(!o)return;const P=probs[0][i]*probs[1][j];combos.push({a,b,P,o,v:P*o})}));
+  combos.sort((x,y)=>y.v-x.v);
+  const pick=combos.filter(c=>c.v>=1);
+  const hit=pick.reduce((a,c)=>a+c.P,0),ev=pick.length?pick.reduce((a,c)=>a+c.P*c.o,0)/pick.length:0;
+  const t0=L[0].start?L[0].start.slice(11,16):"";
+  $("ddTitle").textContent=`Dagens Dubbel · ${cap(dname(dd.date))}`;
+  $("ddMeta").textContent=L.map(l=>`${l.track} lopp ${l.race}${l.start?" kl "+l.start.slice(11,16):""}`).join(" och ")+` · ${krShort(dd.turnover)} inlagt`;
+  $("ddWarn").hidden=dd.turnover>=500000;
+  $("ddWarnText").textContent=`Det ligger bara ${krShort(dd.turnover)} i Dagens Dubbel hittills, mot runt 2 miljoner vid start. Oddsen och värdena ändras mycket fram till start. Tryck Hämta nu strax innan du spelar.`;
+  $("ddN").textContent=pick.length;$("ddHit").textContent=pct(hit);
+  const thin=dd.turnover<500000;
+  $("ddEv").textContent=thin?"vänta":pick.length?fmt(ev*100)+" %":"–";$("ddEv").className=!thin&&ev>=1?"good":"";
+  $("ddBest").textContent=combos.length?fmt(combos[0].v,2):"–";
+  $("ddAdvice").textContent=thin
+    ?"Vänta med att spela. Med så lite pengar inlagt hittar modellen värde som försvinner när de stora pengarna kommer in. Tryck Hämta nu en halvtimme före första loppet och titta igen."
+    :pick.length
+    ?`Förslag: lika stor insats på var och en av de ${pick.length} kombinationerna med värde över 1,0. De vinner tillsammans i ungefär ${pct(hit)} av fallen.`
+    :"Inga kombinationer har värde över 1,0 just nu. Då är det bättre att avstå, eller vänta och hämta nya odds närmare start.";
+  const nm=h=>`${h[0]} ${h[1]}`;
+  $("ddTbl").innerHTML=`<thead><tr><th>Kombination</th><th>Chans</th><th>Odds</th><th>Värde</th></tr></thead><tbody>`+
+    combos.slice(0,thin?10:Math.max(12,pick.length)).map(c=>`<tr><td><b>${c.a[0]}–${c.b[0]}</b><small>${c.a[1]} / ${c.b[1]}</small></td><td>${pct(c.P)}</td><td>${fmt(c.o,c.o<10?2:0)}</td><td><b class="${c.v>=1?"good":""}">${fmt(c.v,2)}</b></td></tr>`).join("")+`</tbody>`;
+  current_dd=pick;
+}
+let current_dd=[];
+$("ddCopy").addEventListener("click",()=>{const dd=D.dd;if(!dd||!current_dd.length){toast("Inget förslag att kopiera just nu");return}
+  const txt=`Dagens Dubbel ${dd.date} (${dd.legs.map(l=>l.track+" "+l.race).join(" + ")}): `+current_dd.map(c=>c.a[0]+"-"+c.b[0]).join(", ");
+  try{navigator.clipboard.writeText(txt).then(()=>toast("Förslaget är kopierat"),()=>toast(txt))}catch(e){toast(txt)}});
 function renderHist(){if($("p-hist").hidden){histDirty=true;return}histDirty=false;
   const modes=[[0,"Max chans"],[0.5,"Balans"],[0.8,"Jaga värde"],["s","Storvinst"]];const budgets=[100,250,500,1000];
   $("testIntro").textContent=`Modellen byggde en kupong för varje budget och spelstil i alla ${hist.length} V85-omgångar i år, med slutodds och spelprocent från ATG. Siffran visar hur mycket som kom tillbaka per insatt krona, och hur många gånger kupongen tog 8 rätt. Storvinst använder minsta vinst ${minOpts.find(o=>o[0]===MINWIN)[1].toLowerCase()}.`;
@@ -683,7 +764,7 @@ function renderHist(){if($("p-hist").hidden){histDirty=true;return}histDirty=fal
   const showAll=$("rlist").dataset.all==="1";
   $("rlist").innerHTML=rounds.slice(0,showAll?rounds.length:12).map(r=>{
     const os=r.legs.map(l=>l.w.map(w=>w[3]));
-    return `<div class="rrow"><div><h3>${r.track}</h3><span class="when">${cap(dname(r.date))}</span></div><div class="pay">${r.pay["8"]?kr(r.pay["8"]):"Jackpot"}</div>
+    return `<div class="rrow"><div><h3>${r.track}${r.jp?` <em class="badge value">+${fmt(r.jp/1e6,0)} Mkr</em>`:""}</h3><span class="when">${cap(dname(r.date))}</span></div><div class="pay">${r.pay["8"]?kr(r.pay["8"]):"Jackpot"}</div>
     <div class="odds">${os.map(o=>`<span class="o ${o.some(x=>x>=10)?"skr":o.every(x=>x<3)?"fav":""}">${o.map(x=>fmt(x,x<10?2:1)).join("/")}</span>`).join("")}</div></div>`}).join("")+
     (rounds.length>12?`<button class="btn ghost" id="moreRounds" style="margin-top:10px">${showAll?"Visa färre":"Visa alla "+rounds.length}</button>`:"");
 }
@@ -736,7 +817,7 @@ let tt;function toast(m){$("toast").textContent=m;clearTimeout(tt);tt=setTimeout
 $("budget").addEventListener("input",renderSpel);$("facit").addEventListener("change",renderSpel);
 ["aRows","aShares","aFee"].forEach(id=>$(id).addEventListener("input",renderAndel));
 $("rlist").addEventListener("click",e=>{if(!e.target.closest("#moreRounds"))return;const l=$("rlist");l.dataset.all=l.dataset.all==="1"?"0":"1";renderHist()});
-const tabs={"t-spel":"p-spel","t-andel":"p-andel","t-hist":"p-hist","t-inst":"p-inst","t-logg":"p-logg"};
+const tabs={"t-spel":"p-spel","t-dd":"p-dd","t-andel":"p-andel","t-hist":"p-hist","t-inst":"p-inst","t-logg":"p-logg"};
 Object.keys(tabs).forEach(t=>$(t).addEventListener("click",()=>{Object.entries(tabs).forEach(([b,p])=>{$(b).setAttribute("aria-selected",b===t);$(p).hidden=b!==t});if(t==="t-hist"&&histDirty)renderHist()}));
 // läget sparas inför dra-ned-uppdatering och läses in igen efteråt
 // Hämta nu: startar GitHub-hämtningen med en nyckel som bara finns på den här enheten,
@@ -785,7 +866,7 @@ $("fetchNow").addEventListener("click",async()=>{
 window.v85State=()=>({budget:$("budget").value,mode:MODE,minwin:MINWIN,tab:Object.keys(tabs).find(t=>$(t).getAttribute("aria-selected")==="true")});
 let saved=null;try{saved=JSON.parse(sessionStorage.getItem("v85-state"));sessionStorage.removeItem("v85-state")}catch(e){}
 if(saved){$("budget").value=saved.budget;MODE=saved.mode;V=MODE==="s"?0.8:+MODE;MINWIN=+saved.minwin}
-renderWeights();renderSpel();renderHist();
+renderWeights();renderSpel();renderHist();renderDD();
 if(saved&&saved.tab&&saved.tab!=="t-spel")$(saved.tab).click();
 if(saved)toast("Uppdaterad · "+$("dateline").textContent.split(" · ").pop());
 }).catch(err=>{
