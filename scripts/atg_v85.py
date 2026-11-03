@@ -174,14 +174,15 @@ def build(cache, today):
     }
 
 
-def build_dd(today):
-    """Närmaste Dagens Dubbel som går att spela: båda loppens hästar och oddset för varje kombination."""
+def build_dd(today, kind="dd"):
+    """Närmaste Dagens Dubbel (dd) eller Lunchdubbel (ld) som går att spela: båda loppens hästar
+    och oddset för varje kombination."""
     for day in [today + dt.timedelta(days=i) for i in range(8)]:
         cal = safe_get(f"/calendar/day/{day}")
-        ids = [g["id"] for g in cal.get("games", {}).get("dd", []) if g.get("id") and g.get("status") == "bettable"]
+        ids = [g["id"] for g in cal.get("games", {}).get(kind, []) if g.get("id") and g.get("status") == "bettable"]
         for gid in ids:
             g = safe_get(f"/games/{gid}")
-            pool = (g.get("pools") or {}).get("dd") or {}
+            pool = (g.get("pools") or {}).get(kind) or {}
             if len(g.get("races") or []) != 2 or not pool.get("comboOdds"):
                 continue
             legs = []
@@ -202,7 +203,8 @@ if __name__ == "__main__":
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
     try:
         data = build(cache, dt.date.today())
-        data["dd"] = build_dd(dt.date.today())
+        data["dd"] = build_dd(dt.date.today(), "dd")
+        data["ld"] = build_dd(dt.date.today(), "ld")
     except Exception:
         import traceback
         # hela felet som en anteckning på körningen i GitHub

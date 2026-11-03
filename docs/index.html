@@ -267,7 +267,7 @@ html,body{overscroll-behavior-y:contain}
 
   <div class="seg" role="tablist">
     <button role="tab" id="t-spel" aria-selected="true">Spel</button>
-    <button role="tab" id="t-dd" aria-selected="false">DD</button>
+    <button role="tab" id="t-dd" aria-selected="false">Dubbel</button>
     <button role="tab" id="t-andel" aria-selected="false">Andelar</button>
     <button role="tab" id="t-hist" aria-selected="false">Historik</button>
     <button role="tab" id="t-inst" aria-selected="false">Modell</button>
@@ -314,6 +314,10 @@ html,body{overscroll-behavior-y:contain}
 
   <section class="panel" id="p-dd" hidden>
     <div class="card">
+      <div class="mode" id="ddKind" role="radiogroup" aria-label="Spel">
+        <button type="button" data-k="dd" role="radio">Dagens Dubbel</button>
+        <button type="button" data-k="ld" role="radio">Lunchdubbel</button>
+      </div>
       <h2 id="ddTitle">Dagens Dubbel</h2>
       <p id="ddMeta"></p>
       <div class="next" id="ddWarn" hidden><b>Oddsen är tunna än</b><span id="ddWarnText"></span></div>
@@ -329,9 +333,10 @@ html,body{overscroll-behavior-y:contain}
     </div>
     <div class="card">
       <h2>Så räknar den</h2>
-      <p>I Dagens Dubbel ska du pricka vinnarna i två lopp. ATG behåller 25 % av insatserna, mot 35 % på V85, och visar vad varje kombination betalar.</p>
+      <p>I Dagens Dubbel och Lunchdubbel ska du pricka vinnarna i två lopp. ATG behåller 25 % av insatserna, mot 35 % på V85, och visar vad varje kombination betalar.</p>
       <p><strong>Chansen</strong> för en kombination räknas från vinnaroddsen i de två loppen. <strong>Värde</strong> är chansen gånger oddset: 1,0 betyder att kombinationen betalar precis vad chansen motiverar, och över 1,0 att den betalar mer.</p>
-      <p><strong>Test på årets 299 Dagens Dubbel:</strong> att spela alla kombinationer med värde över 1,0, lika mycket på varje, gav 96 % tillbaka. Att spela alla kombinationer lika mycket gav 59 %. Testet använder slutodds, så verkligheten blir något sämre, och det är ingen garanti att vinna.</p>
+      <p><strong>Test på årets omgångar</strong>, där man spelar alla kombinationer med värde över 1,0 lika mycket: Dagens Dubbel (299 omgångar) gav 96 % tillbaka och Lunchdubbel (305 omgångar) 87 %. Att spela alla kombinationer lika mycket gav 59 % respektive 62 %. Testet använder slutodds, så verkligheten blir något sämre, och det är ingen garanti att vinna.</p>
+      <p>Samma test gjordes på Tvilling, Komb och Plats. Där hittade modellen inget som höjde återbetalningen nämnvärt, så de är inte med här.</p>
     </div>
   </section>
 
@@ -698,8 +703,15 @@ function renderAndel(){
 
 let histDirty=true;
 // Dagens Dubbel: chans per kombination från vinnaroddsen, jämförd med vad kombinationen betalar
+// spel som visas i Dubbel-fliken; byts med knapparna högst upp i fliken
+const DDINFO={dd:{name:"Dagens Dubbel",thin:500000,typ:"runt 2 miljoner"},ld:{name:"Lunchdubbel",thin:150000,typ:"runt 700 000 kr"}};
+let ddKind=D.dd?"dd":"ld";
+$("ddKind").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;ddKind=b.dataset.k;renderDD()});
 function renderDD(){
-  const dd=D.dd;$("t-dd").hidden=!dd;if(!dd)return;
+  $("t-dd").hidden=!D.dd&&!D.ld;if(!D.dd&&!D.ld)return;
+  if(!D[ddKind])ddKind=D.dd?"dd":"ld";
+  document.querySelectorAll("#ddKind button").forEach(b=>{b.setAttribute("aria-checked",b.dataset.k===ddKind);b.hidden=!D[b.dataset.k]});
+  const dd=D[ddKind],info=DDINFO[ddKind];
   const L=dd.legs.map(l=>({...l,run:l.h.filter(h=>h[3]>0)}));
   // ATG:s kombinationsodds (i hundradelar); 99999 betyder att ingen spelat kombinationen
   const co=(a,b)=>{const o=((dd.combo[a-1]||[])[b-1]||0)/100;return o>0&&o<999?o:0};
@@ -716,12 +728,12 @@ function renderDD(){
   const pick=combos.filter(c=>c.v>=1);
   const hit=pick.reduce((a,c)=>a+c.P,0),ev=pick.length?pick.reduce((a,c)=>a+c.P*c.o,0)/pick.length:0;
   const t0=L[0].start?L[0].start.slice(11,16):"";
-  $("ddTitle").textContent=`Dagens Dubbel · ${cap(dname(dd.date))}`;
+  $("ddTitle").textContent=`${info.name} · ${cap(dname(dd.date))}`;
   $("ddMeta").textContent=L.map(l=>`${l.track} lopp ${l.race}${l.start?" kl "+l.start.slice(11,16):""}`).join(" och ")+` · ${krShort(dd.turnover)} inlagt`;
-  $("ddWarn").hidden=dd.turnover>=500000;
-  $("ddWarnText").textContent=`Det ligger bara ${krShort(dd.turnover)} i Dagens Dubbel hittills, mot runt 2 miljoner vid start. Oddsen och värdena ändras mycket fram till start. Tryck Hämta nu strax innan du spelar.`;
+  $("ddWarn").hidden=dd.turnover>=info.thin;
+  $("ddWarnText").textContent=`Det ligger bara ${krShort(dd.turnover)} i ${info.name} hittills, mot ${info.typ} vid start. Oddsen och värdena ändras mycket fram till start. Tryck Hämta nu strax innan du spelar.`;
   $("ddN").textContent=pick.length;$("ddHit").textContent=pct(hit);
-  const thin=dd.turnover<500000;
+  const thin=dd.turnover<info.thin;
   $("ddEv").textContent=thin?"vänta":pick.length?fmt(ev*100)+" %":"–";$("ddEv").className=!thin&&ev>=1?"good":"";
   $("ddBest").textContent=combos.length?fmt(combos[0].v,2):"–";
   $("ddAdvice").textContent=thin
@@ -732,11 +744,11 @@ function renderDD(){
   const nm=h=>`${h[0]} ${h[1]}`;
   $("ddTbl").innerHTML=`<thead><tr><th>Kombination</th><th>Chans</th><th>Odds</th><th>Värde</th></tr></thead><tbody>`+
     combos.slice(0,thin?10:Math.max(12,pick.length)).map(c=>`<tr><td><b>${c.a[0]}–${c.b[0]}</b><small>${c.a[1]} / ${c.b[1]}</small></td><td>${pct(c.P)}</td><td>${fmt(c.o,c.o<10?2:0)}</td><td><b class="${c.v>=1?"good":""}">${fmt(c.v,2)}</b></td></tr>`).join("")+`</tbody>`;
-  current_dd=pick;
+  current_dd=thin?[]:pick; // inget förslag att kopiera så länge oddsen är tunna
 }
 let current_dd=[];
-$("ddCopy").addEventListener("click",()=>{const dd=D.dd;if(!dd||!current_dd.length){toast("Inget förslag att kopiera just nu");return}
-  const txt=`Dagens Dubbel ${dd.date} (${dd.legs.map(l=>l.track+" "+l.race).join(" + ")}): `+current_dd.map(c=>c.a[0]+"-"+c.b[0]).join(", ");
+$("ddCopy").addEventListener("click",()=>{const dd=D[ddKind];if(!dd||!current_dd.length){toast("Inget förslag att kopiera just nu. Vänta tills det finns mer pengar inlagt.");return}
+  const txt=`${DDINFO[ddKind].name} ${dd.date} (${dd.legs.map(l=>l.track+" "+l.race).join(" + ")}): `+current_dd.map(c=>c.a[0]+"-"+c.b[0]).join(", ");
   try{navigator.clipboard.writeText(txt).then(()=>toast("Förslaget är kopierat"),()=>toast(txt))}catch(e){toast(txt)}});
 function renderHist(){if($("p-hist").hidden){histDirty=true;return}histDirty=false;
   const modes=[[0,"Max chans"],[0.5,"Balans"],[0.8,"Jaga värde"],["s","Storvinst"]];const budgets=[100,250,500,1000];
