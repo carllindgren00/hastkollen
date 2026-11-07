@@ -339,7 +339,7 @@ html,body{overscroll-behavior-y:contain}
         <div><span>Snittvinst vid träff</span><span id="ddPay"></span></div>
         <div><span>Väntat tillbaka</span><span id="ddEv"></span></div>
       </div>
-      <p id="ddAdvice"></p>
+      <div id="ddAdvice" class="legs" style="border:0;padding:0"></div>
       <div class="tbl"><table id="ddTbl"></table></div>
       <div class="ticket-foot" style="padding:0;border:0"><button class="btn primary" id="ddCopy" type="button">Kopiera förslaget</button></div>
     </div>
@@ -347,13 +347,16 @@ html,body{overscroll-behavior-y:contain}
       <h2>Så räknar den</h2>
       <p>I Dagens Dubbel och Lunchdubbel ska du pricka vinnarna i två lopp. ATG behåller 25 % av insatserna, mot 35 % på V85, och visar vad varje kombination betalar.</p>
       <p><strong>Chansen</strong> för en kombination räknas från vinnaroddsen i de två loppen. <strong>Värde</strong> är chansen gånger oddset: 1,0 betyder att kombinationen betalar precis vad chansen motiverar, och över 1,0 att den betalar mer.</p>
-      <p><strong>Max chans</strong> tar de kombinationer som oftast vinner. <strong>Balans</strong> väger chans mot värde. <strong>Jaga värde</strong> tar bara kombinationer som betalar mer än chansen motiverar, och kan därför lägga mindre än budgeten.</p>
-      <p><strong>Test på årets omgångar med 10 rader</strong> (andel tillbaka, och hur ofta kupongen träffade):</p>
+      <p>Kupongen byggs som hos ATG: några hästar i varje lopp, och alla kombinationer av dem spelas. 3 hästar i första loppet och 2 i andra blir 3 × 2 = 6 rader. Appen lägger till en häst i taget där den gör kupongen mest nytta, tills budgeten är slut eller fler hästar inte gör den bättre.</p>
+      <p><strong>Max chans</strong> tar hästarna som oftast vinner. <strong>Balans</strong> och <strong>Jaga värde</strong> väger också in vad kombinationerna betalar, mer eller mindre.</p>
+      <p><strong>Test:</strong> inställningarna valdes på 2025 års 726 omgångar och prövades sedan på 624 omgångar 2026, som modellen inte hade sett. Siffrorna är för 2026, med 10 kr per rad. Tillbaka är snittet över budgetar från 40 till 200 kr:</p>
       <div class="tbl"><table><thead><tr><th></th><th>Max chans</th><th>Balans</th><th>Jaga värde</th></tr></thead><tbody>
-        <tr><td>Dagens Dubbel</td><td><b>85 %</b><small>61 % träff</small></td><td><b>87 %</b><small>60 % träff</small></td><td><b>75 %</b><small>12 % träff</small></td></tr>
-        <tr><td>Lunchdubbel</td><td><b>89 %</b><small>60 % träff</small></td><td><b>85 %</b><small>56 % träff</small></td><td><b>53 %</b><small>13 % träff</small></td></tr>
+        <tr><td>Tillbaka</td><td><b>83 %</b></td><td><b>87 %</b></td><td><b>92 %</b></td></tr>
+        <tr><td>Träff vid 50 kr</td><td><b>39 %</b></td><td><b>37 %</b></td><td><b>31 %</b></td></tr>
+        <tr><td>Träff vid 100 kr</td><td><b>57 %</b></td><td><b>53 %</b></td><td><b>46 %</b></td></tr>
+        <tr><td>Träff vid 200 kr</td><td><b>74 %</b></td><td><b>70 %</b></td><td><b>59 %</b></td></tr>
       </tbody></table></div>
-      <p>Med 20 rader gav Jaga värde 101 % i Dagens Dubbel men träffade bara var sjätte gång. Att spela alla kombinationer lika mycket gav 59–62 %. Testet använder slutodds, så verkligheten blir något sämre, och det är ingen garanti att vinna.</p>
+      <p>Samma ordning gällde 2025. Att väga in vad dubbelspelarna själva satsat gjorde chanserna sämre, så modellen litar på vinnaroddsen. Testet använder slutodds, så verkligheten blir något sämre, och det är ingen garanti att vinna.</p>
       <p>Samma test gjordes på Tvilling, Komb och Plats. Där hittade modellen inget som höjde återbetalningen nämnvärt, så de är inte med här.</p>
     </div>
   </section>
@@ -722,7 +725,7 @@ function renderAndel(){
 let histDirty=true;
 // Dagens Dubbel: chans per kombination från vinnaroddsen, jämförd med vad kombinationen betalar
 // spel som visas i Dubbel-fliken; byts med knapparna högst upp i fliken
-const DDHINT={chans:"Tar de kombinationer som oftast vinner. Träffar oftast, men betalar minst.",balans:"Väger chans mot värde. I testet på årets omgångar det jämnaste valet.",varde:"Tar bara kombinationer som betalar mer än chansen motiverar. Träffar sällan, men betalar bra när den gör det."};
+const DDHINT={chans:"Hästarna som oftast vinner. Träffar oftast, men betalar minst.",balans:"Väger chans mot värde. Träffar nästan lika ofta som Max chans och betalade mer i testet.",varde:"Väger värdet tyngst. Träffar mer sällan, men gav mest tillbaka i testet."};
 let ddMode="balans";
 const DDINFO={dd:{name:"Dagens Dubbel",thin:500000,typ:"runt 2 miljoner"},ld:{name:"Lunchdubbel",thin:150000,typ:"runt 700 000 kr"}};
 let ddKind=D.dd?"dd":"ld";
@@ -746,41 +749,50 @@ function renderDD(){
     const dq=l.run.map(h=>L[1-k].run.reduce((a,g)=>{const o=k?co(g[0],h[0]):co(h[0],g[0]);return a+(o?1/o:0)},0));const sdq=dq.reduce((a,b)=>a+b,0)||1;
     const sc=l.run.map((h,j)=>Math.pow(mk[j]/smk,conf)*Math.pow(Math.max(dq[j]/sdq,1e-4),1-conf));const t=sc.reduce((a,b)=>a+b,0);
     return sc.map(x=>x/t)});
-  const combos=[];
-  L[0].run.forEach((a,i)=>L[1].run.forEach((b,j)=>{const o=co(a[0],b[0]);if(!o)return;const P=probs[0][i]*probs[1][j];combos.push({a,b,P,o,v:P*o})}));
-  combos.sort((x,y)=>y.v-x.v);
+  // ATG spelar alla kombinationer av de markerade hästarna: A hästar i lopp 1 × B i lopp 2 = rader.
+  // Systemet byggs häst för häst; målet är log(chans) + lam·log(snittvärde), där lam är spelstilen.
+  // lam 0, 1 och 2 valdes på 2025 års omgångar och höll samma ordning på 2026.
   const budget=+$("ddBudget").value,stake=+$("ddStake").value,n=Math.max(1,Math.floor(budget/stake));
+  const lam={chans:0,balans:1,varde:2}[ddMode];
+  const score=(A,B)=>{let hit=0,ret=0;A.forEach(i=>B.forEach(j=>{const P=probs[0][i]*probs[1][j];hit+=P;ret+=P*co(L[0].run[i][0],L[1].run[j][0])}));
+    return {hit,ret,v:Math.log(hit)+lam*Math.log(Math.max(ret/(A.length*B.length),1e-9))}};
+  const top=pr=>pr.indexOf(Math.max(...pr));
+  let A=[top(probs[0])],B=[top(probs[1])],cur=score(A,B);
+  for(;;){let best=null;
+    [0,1].forEach(k=>{if((A.length+(k===0))*(B.length+(k===1))>n)return;
+      probs[k].forEach((x,j)=>{if((k?B:A).includes(j))return;const A2=k?A:[...A,j],B2=k?[...B,j]:B;const sc=score(A2,B2);if(!best||sc.v>best.sc.v)best={A:A2,B:B2,sc}})});
+    if(!best||best.sc.v<cur.v)break;A=best.A;B=best.B;cur=best.sc}
+  // pröva också alla storlekar a×b inom budgeten med de mest troliga hästarna; ta det bästa
+  const rank=k=>probs[k].map((x,j)=>j).sort((x,y)=>probs[k][y]-probs[k][x]);const r0=rank(0),r1=rank(1);
+  for(let a=1;a<=r0.length;a++)for(let b=1;b<=r1.length&&a*b<=n;b++){const sc=score(r0.slice(0,a),r1.slice(0,b));if(sc.v>cur.v){A=r0.slice(0,a);B=r1.slice(0,b);cur=sc}}
+  const rows=A.length*B.length,hit=cur.hit,ret=cur.ret;
+  // varför kupongen blev billigare än budgeten: att det inte ryms, eller att fler hästar gjorde den sämre
+  const fits=(A.length+1)*B.length<=n&&A.length<r0.length||A.length*(B.length+1)<=n&&B.length<r1.length;
   $("ddBudgetOut").textContent=kr(budget);
   [...$("ddPresets").children].forEach(b=>b.setAttribute("aria-pressed",+b.dataset.v===budget));
   document.querySelectorAll("#ddMode button").forEach(b=>b.setAttribute("aria-checked",b.dataset.m===ddMode));
   $("ddModeHint").textContent=DDHINT[ddMode];
-  // poäng per spelstil; samma rangordning som i testet på årets omgångar
-  const key={chans:c=>c.P,balans:c=>c.P*c.v,varde:c=>c.v}[ddMode];
-  let pick=[...combos].sort((x,y)=>key(y)-key(x)).slice(0,n);
-  if(ddMode==="varde")pick=pick.filter(c=>c.v>=1);
   const thin=dd.turnover<info.thin;
-  const hit=pick.reduce((a,c)=>a+c.P,0),ret=pick.reduce((a,c)=>a+c.P*c.o,0);
-  const t0=L[0].start?L[0].start.slice(11,16):"";
   $("ddTitle").textContent=`${info.name} · ${cap(dname(dd.date))}`;
   $("ddMeta").textContent=L.map(l=>`${l.track} lopp ${l.race}${l.start?" kl "+l.start.slice(11,16):""}`).join(" och ")+` · ${krShort(dd.turnover)} inlagt`;
   $("ddWarn").hidden=!thin;
   $("ddWarnText").textContent=`Det ligger bara ${krShort(dd.turnover)} i ${info.name} hittills, mot ${info.typ} vid start. Oddsen ändras mycket fram till start, så tryck Hämta nu en halvtimme före första loppet och titta igen innan du spelar.`;
-  $("ddCost").textContent=kr(pick.length*stake);$("ddHit").textContent=pct(hit);
+  $("ddCost").textContent=kr(rows*stake);$("ddHit").textContent=pct(hit);
   $("ddPay").textContent=hit?krShort(stake*ret/hit):"–";
-  $("ddEv").textContent=!pick.length?"–":thin?"osäkert":fmt(ret/pick.length*100)+" %";$("ddEv").className=!thin&&pick.length&&ret/pick.length>=1?"good":"";
-  $("ddAdvice").textContent=!pick.length
-    ?"Inga kombinationer har värde över 1,0 just nu. Välj Balans eller Max chans, eller vänta och hämta nya odds närmare start."
-    :`${pick.length} kombinationer à ${stake} kr${pick.length<n?` (bara ${pick.length} har värde över 1,0, så kupongen blir billigare än budgeten)`:""}. Markerade nedan. Kupongen träffar i ungefär ${pct(hit)} av fallen.`;
-  const picked=new Set(pick);
-  const show=[...pick].sort((x,y)=>y.P-x.P).concat(combos.filter(c=>!picked.has(c)).slice(0,5));
-  const nm=h=>`${h[0]} ${h[1]}`;
-  $("ddTbl").innerHTML=`<thead><tr><th>Kombination</th><th>Chans</th><th>Odds</th><th>Värde</th></tr></thead><tbody>`+
-    show.map(c=>`<tr class="${picked.has(c)?"in":""}"><td><b>${c.a[0]}–${c.b[0]}</b><small>${c.a[1]} / ${c.b[1]}</small></td><td>${pct(c.P)}</td><td>${fmt(c.o,c.o<10?2:0)}</td><td><b class="${c.v>=1?"good":""}">${fmt(c.v,2)}</b></td></tr>`).join("")+`</tbody>`;
-  current_dd=pick;current_dd.stake=stake;
+  $("ddEv").textContent=thin?"osäkert":fmt(ret/rows*100)+" %";$("ddEv").className=!thin&&ret/rows>=1?"good":"";
+  const nums=(k,S)=>S.map(j=>L[k].run[j][0]).sort((x,y)=>x-y);
+  $("ddAdvice").innerHTML=L.map((l,k)=>`<button class="leg" type="button"><span class="avd">Lopp ${l.race}</span><span class="nums">${nums(k,k?B:A).map(x=>`<span class="num ${(k?B:A).length===1?"spik":""}">${x}</span>`).join("")}</span><span></span></button>`).join("")+
+    `<span class="small" style="display:block;margin-top:6px">${A.length} × ${B.length} = ${rows} rader à ${stake} kr = ${kr(rows*stake)}${rows*stake<budget?(fits?`. Det blev billigare än budgeten eftersom fler hästar gjorde kupongen sämre i den här spelstilen`:`. Det blev billigare än budgeten eftersom en häst till inte ryms: då blir det fler rader än budgeten räcker till`):""}. Kupongen träffar i ungefär ${pct(hit)} av fallen.</span>`;
+  // hästarna i båda loppen, med modellens chans och hur mycket de är spelade i dubbeln
+  $("ddTbl").innerHTML=L.map((l,k)=>{const S=k?B:A;const dq=l.run.map(h=>L[1-k].run.reduce((a,g)=>{const o=k?co(g[0],h[0]):co(h[0],g[0]);return a+(o?1/o:0)},0));const sdq=dq.reduce((a,b)=>a+b,0)||1;
+    const idx=l.run.map((h,j)=>j).sort((x,y)=>probs[k][y]-probs[k][x]);
+    return `<thead><tr><th>Lopp ${l.race} · ${l.track}</th><th>Chans</th><th>Spelad</th><th>Odds</th></tr></thead><tbody>`+
+      idx.map(j=>{const h=l.run[j];return `<tr class="${S.includes(j)?"in":""}"><td><b>${h[0]}</b><small>${h[1]}</small></td><td>${pct(probs[k][j])}</td><td>${pct(dq[j]/sdq)}</td><td>${fmt(h[3],h[3]<10?2:0)}</td></tr>`}).join("")+`</tbody>`}).join("");
+  current_dd={A:nums(0,A),B:nums(1,B),rows,stake};
 }
-let current_dd=[];
-$("ddCopy").addEventListener("click",()=>{const dd=D[ddKind];if(!dd||!current_dd.length){toast("Inget förslag att kopiera just nu");return}
-  const txt=`${DDINFO[ddKind].name} ${dd.date} (${dd.legs.map(l=>l.track+" "+l.race).join(" + ")}), ${current_dd.stake} kr per rad: `+[...current_dd].sort((x,y)=>x.a[0]-y.a[0]||x.b[0]-y.b[0]).map(c=>c.a[0]+"-"+c.b[0]).join(", ");
+let current_dd=null;
+$("ddCopy").addEventListener("click",()=>{const dd=D[ddKind];if(!dd||!current_dd){toast("Inget förslag att kopiera just nu");return}
+  const c=current_dd,txt=`${DDINFO[ddKind].name} ${dd.date}: ${dd.legs[0].track} lopp ${dd.legs[0].race}: ${c.A.join(", ")} · ${dd.legs[1].track} lopp ${dd.legs[1].race}: ${c.B.join(", ")} (${c.rows} rader à ${c.stake} kr = ${c.rows*c.stake} kr)`;
   try{navigator.clipboard.writeText(txt).then(()=>toast("Förslaget är kopierat"),()=>toast(txt))}catch(e){toast(txt)}});
 function renderHist(){if($("p-hist").hidden){histDirty=true;return}histDirty=false;
   const modes=[[0,"Max chans"],[0.5,"Balans"],[0.8,"Jaga värde"],["s","Storvinst"]];const budgets=[100,250,500,1000];
