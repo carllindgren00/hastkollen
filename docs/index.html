@@ -326,7 +326,7 @@ html,body{overscroll-behavior-y:contain}
       <div class="budget-row"><label for="ddBudget">Din budget</label><span class="budget-val" id="ddBudgetOut"></span></div>
       <div class="presets" id="ddPresets"></div>
       <input type="range" id="ddBudget" min="10" max="1000" step="10" value="100" aria-label="Budget i kronor">
-      <div class="field"><label for="ddStake">Insats per rad</label><select id="ddStake"><option value="5">5 kr</option><option value="10" selected>10 kr</option><option value="20">20 kr</option><option value="50">50 kr</option></select></div>
+      <div class="field"><label for="ddStake">Insats per rad</label><select id="ddStake"><option value="5">5 kr</option><option value="10" selected>10 kr</option><option value="20">20 kr</option><option value="50">50 kr</option><option value="100">100 kr</option></select></div>
       <div class="mode" id="ddMode" role="radiogroup" aria-label="Spelstil">
         <button type="button" data-m="chans" role="radio">Max chans</button>
         <button type="button" data-m="balans" role="radio">Balans</button>
@@ -340,6 +340,9 @@ html,body{overscroll-behavior-y:contain}
         <div><span>Väntat tillbaka</span><span id="ddEv"></span></div>
       </div>
       <div id="ddAdvice" class="legs" style="border:0;padding:0"></div>
+      <h3 style="margin-top:6px">Samma budget, olika insats per rad</h3>
+      <p class="small">Färre rader och högre insats ger större vinster, men kupongen går in mer sällan. Tryck på en rad för att välja den.</p>
+      <div class="tbl"><table id="ddStakeTbl"></table></div>
       <div class="tbl"><table id="ddTbl"></table></div>
       <div class="ticket-foot" style="padding:0;border:0"><button class="btn primary" id="ddCopy" type="button">Kopiera förslaget</button></div>
     </div>
@@ -356,6 +359,7 @@ html,body{overscroll-behavior-y:contain}
         <tr><td>Träff vid 100 kr</td><td><b>57 %</b></td><td><b>53 %</b></td><td><b>46 %</b></td></tr>
         <tr><td>Träff vid 200 kr</td><td><b>74 %</b></td><td><b>70 %</b></td><td><b>59 %</b></td></tr>
       </tbody></table></div>
+      <p><strong>Färre rader med högre insats</strong>, budget 100 kr, 2026: 10 kr per rad gick in i 53–57 % av omgångarna med typisk vinst runt 115 kr. 100 kr på en enda rad gick in i 15 % med typisk vinst runt 575 kr. Totalt kom ungefär lika mycket tillbaka, 86–99 %, lite mer med färre rader.</p>
       <p>Samma ordning gällde 2025. Att väga in vad dubbelspelarna själva satsat gjorde chanserna sämre, så modellen litar på vinnaroddsen. Testet använder slutodds, så verkligheten blir något sämre, och det är ingen garanti att vinna.</p>
       <p>Samma test gjordes på Tvilling, Komb och Plats. Där hittade modellen inget som höjde återbetalningen nämnvärt, så de är inte med här.</p>
     </div>
@@ -734,6 +738,7 @@ $("ddPresets").innerHTML=[50,100,200,500].map(v=>`<button type="button" data-v="
 $("ddPresets").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("ddBudget").value=b.dataset.v;renderDD()});
 $("ddMode").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;ddMode=b.dataset.m;renderDD()});
 $("ddBudget").addEventListener("input",()=>renderDD());$("ddStake").addEventListener("change",()=>renderDD());
+$("ddStakeTbl").addEventListener("click",e=>{const tr=e.target.closest("tr[data-st]");if(!tr)return;$("ddStake").value=tr.dataset.st;renderDD()});
 function renderDD(){
   $("t-dd").hidden=!D.dd&&!D.ld;if(!D.dd&&!D.ld)return;
   if(!D[ddKind])ddKind=D.dd?"dd":"ld";
@@ -752,19 +757,25 @@ function renderDD(){
   // ATG spelar alla kombinationer av de markerade hästarna: A hästar i lopp 1 × B i lopp 2 = rader.
   // Systemet byggs häst för häst; målet är log(chans) + lam·log(snittvärde), där lam är spelstilen.
   // lam 0, 1 och 2 valdes på 2025 års omgångar och höll samma ordning på 2026.
-  const budget=+$("ddBudget").value,stake=+$("ddStake").value,n=Math.max(1,Math.floor(budget/stake));
+  const budget=+$("ddBudget").value,stake=+$("ddStake").value;
   const lam={chans:0,balans:1,varde:2}[ddMode];
   const score=(A,B)=>{let hit=0,ret=0;A.forEach(i=>B.forEach(j=>{const P=probs[0][i]*probs[1][j];hit+=P;ret+=P*co(L[0].run[i][0],L[1].run[j][0])}));
     return {hit,ret,v:Math.log(hit)+lam*Math.log(Math.max(ret/(A.length*B.length),1e-9))}};
-  const top=pr=>pr.indexOf(Math.max(...pr));
-  let A=[top(probs[0])],B=[top(probs[1])],cur=score(A,B);
-  for(;;){let best=null;
-    [0,1].forEach(k=>{if((A.length+(k===0))*(B.length+(k===1))>n)return;
-      probs[k].forEach((x,j)=>{if((k?B:A).includes(j))return;const A2=k?A:[...A,j],B2=k?[...B,j]:B;const sc=score(A2,B2);if(!best||sc.v>best.sc.v)best={A:A2,B:B2,sc}})});
-    if(!best||best.sc.v<cur.v)break;A=best.A;B=best.B;cur=best.sc}
-  // pröva också alla storlekar a×b inom budgeten med de mest troliga hästarna; ta det bästa
   const rank=k=>probs[k].map((x,j)=>j).sort((x,y)=>probs[k][y]-probs[k][x]);const r0=rank(0),r1=rank(1);
-  for(let a=1;a<=r0.length;a++)for(let b=1;b<=r1.length&&a*b<=n;b++){const sc=score(r0.slice(0,a),r1.slice(0,b));if(sc.v>cur.v){A=r0.slice(0,a);B=r1.slice(0,b);cur=sc}}
+  function buildSys(n){
+    let A=[r0[0]],B=[r1[0]],cur=score(A,B);
+    for(;;){let best=null;
+      [0,1].forEach(k=>{if((A.length+(k===0))*(B.length+(k===1))>n)return;
+        probs[k].forEach((x,j)=>{if((k?B:A).includes(j))return;const A2=k?A:[...A,j],B2=k?[...B,j]:B;const sc=score(A2,B2);if(!best||sc.v>best.sc.v)best={A:A2,B:B2,sc}})});
+      if(!best||best.sc.v<cur.v)break;A=best.A;B=best.B;cur=best.sc}
+    // pröva också alla storlekar a×b inom budgeten med de mest troliga hästarna; ta det bästa
+    for(let a=1;a<=r0.length;a++)for(let b=1;b<=r1.length&&a*b<=n;b++){const sc=score(r0.slice(0,a),r1.slice(0,b));if(sc.v>cur.v){A=r0.slice(0,a);B=r1.slice(0,b);cur=sc}}
+    // vinst om kupongen går in, per insatt krona: lägsta och högsta oddset bland raderna
+    const os=[];A.forEach(i=>B.forEach(j=>{const o=co(L[0].run[i][0],L[1].run[j][0]);if(o)os.push(o)}));
+    return {A,B,hit:cur.hit,ret:cur.ret,rows:A.length*B.length,omin:Math.min(...os),omax:Math.max(...os)};
+  }
+  const n=Math.max(1,Math.floor(budget/stake));
+  const sys=buildSys(n),A=sys.A,B=sys.B,cur=score(A,B);
   const rows=A.length*B.length,hit=cur.hit,ret=cur.ret;
   // varför kupongen blev billigare än budgeten: att det inte ryms, eller att fler hästar gjorde den sämre
   const fits=(A.length+1)*B.length<=n&&A.length<r0.length||A.length*(B.length+1)<=n&&B.length<r1.length;
@@ -782,13 +793,17 @@ function renderDD(){
   $("ddEv").textContent=thin?"osäkert":fmt(ret/rows*100)+" %";$("ddEv").className=!thin&&ret/rows>=1?"good":"";
   const nums=(k,S)=>S.map(j=>L[k].run[j][0]).sort((x,y)=>x-y);
   $("ddAdvice").innerHTML=L.map((l,k)=>`<button class="leg" type="button"><span class="avd">Lopp ${l.race}</span><span class="nums">${nums(k,k?B:A).map(x=>`<span class="num ${(k?B:A).length===1?"spik":""}">${x}</span>`).join("")}</span><span></span></button>`).join("")+
-    `<span class="small" style="display:block;margin-top:6px">${A.length} × ${B.length} = ${rows} rader à ${stake} kr = ${kr(rows*stake)}${rows*stake<budget?(fits?`. Det blev billigare än budgeten eftersom fler hästar gjorde kupongen sämre i den här spelstilen`:`. Det blev billigare än budgeten eftersom en häst till inte ryms: då blir det fler rader än budgeten räcker till`):""}. Kupongen träffar i ungefär ${pct(hit)} av fallen.</span>`;
+    `<span class="small" style="display:block;margin-top:6px">Går kupongen in vinner du ${sys.omin===sys.omax?kr(Math.round(stake*sys.omin)):kr(Math.round(stake*sys.omin))+" till "+kr(Math.round(stake*sys.omax))} med dagens odds. ${A.length} × ${B.length} = ${rows} rader à ${stake} kr = ${kr(rows*stake)}${rows*stake<budget?(fits?`. Det blev billigare än budgeten eftersom fler hästar gjorde kupongen sämre i den här spelstilen`:`. Det blev billigare än budgeten eftersom en häst till inte ryms: då blir det fler rader än budgeten räcker till`):""}. Kupongen träffar i ungefär ${pct(hit)} av fallen.</span>`;
   // hästarna i båda loppen, med modellens chans och hur mycket de är spelade i dubbeln
   $("ddTbl").innerHTML=L.map((l,k)=>{const S=k?B:A;const dq=l.run.map(h=>L[1-k].run.reduce((a,g)=>{const o=k?co(g[0],h[0]):co(h[0],g[0]);return a+(o?1/o:0)},0));const sdq=dq.reduce((a,b)=>a+b,0)||1;
     const idx=l.run.map((h,j)=>j).sort((x,y)=>probs[k][y]-probs[k][x]);
     return `<thead><tr><th>Lopp ${l.race} · ${l.track}</th><th>Chans</th><th>Spelad</th><th>Odds</th></tr></thead><tbody>`+
       idx.map(j=>{const h=l.run[j];return `<tr class="${S.includes(j)?"in":""}"><td><b>${h[0]}</b><small>${h[1]}</small></td><td>${pct(probs[k][j])}</td><td>${pct(dq[j]/sdq)}</td><td>${fmt(h[3],h[3]<10?2:0)}</td></tr>`}).join("")+`</tbody>`}).join("");
   current_dd={A:nums(0,A),B:nums(1,B),rows,stake};
+  // jämförelse: samma budget med olika insats per rad
+  const opts=[...$("ddStake").options].map(o=>+o.value).filter(st=>st<=budget);
+  $("ddStakeTbl").innerHTML=`<thead><tr><th>Insats</th><th>Rader</th><th>Går in</th><th>Vinst då</th></tr></thead><tbody>`+opts.map(st=>{const sy=buildSys(Math.max(1,Math.floor(budget/st)));
+    return `<tr class="${st===stake?"in":""}" data-st="${st}" style="cursor:pointer"><td><b>${st} kr</b></td><td>${sy.rows}</td><td>${pct(sy.hit)}</td><td><b>${krShort(st*sy.ret/sy.hit)}</b><small>${kr(Math.round(st*sy.omin))}–${kr(Math.round(st*sy.omax))}</small></td></tr>`}).join("")+`</tbody>`;
 }
 let current_dd=null;
 $("ddCopy").addEventListener("click",()=>{const dd=D[ddKind];if(!dd||!current_dd){toast("Inget förslag att kopiera just nu");return}
