@@ -186,7 +186,10 @@ details.race summary::-webkit-details-marker{display:none}
 .lockscreen button:disabled{opacity:.6}
 .lockscreen .err{color:var(--warn);min-height:1.2em}
 .lockscreen small{color:var(--muted);font-size:.78rem}
-html,body{overscroll-behavior-y:contain}
+html,body{overscroll-behavior-y:contain;touch-action:manipulation}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+/* iPhone zoomar in på fält med text under 16 px */
+input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!important}
 .ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:10;transform:translate(-50%,-70px);display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:99px;background:var(--surface);color:var(--fg);box-shadow:0 2px 10px rgba(0,0,0,.15);font-size:.82rem;font-weight:600;pointer-events:none;opacity:0}
 .ptr i{display:inline-block;width:14px;height:14px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%}
 .ptr.ready i{border-color:var(--accent)}
@@ -910,7 +913,7 @@ $("budget").addEventListener("input",renderSpel);$("facit").addEventListener("ch
 ["aRows","aShares","aFee"].forEach(id=>$(id).addEventListener("input",renderAndel));
 $("rlist").addEventListener("click",e=>{if(!e.target.closest("#moreRounds"))return;const l=$("rlist");l.dataset.all=l.dataset.all==="1"?"0":"1";renderHist()});
 const tabs={"t-spel":"p-spel","t-dd":"p-dd","t-andel":"p-andel","t-hist":"p-hist","t-inst":"p-inst","t-logg":"p-logg"};
-Object.keys(tabs).forEach(t=>$(t).addEventListener("click",()=>{Object.entries(tabs).forEach(([b,p])=>{$(b).setAttribute("aria-selected",b===t);$(p).hidden=b!==t});if(t==="t-hist"&&histDirty)renderHist()}));
+Object.keys(tabs).forEach(t=>$(t).addEventListener("click",()=>{Object.entries(tabs).forEach(([b,p])=>{$(b).setAttribute("aria-selected",b===t);$(p).hidden=b!==t});$("gameSel").hidden=t==="t-dd";if(t==="t-hist"&&histDirty)renderHist()}));
 // läget sparas inför dra-ned-uppdatering och läses in igen efteråt
 // Hämta nu: startar GitHub-hämtningen med en nyckel som bara finns på den här enheten,
 // väntar tills ny data är publicerad och laddar sedan om appen
