@@ -1,7 +1,7 @@
 {
-  "name": "V85-kollen",
-  "short_name": "V85-kollen",
-  "description": "V85-kupong med modell, andelar och historik, med data från ATG.",
+  "name": "Travhästarna",
+  "short_name": "Travhästarna",
+  "description": "Kupongförslag för V85, V65, Dagens Dubbel och Lunchdubbel, med data från ATG.",
   "lang": "sv",
   "start_url": "./",
   "scope": "./",

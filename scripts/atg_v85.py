@@ -1,6 +1,6 @@
-"""Hämtar V85-data från ATG och skriver den JSON som V85-kollen läser.
+"""Hämtar V85- eller V65-data från ATG och skriver den JSON som appen Travhästarna läser.
 
-Användning: python3 scripts/atg_v85.py <cachekatalog> .work/v85.json  (krypteras sedan med scripts/seal.py)
+Användning: python3 scripts/atg_v85.py <cachekatalog> .work/v85.json [V85|V65]  (krypteras sedan med scripts/seal.py)
 Avslutade omgångar cachas; kommande/pågående hämtas alltid om.
 """
 import datetime as dt, json, os, sys, time, urllib.request
@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 API = "https://www.atg.se/services/racinginfo/v1/api"
 START = dt.date(2026, 1, 1)
+GAME = sys.argv[3] if len(sys.argv) > 3 else "V85"  # spelformen: V85 eller V65
 SEX = {"mare": "sto", "gelding": "valack", "stallion": "hingst"}
 
 
@@ -50,7 +51,7 @@ def game_ids(cache, today):
         cals = list(ex.map(load, days))
     ids = []
     for day, d in zip(days, cals):
-        for g in d.get("games", {}).get("V85", []):
+        for g in d.get("games", {}).get(GAME, []):
             ids.append((day.isoformat(), g.get("id"), g.get("status"), g.get("tracks")))
     return ids
 
@@ -83,7 +84,7 @@ def odds(s):
 
 
 def streck(s):
-    v = ((s.get("pools") or {}).get("V85") or {}).get("betDistribution")
+    v = ((s.get("pools") or {}).get(GAME) or {}).get("betDistribution")
     return None if v is None else v / 100
 
 
@@ -105,13 +106,15 @@ def build(cache, today):
     for (date, gid, status, tracks), g in zip(gids, games):
         if not g.get("races"):
             continue
-        if not (g.get("pools") or {}).get("V85"):
+        if not (g.get("pools") or {}).get(GAME):
             # startlistan är ute men spelet har inte öppnat: inga odds eller V85-procent än
             waiting = waiting or {"date": date, "track": g["races"][0]["track"]["name"], "start": g["races"][0].get("startTime")}
             continue
-        pool = g["pools"]["V85"]
+        pool = g["pools"][GAME]
         res = (pool.get("result") or {}).get("payouts") or {}
         done = g.get("status") == "results"
+        if not done and g.get("status") not in ("bettable", "ongoing", "upcoming"):
+            continue  # inställd eller struken omgång
         if done:
             legs = []
             for r in g["races"]:
@@ -130,7 +133,7 @@ def build(cache, today):
     # närmaste omgång som går att spela på; annars den senast avgjorda
     cur = open_games[0] if open_games else last_done
     if cur is None:
-        print(f"::error::Fick ingen V85-omgång från ATG ({len(ids)} omgångar i kalendern, {sum(1 for g in games if g.get('races'))} med lopp).")
+        print(f"::error::Fick ingen {GAME}-omgång från ATG ({len(ids)} omgångar i kalendern, {sum(1 for g in games if g.get('races'))} med lopp).")
         sys.exit(1)
     if open_games:
         waiting = None
@@ -164,10 +167,10 @@ def build(cache, today):
         "cur": {"id": cur["id"], "date": cur["races"][0]["date"][:10], "track": cur["races"][0]["track"]["name"],
                 "start": cur["races"][0].get("startTime"), "status": cur.get("status"),
                 "done": cur.get("status") == "results",
-                "pay": {k: (v.get("payout") or 0) / 100 or None for k, v in ((cur["pools"]["V85"].get("result") or {}).get("payouts") or {}).items()},
-                "turnover": cur["pools"]["V85"].get("turnover", 0) / 100, "oddsOpen": odds_open,
-                # extra pengar i 8-rättspotten (jackpot från förra omgången eller ATG:s egna tillskott), i kronor
-                "jackpot": cur["pools"]["V85"].get("jackpotAmount"), "field": field},
+                "pay": {k: (v.get("payout") or 0) / 100 or None for k, v in ((cur["pools"][GAME].get("result") or {}).get("payouts") or {}).items()},
+                "turnover": cur["pools"][GAME].get("turnover", 0) / 100, "oddsOpen": odds_open,
+                # extra pengar i toppotten (8 rätt på V85, 6 rätt på V65) (jackpot från förra omgången eller ATG:s egna tillskott), i kronor
+                "jackpot": cur["pools"][GAME].get("jackpotAmount"), "field": field},
         "next": upcoming[0][0] if upcoming else None,
         "waiting": waiting,
         "later": later,
@@ -210,5 +213,6 @@ if __name__ == "__main__":
         # hela felet som en anteckning på körningen i GitHub
         print("::error::" + traceback.format_exc().replace("\n", "%0A"))
         raise
+    data["game"] = GAME
     json.dump(data, open(out, "w"), ensure_ascii=False, separators=(",", ":"))
     print(out, len(data["rounds"]), "omgångar; aktuell", data["cur"]["id"], data["cur"]["status"], "· nästa", data["next"])
