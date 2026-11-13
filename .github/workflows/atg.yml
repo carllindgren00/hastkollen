@@ -3,9 +3,7 @@ name: Hämta från ATG
 # GitHubs schema går i UTC. Svensk vintertid är UTC+1, sommartid UTC+2.
 on:
   schedule:
-    - cron: "17 18 * * 1-5"            # vardagar 19:17 vintertid: startlista och odds när spelet öppnar
-    - cron: "37 8 * * 6,0"             # lör/sön 09:37 vintertid: spara odds + uppdatera
-    - cron: "7,22,37,52 10-13 * * 6,0" # lör/sön var 15:e minut 11:07–14:52 vintertid, fram till start
+    - cron: "7,37 8-20 * * *"   # varje halvtimme 09:07–21:37 vintertid, alla dagar
   workflow_dispatch:
     inputs:
       snapshot:
@@ -38,19 +36,37 @@ jobs:
           python3 -m pip install --quiet "cryptography>=42" || python3 -m pip install --quiet --user --break-system-packages "cryptography>=42"
 
       # Klartext hamnar bara i .work/, som aldrig sparas i repot. Det som sparas är krypterat.
+      # Skriptet loggar bara spel som närmar sig start (V85, V65, Dagens Dubbel, Lunchdubbel).
       - name: Spara odds före start
-        if: (github.event_name == 'schedule' && github.event.schedule != '17 18 * * 1-5') || inputs.snapshot
+        id: snap
         run: |
-          python3 scripts/atg_snapshot.py .work/snaps
+          python3 scripts/atg_snapshot.py .work/snaps docs/data/snapshots/files.json
+          n=$(ls .work/snaps/*.json 2>/dev/null | wc -l)
+          echo "taken=$n" >> "$GITHUB_OUTPUT"
           python3 scripts/seal.py snapshots .work/snaps docs/data/snapshots
 
-      - name: Hämta omgångar och startlista
+      # Appens data hämtas när den startas för hand (Hämta nu), när ett spel är nära start,
+      # och två gånger om dagen (runt 09 och 19 vintertid) för nya startlistor och resultat.
+      - name: Ska appens data hämtas?
+        id: plan
         run: |
-          # ett nytt försök efter en minut om ATG svarar fel
-          for g in V85 V65; do
-            f=.work/$(echo $g | tr A-Z a-z).json
+          h=$(date -u +%H); m=$(date -u +%M); full=0
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then full=1; fi
+          if [ "${{ steps.snap.outputs.taken }}" != "0" ]; then full=1; fi
+          if [ "$m" -lt 30 ] && { [ "$h" = "08" ] || [ "$h" = "18" ]; }; then full=1; fi
+          echo "full=$full" >> "$GITHUB_OUTPUT"
+
+      - name: Hämta omgångar och startlista
+        if: steps.plan.outputs.full == '1'
+        run: |
+          mkdir -p .work
+          for g in V85 V65 DUBBEL; do
+            n=$(echo $g | tr A-Z a-z); f=.work/$n.json
+            # ett nytt försök efter en minut om ATG svarar fel
             python3 -I scripts/atg_v85.py .cache $f $g || { sleep 60; python3 -I scripts/atg_v85.py .cache $f $g; }
-            python3 scripts/seal.py file $f docs/data/$(basename $f .json).enc 2> .work/seal.err || { echo "::error::$(tr '\n' ' ' < .work/seal.err)"; exit 1; }
+            python3 scripts/seal.py file $f docs/data/$n.enc 2> .work/seal.err || { echo "::error::$(tr '\n' ' ' < .work/seal.err)"; exit 1; }
+            # historiken sparas bara om när en omgång har avgjorts
+            if [ -f .work/$n-hist.json ]; then python3 scripts/seal.py file .work/$n-hist.json docs/data/$n-hist.enc --if-changed; fi
           done
 
       # sparar loggade odds även om hämtningen ovan misslyckades

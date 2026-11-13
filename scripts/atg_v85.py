@@ -1,6 +1,8 @@
 """Hämtar V85- eller V65-data från ATG och skriver den JSON som appen Travhästarna läser.
 
-Användning: python3 scripts/atg_v85.py <cachekatalog> .work/v85.json [V85|V65]  (krypteras sedan med scripts/seal.py)
+Användning: python3 scripts/atg_v85.py <cachekatalog> .work/v85.json [V85|V65|DUBBEL]  (krypteras sedan med scripts/seal.py)
+V85/V65 skriver två filer: <ut>.json med aktuell omgång och <ut>-hist.json med årets avgjorda omgångar.
+DUBBEL skriver närmaste Dagens Dubbel och Lunchdubbel.
 Avslutade omgångar cachas; kommande/pågående hämtas alltid om.
 """
 import datetime as dt, json, os, sys, time, urllib.request
@@ -204,15 +206,24 @@ if __name__ == "__main__":
     cache, out = sys.argv[1], sys.argv[2]
     os.makedirs(cache, exist_ok=True)
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
+    def dump(obj, path):
+        json.dump(obj, open(path, "w"), ensure_ascii=False, separators=(",", ":"))
+
     try:
+        if GAME == "DUBBEL":
+            dump({"updated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="minutes"),
+                  "dd": build_dd(dt.date.today(), "dd"), "ld": build_dd(dt.date.today(), "ld")}, out)
+            print(out, "Dagens Dubbel och Lunchdubbel")
+            sys.exit(0)
         data = build(cache, dt.date.today())
-        data["dd"] = build_dd(dt.date.today(), "dd")
-        data["ld"] = build_dd(dt.date.today(), "ld")
     except Exception:
         import traceback
         # hela felet som en anteckning på körningen i GitHub
         print("::error::" + traceback.format_exc().replace("\n", "%0A"))
         raise
     data["game"] = GAME
-    json.dump(data, open(out, "w"), ensure_ascii=False, separators=(",", ":"))
+    # historiken ändras bara när en omgång avgörs, så den sparas för sig
+    dump({"game": GAME, "rounds": data.pop("rounds")}, out[:-5] + "-hist.json")
+    dump(data, out)
+    data["rounds"] = json.load(open(out[:-5] + "-hist.json"))["rounds"]
     print(out, len(data["rounds"]), "omgångar; aktuell", data["cur"]["id"], data["cur"]["status"], "· nästa", data["next"])

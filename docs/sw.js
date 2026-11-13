@@ -1,7 +1,7 @@
 // Nätet först, så att färsk ATG-data alltid vinner. Cachen används bara när hämtningen
 // misslyckas, till exempel offline.
-const CACHE = "travhastarna-v4";
-const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "data/v85.enc", "data/v65.enc", "data/keys.json"];
+const CACHE = "travhastarna-v5";
+const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "data/v85.enc", "data/v85-hist.enc", "data/v65.enc", "data/v65-hist.enc", "data/dubbel.enc", "data/keys.json"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).catch(() => {}).then(() => self.skipWaiting()));

@@ -431,7 +431,7 @@ html,body{overscroll-behavior-y:contain}
     </div>
     <div class="card">
       <h2>Odds före start</h2>
-      <p>Testet på Historik använder slutodds, som du inte har när du lämnar in kupongen. Här sparas ATG:s odds och spelprocent flera gånger varje lördag och söndag innan första start. Efter några veckor kan modellen testas med de siffror du faktiskt hade.</p>
+      <p>Testerna i appen använder slutodds, som du inte har när du lämnar in kupongen. Här sparas ATG:s odds och spelprocent för V85, V65, Dagens Dubbel och Lunchdubbel varje halvtimme de sista 2,5 timmarna före start, plus en gång tidigare samma dag. Efter några veckor kan modellen testas och ställas in med de siffror du faktiskt hade.</p>
     </div>
     <div class="card">
       <h2>Sparade omgångar</h2>
@@ -510,7 +510,7 @@ async function openBox(pk,box){
 document.getElementById("logout").addEventListener("click",e=>{e.preventDefault();try{localStorage.removeItem(KEYSTORE)}catch(x){}location.reload()});
 // spelformerna: avdelningar, radpris, toppottens andel av omsättningen och lägsta vinstklass.
 // V65:s radpris är uppskattat ur ATG:s utdelningar; kontrollera det i ATG-appen.
-const GAMES={V85:{n:8,price:0.5,top:0.195,low:5,file:"data/v85.enc"},V65:{n:6,price:1,top:0.38,low:5,file:"data/v65.enc"}};
+const GAMES={V85:{n:8,price:0.5,top:0.195,low:5,file:"data/v85.enc",hist:"data/v85-hist.enc"},V65:{n:6,price:1,top:0.38,low:5,file:"data/v65.enc",hist:"data/v65-hist.enc"}};
 let GAME="V85";try{GAME=localStorage.getItem("v85-game")||"V85"}catch(e){}if(!GAMES[GAME])GAME="V85";
 const G=GAMES[GAME];
 document.querySelectorAll(".gn").forEach(e=>e.textContent=G.n);document.querySelectorAll(".gname").forEach(e=>e.textContent=GAME);
@@ -521,7 +521,10 @@ unlock().then(pk=>fetch(G.file,{cache:"no-cache"}).then(r=>{if(!r.ok)throw new E
   // svaret kommer från mobilens cache när nätet eller inloggningen inte släppte igenom en färsk hämtning
   if(r.headers.get("x-v85-cache")){const p=document.createElement("p");p.className="info";
     p.textContent="Visar sparad data, eftersom ny data inte gick att hämta. Dra ned för att uppdatera.";document.querySelector(".wrap").prepend(p)}
-  return r.json()}).then(box=>openBox(pk,box))).then(D=>{
+  return r.json()}).then(box=>{
+  // aktuell omgång, årets historik och dubbelspelen ligger i var sin fil
+  const part=(f,opt)=>fetch(f,{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(b=>openBox(pk,b)).catch(e=>{if(opt)return {};throw e});
+  return Promise.all([openBox(pk,box),part(G.hist),part("data/dubbel.enc",true)]).then(([c,h,d])=>({...c,rounds:h.rounds,dd:d.dd||null,ld:d.ld||null}))})).then(D=>{
 const PRICE=G.price, K8=G.top*PRICE; // andel av insatsen som går till högsta vinstklassen, per rad
 const rounds=D.rounds, cur=D.cur;
 // spelprocent normeras över de hästar som startar
@@ -837,7 +840,7 @@ function renderHist(){if($("p-hist").hidden){histDirty=true;return}histDirty=fal
   const dh=rounds.reduce((a,r)=>a+r.legs.filter(l=>l.w.length>1).length,0);
   const bands=[["Under 3",0,3],["3–6",3,6],["6–10",6,10],["10–20",10,20],["Över 20",20,1e9]];
   const counts=bands.map(b=>all.filter(o=>o>=b[1]&&o<b[2]).length);const mx=Math.max(...counts);
-  $("oddsIntro").textContent=`${rounds.length} omgångar, ${rounds.length*8} lopp, från ${dname(rounds[rounds.length-1].date)} till ${dname(rounds[0].date)}.${dh?` ${dh} lopp slutade i dött lopp, så det finns ${all.length} vinnare.`:""}`;
+  $("oddsIntro").textContent=`${rounds.length} omgångar, ${rounds.length*G.n} lopp, från ${dname(rounds[rounds.length-1].date)} till ${dname(rounds[0].date)}.${dh?` ${dh} lopp slutade i dött lopp, så det finns ${all.length} vinnare.`:""}`;
   $("oddsBars").innerHTML=bands.map((b,k)=>`<div class="row"><span>${b[0]}</span><span class="track"><i style="width:${counts[k]/mx*100}%"></i></span><b>${counts[k]} st</b></div>`).join("")+
     `<p style="margin-top:4px">${pct(counts[0]/all.length)} av vinnarna hade odds under 3 och ${pct((counts[3]+counts[4])/all.length)} hade odds över 10. Det är de loppen som avgör hur mycket ${G.n} rätt betalar.</p>`;
   const kw={};rounds.forEach(r=>r.legs.forEach(l=>l.w.forEach(w=>{kw[w[2]]=(kw[w[2]]||0)+1})));
@@ -875,19 +878,22 @@ const DL=true;
 // loggen: odds som GitHub Actions sparat före start
 fetch("data/snapshots/files.json",{cache:"no-cache"}).then(r=>r.ok?r.json():[]).catch(()=>[]).then(all=>{
   const g={};all.forEach(x=>{if(x&&x.game)(g[x.game]=g[x.game]||{x,s:[]}).s.push(x)});
-  const games=Object.values(g).sort((a,b)=>b.x.date.localeCompare(a.x.date));
+  const KIND={V85:"V85",V65:"V65",dd:"Dagens Dubbel",ld:"Lunchdubbel"};
+  const total=Object.keys(g).length;
+  const games=Object.values(g).sort((a,b)=>b.x.date.localeCompare(a.x.date)||a.x.game.localeCompare(b.x.game)).slice(0,20);
   const list=$("loggList");list.textContent="";
-  if(!games.length){const p=document.createElement("p");p.textContent="Inget sparat än. Oddsen sparas lördag och söndag förmiddag.";list.append(p);return}
+  if(!games.length){const p=document.createElement("p");p.textContent="Inget sparat än. Oddsen sparas varje dag när ett spel närmar sig start.";list.append(p);return}
   games.forEach(({x,s})=>{
     s.sort((a,b)=>b.minsToStart-a.minsToStart);
     const row=document.createElement("div");row.className="rrow";
-    const left=document.createElement("div");const h=document.createElement("h3");h.textContent=x.track;
+    const left=document.createElement("div");const h=document.createElement("h3");h.textContent=(KIND[x.game.split("_")[0]]||"")+" · "+x.track;
     const w=document.createElement("span");w.className="when";w.textContent=cap(dname(x.date));left.append(h,w);
     const n=document.createElement("div");n.className="pay";n.textContent=s.length+" st";
     const t=document.createElement("div");t.className="odds";
     s.forEach(y=>{const e=document.createElement("span");e.className="t"+(y.minsToStart>0?" pre":"");
       e.textContent=y.minsToStart>0?y.minsToStart+" min":String(y.taken).slice(11,16);t.append(e)});
     row.append(left,n,t);list.append(row)});
+  if(total>games.length){const p=document.createElement("p");p.className="small";p.textContent=`Visar de ${games.length} senaste av ${total} loggade spel.`;list.append(p)}
 });
 $("save").addEventListener("click",()=>{if(!current.list)return;
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([rowsText()+"\n"],{type:"text/plain"}));

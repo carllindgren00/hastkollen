@@ -5,11 +5,12 @@ ny data men aldrig läsa den. Den privata nyckeln ligger i docs/data/keys.json,
 krypterad en gång per kod, och låses upp i webbläsaren när någon skriver rätt kod.
 
 Användning:
-  python3 scripts/seal.py file <klartext.json> <ut.enc>
+  python3 scripts/seal.py file <klartext.json> <ut.enc> [--if-changed]
+      (--if-changed: hoppar över filen om innehållet är samma som förra gången)
   python3 scripts/seal.py snapshots <klartextkatalog> docs/data/snapshots
   python3 scripts/seal.py keygen docs/data      (läser koderna från stdin, en per rad)
 """
-import base64, glob, json, os, secrets, sys
+import base64, glob, hashlib, json, os, secrets, sys
 
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
@@ -28,8 +29,17 @@ def seal(plain: bytes, pubkey_pem: bytes) -> dict:
     return {"v": 1, "k": b64(wrapped), "iv": b64(iv), "ct": b64(AESGCM(key).encrypt(iv, plain, None))}
 
 
-def seal_file(src, dst):
-    out = seal(open(src, "rb").read(), open(PUBKEY, "rb").read())
+def seal_file(src, dst, if_changed=False):
+    plain = open(src, "rb").read()
+    if if_changed:
+        # fingeravtrycket är saltat med den publika nyckeln och avslöjar inget om innehållet
+        digest = hashlib.sha256(open(PUBKEY, "rb").read() + plain).hexdigest()
+        mark = dst + ".sha256"
+        if os.path.exists(dst) and os.path.exists(mark) and open(mark).read().strip() == digest:
+            print("Oförändrad, hoppar över", dst)
+            return
+        open(mark, "w").write(digest + "\n")
+    out = seal(plain, open(PUBKEY, "rb").read())
     json.dump(out, open(dst, "w"))
     print("Krypterade", src, "->", dst)
 
@@ -46,6 +56,7 @@ def seal_snapshots(src_dir, dst_dir):
         snap = json.load(open(f))
         seal_file(f, os.path.join(dst_dir, name + ".enc"))
         idx.append({"id": name, **{k: snap[k] for k in ("game", "date", "track", "taken", "minsToStart")}})
+        os.remove(f)  # klar: ska inte loggas en gång till
     json.dump(idx, open(idx_path, "w"), ensure_ascii=False, indent=0)
 
 
@@ -70,7 +81,7 @@ def keygen(out_dir):
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     if cmd == "file":
-        seal_file(sys.argv[2], sys.argv[3])
+        seal_file(sys.argv[2], sys.argv[3], "--if-changed" in sys.argv)
     elif cmd == "snapshots":
         seal_snapshots(sys.argv[2], sys.argv[3])
     elif cmd == "keygen":
