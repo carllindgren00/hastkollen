@@ -10,6 +10,10 @@ on:
         description: "Spara även dagens odds i loggen"
         type: boolean
         default: false
+      testnotis:
+        description: "Skicka en testnotis till ntfy"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -50,7 +54,7 @@ jobs:
         continue-on-error: true
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-        run: python3 -I scripts/notify.py docs/data/notified.json
+        run: python3 -I scripts/notify.py docs/data/notified.json ${{ inputs.testnotis && '--test' || '' }}
 
       # Appens data hämtas när den startas för hand (Hämta nu), när ett spel är nära start,
       # och två gånger om dagen (runt 09 och 19 vintertid) för nya startlistor och resultat.

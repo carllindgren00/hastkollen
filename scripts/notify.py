@@ -1,6 +1,7 @@
 """Schemalägger en notis 30 minuter före start för V85, V65, Dagens Dubbel och Lunchdubbel.
 
-Användning: NTFY_TOPIC=<hemligt kanalnamn> python3 scripts/notify.py docs/data/notified.json [--dry-run]
+Användning: NTFY_TOPIC=<hemligt kanalnamn> python3 scripts/notify.py docs/data/notified.json [--dry-run] [--test]
+(--test skickar en testnotis direkt.)
 Notisen skickas via ntfy.sh, som levererar den vid rätt klockslag även om GitHubs körning är sen.
 Kanalnamnet är en hemlighet i GitHub (Settings → Secrets → Actions → NTFY_TOPIC) och finns inte i repot.
 notified.json håller reda på vilka spel som redan fått en notis.
@@ -48,6 +49,9 @@ if __name__ == "__main__":
     if not topic and not dry:
         print("NTFY_TOPIC är inte satt, inga notiser skickas.")
         sys.exit(0)
+    if topic and "--test" in sys.argv:
+        send(topic, "Travhästarna", "Testnotis: notiserna fungerar. Du får en notis 30 minuter före varje spel.", None)
+        print("Testnotis skickad")
     now = dt.datetime.now(TZ)
     state = json.load(open(state_path)) if os.path.exists(state_path) else {}
     # glöm spel som är äldre än tre dagar
