@@ -415,6 +415,17 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
   </section>
 
   <section class="panel" id="p-logg" hidden>
+    <div class="card">
+      <h2>Notiser 30 minuter före start</h2>
+      <p>Du kan få en notis i mobilen en halvtimme före V85, V65, Dagens Dubbel och Lunchdubbel. Den skickas via gratisappen ntfy. Gör så här en gång:</p>
+      <ol>
+        <li>Hitta på ett eget kanalnamn som är svårt att gissa, till exempel <b>trav-</b> följt av 12 slumpade bokstäver och siffror. Den som kan namnet kan se och skicka notiser i kanalen.</li>
+        <li>Installera appen <b>ntfy</b> från App Store eller Google Play. Tryck på plus, skriv kanalnamnet och välj Subscribe. Tillåt notiser.</li>
+        <li>Öppna <a href="https://github.com/carllindgren00/hastkollen/settings/secrets/actions/new" target="_blank" rel="noopener">GitHub → hastkollen → Settings → Secrets and variables → Actions → New repository secret</a>.</li>
+        <li>Name: <b>NTFY_TOPIC</b>. Secret: ditt kanalnamn. Tryck Add secret.</li>
+      </ol>
+      <p class="small">Notiserna börjar komma vid nästa spel. Vill du stänga av dem tar du bort hemligheten i GitHub eller kanalen i ntfy-appen.</p>
+    </div>
     <div class="card" id="tokenCard">
       <h2>Hämta nu-knappen</h2>
       <p id="tokenStatus"></p>

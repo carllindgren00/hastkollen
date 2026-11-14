@@ -45,6 +45,13 @@ jobs:
           echo "taken=$n" >> "$GITHUB_OUTPUT"
           python3 scripts/seal.py snapshots .work/snaps docs/data/snapshots
 
+      # Notis 30 minuter före start, om kanalnamnet finns som hemlighet (NTFY_TOPIC)
+      - name: Schemalägg notiser
+        continue-on-error: true
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python3 -I scripts/notify.py docs/data/notified.json
+
       # Appens data hämtas när den startas för hand (Hämta nu), när ett spel är nära start,
       # och två gånger om dagen (runt 09 och 19 vintertid) för nya startlistor och resultat.
       - name: Ska appens data hämtas?
