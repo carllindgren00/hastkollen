@@ -382,8 +382,8 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
     <div class="card" id="kStart" hidden>
       <h2>Starta din spelkassa</h2>
       <p>Bestäm en summa en gång, och spela sedan bara på den och det den vinner. Fyll aldrig på den. När den är slut har det kostat precis det du bestämde.</p>
-      <div class="field"><label for="kStartIn">Startkassa (kr)</label><input type="number" id="kStartIn" min="1" step="0.01" inputmode="decimal" value="500"></div>
-      <div class="field"><label for="kPctIn">Insats per spel (% av kassan)</label><input type="number" id="kPctIn" min="1" max="25" step="1" inputmode="numeric" value="5"></div>
+      <div class="field"><label for="kStartIn">Startkassa (kr)</label><input type="text" id="kStartIn" inputmode="decimal" value="500"></div>
+      <div class="field"><label for="kPctIn">Insats per spel (% av kassan)</label><input type="text" id="kPctIn" inputmode="numeric" value="5"></div>
       <button class="btn primary" id="kStartBtn" type="button">Starta kassan</button>
     </div>
     <div id="kMain" hidden>
@@ -404,8 +404,8 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
         <h2>Lägg till ett spel</h2>
         <div class="field"><label for="kGame">Spel</label><select id="kGame"><option>V85</option><option>V65</option><option>V64</option><option>GS75</option><option value="DD">Dagens Dubbel</option><option value="LD">Lunchdubbel</option><option>Annat</option></select></div>
         <div class="field"><label for="kDate">Datum</label><input type="date" id="kDate" style="width:auto"></div>
-        <div class="field"><label for="kStake">Insats (kr)</label><input type="number" id="kStake" min="0" step="0.5" inputmode="decimal"></div>
-        <div class="field"><label for="kWin">Vinst (kr)</label><input type="number" id="kWin" min="0" step="1" inputmode="decimal" value="0"></div>
+        <div class="field"><label for="kStake">Insats (kr)</label><input type="text" id="kStake" inputmode="decimal"></div>
+        <div class="field"><label for="kWin">Vinst (kr)</label><input type="text" id="kWin" inputmode="decimal" value="0"></div>
         <button class="btn primary" id="kAdd" type="button">Spara</button>
       </div>
       <div class="card">
@@ -590,6 +590,7 @@ document.getElementById("logout").addEventListener("click",e=>{e.preventDefault(
   const save=k=>{try{localStorage.setItem(KASSA,JSON.stringify(k))}catch(e){}};
   const note=m=>{const t=$k("toast");if(t){t.textContent=m;setTimeout(()=>{if(t.textContent===m)t.textContent=""},4000)}};
   const today=()=>new Date().toLocaleDateString("sv-SE");
+  const num=id=>parseFloat(String($k(id).value).replace(/\s/g,"").replace(",","."));
   function render(){
     const k=load();$k("kStart").hidden=!!k;$k("kMain").hidden=!k;if(!k)return;
     const ins=k.bets.reduce((a,b)=>a+b.s,0),won=k.bets.reduce((a,b)=>a+b.w,0),now=k.start-ins+won;
@@ -617,14 +618,14 @@ document.getElementById("logout").addEventListener("click",e=>{e.preventDefault(
       row.append(left,right,del);list.append(row)});
   }
   $k("kDate").value=today();
-  $k("kStartBtn").addEventListener("click",()=>{const st=+$k("kStartIn").value,pc=+$k("kPctIn").value;if(!(st>0)){note("Skriv en startkassa");return}
+  $k("kStartBtn").addEventListener("click",()=>{const st=num("kStartIn"),pc=num("kPctIn");if(!(st>0)){note("Skriv en startkassa");return}
     const old=load();save({start:st,pct:Math.min(25,Math.max(1,pc||5)),bets:old?old.bets:[]});render()});
-  $k("kAdd").addEventListener("click",()=>{const s=+$k("kStake").value,w=+$k("kWin").value||0;if(!(s>0)){note("Skriv insatsen");return}
+  $k("kAdd").addEventListener("click",()=>{const s=num("kStake"),w=num("kWin")||0;if(!(s>0)){note("Skriv insatsen");return}
     const k=load();k.bets.push({d:$k("kDate").value||today(),g:$k("kGame").value,s,w});save(k);$k("kStake").value="";$k("kWin").value="0";render();note("Spelet är sparat")});
   $k("kExport").addEventListener("click",()=>{const t=localStorage.getItem(KASSA)||"";try{navigator.clipboard.writeText(t).then(()=>note("Säkerhetskopian är kopierad"),()=>note(t))}catch(e){note(t)}});
   $k("kImportBtn").addEventListener("click",()=>{const ta=$k("kImport");if(ta.hidden){ta.hidden=false;ta.focus();return}
     try{const k=JSON.parse(ta.value);if(!(k.start>0)||!Array.isArray(k.bets))throw 0;save({start:k.start,pct:k.pct||5,bets:k.bets});ta.value="";ta.hidden=true;render();note("Säkerhetskopian är inläst")}catch(e){note("Det gick inte att läsa säkerhetskopian")}});
-  $k("kSettings").addEventListener("click",()=>{const k=load();$k("kStartIn").value=k.start;$k("kPctIn").value=k.pct;$k("kStart").hidden=false;$k("kStartBtn").textContent="Spara";$k("kStart").scrollIntoView({behavior:"smooth"})});
+  $k("kSettings").addEventListener("click",()=>{const k=load();$k("kStartIn").value=String(k.start).replace(".",",");$k("kPctIn").value=k.pct;$k("kStart").hidden=false;$k("kStartBtn").textContent="Spara";$k("kStart").scrollIntoView({behavior:"smooth"})});
   $k("kReset").addEventListener("click",()=>{if(!confirm("Ta bort kassan och alla sparade spel på den här enheten?"))return;try{localStorage.removeItem(KASSA)}catch(e){}$k("kStartBtn").textContent="Starta kassan";render()});
   render();
 })();
