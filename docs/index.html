@@ -382,7 +382,7 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
     <div class="card" id="kStart" hidden>
       <h2>Starta din spelkassa</h2>
       <p>Bestäm en summa en gång, och spela sedan bara på den och det den vinner. Fyll aldrig på den. När den är slut har det kostat precis det du bestämde.</p>
-      <div class="field"><label for="kStartIn">Startkassa (kr)</label><input type="number" id="kStartIn" min="1" step="1" inputmode="numeric" value="500"></div>
+      <div class="field"><label for="kStartIn">Startkassa (kr)</label><input type="number" id="kStartIn" min="1" step="0.01" inputmode="decimal" value="500"></div>
       <div class="field"><label for="kPctIn">Insats per spel (% av kassan)</label><input type="number" id="kPctIn" min="1" max="25" step="1" inputmode="numeric" value="5"></div>
       <button class="btn primary" id="kStartBtn" type="button">Starta kassan</button>
     </div>
@@ -583,7 +583,8 @@ document.getElementById("logout").addEventListener("click",e=>{e.preventDefault(
 // Spelkassa: sparas bara på enheten. {start, pct, bets:[{d,g,s,w}]}
 (()=>{
   const KASSA="trav-kassa",$k=id=>document.getElementById(id);
-  const kr=n=>Math.round(n).toLocaleString("sv-SE")+" kr";
+  // kronor med ören när det behövs, så att kassan stämmer med saldot hos ATG
+  const kr=n=>(Math.round(n*100)/100).toLocaleString("sv-SE",{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2})+" kr";
   const NAME={DD:"Dagens Dubbel",LD:"Lunchdubbel"};
   const load=()=>{try{return JSON.parse(localStorage.getItem(KASSA))}catch(e){return null}};
   const save=k=>{try{localStorage.setItem(KASSA,JSON.stringify(k))}catch(e){}};
