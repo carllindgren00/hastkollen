@@ -15,7 +15,7 @@ Datan är krypterad. Appen frågar efter en kod och låser upp datan i webbläsa
   Den hämtar också jackpot (extra pengar i 8-rättspotten) och närmaste Dagens Dubbel med oddset för varje kombination.
 - `scripts/atg_snapshot.py` sparar oddsen före start för V85, V65, V64, GS75, Dagens Dubbel och Lunchdubbel: varje halvtimme de sista 2,5 timmarna, plus en gång tidigare samma dag. Med dem kan modellen testas med de odds man faktiskt hade när man spelade.
 - Datan är uppdelad per spel: `v85.enc` (aktuell omgång), `v85-hist.enc` (lista över månader) och `v85-hist-ÅÅÅÅ-MM.enc` (avgjorda omgångar per månad, sparas bara om när något ändrats), samma för v65, v64 och gs75, plus `dubbel.enc`.
-- `scripts/notify.py` schemalägger en notis via ntfy.sh 30 minuter före start för alla fyra spelen. Kanalnamnet ligger som hemligheten `NTFY_TOPIC` i GitHub Actions; utan den skickas inget.
+- `scripts/notify.py` schemalägger en notis via ntfy.sh 30 minuter före start för V85, V65, V64, GS75, Dagens Dubbel och Lunchdubbel. Kanalnamnet ligger som hemligheten `NTFY_TOPIC` i GitHub Actions; utan den skickas inget.
 - `.github/workflows/atg.yml` kör skripten på schema och sparar datan i repot. Den kan också köras för hand under Actions → "Hämta från ATG" → Run workflow.
 
 ## Köra lokalt

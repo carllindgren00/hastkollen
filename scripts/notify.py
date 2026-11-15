@@ -1,4 +1,4 @@
-"""Schemalägger en notis 30 minuter före start för V85, V65, Dagens Dubbel och Lunchdubbel.
+"""Schemalägger en notis 30 minuter före start för V85, V65, V64, GS75, Dagens Dubbel och Lunchdubbel.
 
 Användning: NTFY_TOPIC=<hemligt kanalnamn> python3 scripts/notify.py docs/data/notified.json [--dry-run] [--test]
 (--test skickar en testnotis direkt.)
@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 API = "https://www.atg.se/services/racinginfo/v1/api"
 APP = "https://carllindgren00.github.io/hastkollen/"
 TZ = ZoneInfo("Europe/Stockholm")
-NAMES = {"V85": "V85", "V65": "V65", "dd": "Dagens Dubbel", "ld": "Lunchdubbel"}
+NAMES = {"V85": "V85", "V65": "V65", "V64": "V64", "GS75": "GS75", "dd": "Dagens Dubbel", "ld": "Lunchdubbel"}
 BEFORE = 30   # minuter före start
 AHEAD = 240   # schemalägg när notisen ska gå inom så här många minuter
 
