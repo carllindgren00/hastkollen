@@ -9,7 +9,7 @@ body{margin:0;background:#c9d1cb;font-family:Figtree,sans-serif;min-height:100vh
 a{color:inherit;text-decoration:none}
 .wrap{display:flex;gap:40px;flex-wrap:wrap;justify-content:center}
 .phone{border-radius:44px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.25);width:390px;height:844px}
-.lbl{text-align:center;font-weight:600;color:#33403a;margin-bottom:8px}
+.scr>*{flex-shrink:0}.scr{scrollbar-width:none}.lbl{text-align:center;font-weight:600;color:#33403a;margin-bottom:8px}
 @media(max-width:860px){.screen:not(.on){display:none}body{padding:0}.phone{border-radius:0;box-shadow:none}.lbl,.top{display:none}}
 </style></head><body>
 <div class="top" style="color:#33403a;font-weight:700;font-size:18px">Travhästarna – förslag på ny startvy (bara exempel, inga riktiga siffror)</div>
@@ -156,8 +156,8 @@ a{color:inherit;text-decoration:none}
   </div>
 </div>
 </div></div>
-<div class="screen" id="s-spel"><div class="lbl">Efter tryck på V65</div><div class="phone">
-<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 20px 16px 0; background: #eef1ed; font-family: Figtree, system-ui, sans-serif; color: #17201a; display: flex; flex-direction: column; gap: 14px; position: relative; overflow: hidden">
+<div class="screen" id="s-spel"><div class="lbl">Efter tryck på V65 (skrolla)</div><div class="phone">
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 20px 16px 0; background: #eef1ed; font-family: Figtree, system-ui, sans-serif; color: #17201a; display: flex; flex-direction: column; gap: 14px; position: relative; overflow-y: auto" class="scr">
 
   <div style="display: flex; justify-content: space-between; align-items: center">
     <a href="#hem" style="display: flex; align-items: center; gap: 4px; color: #1e6a46; font-size: 16px; font-weight: 600; min-height: 44px">
@@ -222,15 +222,23 @@ a{color:inherit;text-decoration:none}
       <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #4f5b53">Avd 3</span>
       <span style="display: flex; gap: 6px"><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">1</span><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">4</span><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">8</span></span>
     </div>
+    <div style="display: grid; grid-template-columns: 54px 1fr; align-items: center; gap: 8px; min-height: 40px; border-bottom: 1px solid #e3e7e2">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #4f5b53">Avd 4</span>
+      <span style="display: flex; gap: 6px"><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">2</span><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">6</span></span>
+    </div>
+    <div style="display: grid; grid-template-columns: 54px 1fr; align-items: center; gap: 8px; min-height: 40px; border-bottom: 1px solid #e3e7e2">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #4f5b53">Avd 5</span>
+      <span style="display: flex; gap: 6px"><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">1</span><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">3</span><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">9</span></span>
+    </div>
     <div style="display: grid; grid-template-columns: 54px 1fr; align-items: center; gap: 8px; min-height: 40px">
-      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #4f5b53">Avd 4–6</span>
-      <span style="font-size: 13px; color: #4f5b53">Tryck för att se alla avdelningar</span>
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #4f5b53">Avd 6</span>
+      <span style="display: flex; gap: 6px"><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">4</span><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">7</span></span>
     </div>
   </div>
 
   <button type="button" style="border: 0; border-radius: 14px; background: #1e6a46; color: #ffffff; font: 600 16px Figtree, sans-serif; min-height: 52px">Kopiera kupong</button>
 
-  <div style="position: absolute; left: 16px; right: 16px; bottom: 22px; height: 76px; border-radius: 28px; background: rgba(255,255,255,0.78); box-shadow: 0 4px 18px rgba(20,40,28,0.10); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: center">
+  <div style="position: sticky; bottom: 22px; margin-top: auto; margin-bottom: 22px; height: 76px; border-radius: 28px; background: rgba(255,255,255,0.78); box-shadow: 0 4px 18px rgba(20,40,28,0.10); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: center">
     <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #4f5b53">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9H3z"></path><path d="M9 20v-6h6v6"></path></svg>
       <span style="font-size: 11px; font-weight: 600">Hem</span>
