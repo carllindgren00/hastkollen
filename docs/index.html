@@ -171,6 +171,19 @@ details.race summary::-webkit-details-marker{display:none}
 .src a{color:var(--accent)}
 .disclaimer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;margin-top:8px;display:flex;flex-direction:column;gap:6px}
 .disclaimer p{margin:0}
+.advice{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.advice h3{font-size:.95rem;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.advice h3 span{font:600 .72rem var(--mono);letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:99px}
+.advice h3 span.go{background:var(--accent-soft);color:var(--accent)}
+.advice h3 span.wait{background:var(--gold-soft);color:var(--gold)}
+.advice ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+.advice li{display:grid;grid-template-columns:20px 1fr;gap:8px;font-size:.86rem;line-height:1.4;color:var(--fg)}
+.advice li::before{content:"";width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font:700 .7rem var(--sans);margin-top:1px}
+.advice li.ok::before{content:"✓";background:var(--accent-soft);color:var(--accent)}
+.advice li.warn::before{content:"!";background:var(--gold-soft);color:var(--gold)}
+.advice li.info::before{content:"i";background:var(--sunk);color:var(--muted)}
+.advice li small{display:block;color:var(--muted);font-size:.8rem}
+.advice button{justify-self:start;margin-top:4px;border:0;border-radius:8px;padding:6px 10px;font:600 .8rem var(--sans);background:var(--accent);color:var(--accent-ink)}
 .fetchnow{font:600 .78rem var(--sans);color:var(--accent);background:var(--accent-soft);border:0;padding:7px 12px;border-radius:99px;white-space:nowrap}
 .fetchnow:disabled{opacity:.75}
 .tokenrow{display:flex;gap:8px;flex-wrap:wrap}
@@ -228,6 +241,8 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
 .field{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:.9rem}
 .field select{font:500 1rem var(--mono);padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
 #ddTbl tr.in td{background:var(--accent-soft)}
+#ddAdvice .leg{grid-template-columns:64px 1fr auto}
+#ddAdvice .leg .avd{white-space:nowrap}
 .field input{width:96px;font:500 1rem var(--mono);padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);text-align:right}
 .small{font-size:.8rem!important}
 .compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -322,6 +337,7 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
         <button class="btn primary" id="copy">Kopiera kupong</button>
       </div>
     </div>
+    <div class="advice" id="spelAdvice"></div>
     <p class="toast" id="toast" aria-live="polite"></p>
     <div class="section-title"><h2>Avdelningarna</h2><span class="hint">Tryck på en häst för att ta med eller ta bort den</span></div>
     <div class="panel" id="races"></div>
@@ -352,6 +368,7 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
         <div><span>Snittvinst vid träff</span><span id="ddPay"></span></div>
         <div><span>Väntat tillbaka</span><span id="ddEv"></span></div>
       </div>
+      <div class="advice" id="ddCheck" style="border:0;padding:0;background:none"></div>
       <div id="ddAdvice" class="legs" style="border:0;padding:0"></div>
       <h3 style="margin-top:6px">Samma budget, olika insats per rad</h3>
       <p class="small">Färre rader och högre insats ger större vinster, men kupongen går in mer sällan. Tryck på en rad för att välja den.</p>
@@ -800,6 +817,26 @@ $("minPresets").addEventListener("click",e=>{const b=e.target.closest("button");
 let hT;
 
 let current=null;
+// "Innan du spelar": färska odds, om kupongen lönar sig, lagom insats och spelstil
+function kassaSug(){try{const k=JSON.parse(localStorage.getItem("trav-kassa"));if(!k)return null;
+  const now=k.start-k.bets.reduce((a,b)=>a+b.s,0)+k.bets.reduce((a,b)=>a+b.w,0);
+  return {now,sug:Math.max(10,Math.floor(now*k.pct/100/5)*5),pct:k.pct}}catch(e){return null}}
+function freshItem(){const age=(Date.now()-new Date(D.updated))/60000;
+  return age<=45?{c:"ok",t:`Oddsen är färska, uppdaterade för ${Math.max(1,Math.round(age))} minuter sedan.`}
+    :{c:"warn",t:`Oddsen är ${age<120?Math.round(age)+" minuter":Math.round(age/60)+" timmar"} gamla.`,s:"Tryck Hämta nu högst upp innan du spelar."}}
+function adviceHTML(items,verdict){
+  const go=verdict==="go";
+  return `<h3>Innan du spelar<span class="${go?"go":"wait"}">${go?"Ser bra ut":"Vänta"}</span></h3><ul>`+
+    items.map(i=>`<li class="${i.c}"><span>${i.t}${i.s?`<small>${i.s}</small>`:""}${i.btn?`<button type="button" data-act="${i.btn[0]}">${i.btn[1]}</button>`:""}</span></li>`).join("")+`</ul>`}
+function budgetItem(budget,min,act){const k=kassaSug();
+  if(!k)return {c:"info",t:"Lägg in din kassa under fliken Kassa, så föreslår appen en lagom insats."};
+  if(k.now<=0)return {c:"warn",t:"Kassan är slut.",s:"Spela inte förrän du har bestämt om du vill börja om."};
+  const sug=Math.max(min,k.sug);
+  if(budget<=sug*1.5)return {c:"ok",t:`Insatsen passar kassan på ${Math.round(k.now)} kr (förslag ${sug} kr, ${k.pct} %).`};
+  return {c:"warn",t:`${budget} kr är mycket för kassan på ${Math.round(k.now)} kr.`,s:`Förslaget är ${sug} kr${min>k.sug?`, lägsta budget här`:""}. Större insatser tömmer kassan fort i svackor.`,btn:[act,`Använd ${sug} kr`]}}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b)return;const k=kassaSug();if(!k)return;
+  if(b.dataset.act==="spelBudget"){$("budget").value=Math.max(50,Math.min(2000,Math.round(k.sug/25)*25||50));renderSpel()}
+  if(b.dataset.act==="ddBudget"){$("ddBudget").value=Math.max(10,k.sug);renderDD()}});
 function renderSpel(){
   const budget=+$("budget").value;const facit=$("facit").checked;
   $("budgetOut").textContent=kr(budget);
@@ -838,6 +875,16 @@ function renderSpel(){
       <span class="meter"><span class="lbl">${pct(pr[j])}<em>${pct(h.streck)}</em></span><span class="track"><i style="width:${pr[j]/top*100}%"></i><u style="left:${Math.min(98,h.streck/top*100)}%"></u></span></span>
       <span class="lock" aria-hidden="true">${Lk===1?"●":Lk===-1?"✕":""}</span></button>`}).join("")}
     </div></details>`}).join("");
+  // checklistan för V-spelen
+  const items=[freshItem()];let bad=items[0].c!=="ok";
+  if(!cur.done&&(cur.oddsOpen===false||field.some(l=>l.conf<0.5))){items.push({c:"warn",t:"Vinnaroddsen är tunna än, så modellen hittar inget säkert värde.",s:"Vänta tills det är närmare start."});bad=true}
+  else if(cur.done)items.push({c:"info",t:"Omgången är avgjord. Kupongen visar hur modellen hade spelat."});
+  else if(RS)items.push({c:"info",t:"Storvinst ger sällan vinst men stora när den kommer. Spela den bara med en liten del av kassan."});
+  else if(sys.index>=1)items.push({c:"ok",t:`Kupongen betalar ${fmt(sys.index,1)} gånger snittet när den går in.`});
+  else{items.push({c:"warn",t:`Kupongen betalar bara ${fmt(sys.index,1)} gånger snittet när den går in.`,s:"Prova Balans eller Jaga värde, eller avstå."});bad=true}
+  const bi=budgetItem(budget,50,"spelBudget");items.push(bi);if(bi.c==="warn")bad=true;
+  if(MODE!=="0.5"&&!RS)items.push({c:"info",t:"Balans har varit det jämnaste valet i testerna."});
+  $("spelAdvice").innerHTML=adviceHTML(items,bad||cur.done?"wait":"go");
   renderAndel();
 }
 
@@ -935,13 +982,21 @@ function renderDD(){
   $("ddEv").textContent=thin?"osäkert":fmt(ret/rows*100)+" %";$("ddEv").className=!thin&&ret/rows>=1?"good":"";
   const nums=(k,S)=>S.map(j=>L[k].run[j][0]).sort((x,y)=>x-y);
   $("ddAdvice").innerHTML=L.map((l,k)=>`<button class="leg" type="button"><span class="avd">Lopp ${l.race}</span><span class="nums">${nums(k,k?B:A).map(x=>`<span class="num ${(k?B:A).length===1?"spik":""}">${x}</span>`).join("")}</span><span></span></button>`).join("")+
-    `<span class="small" style="display:block;margin-top:6px">Går kupongen in vinner du ${sys.omin===sys.omax?kr(Math.round(stake*sys.omin)):kr(Math.round(stake*sys.omin))+" till "+kr(Math.round(stake*sys.omax))} med dagens odds. ${A.length} × ${B.length} = ${rows} rader à ${stake} kr = ${kr(rows*stake)}${rows*stake<budget?(fits?`. Det blev billigare än budgeten eftersom fler hästar gjorde kupongen sämre i den här spelstilen`:`. Det blev billigare än budgeten eftersom en häst till inte ryms: då blir det fler rader än budgeten räcker till`):""}. Kupongen träffar i ungefär ${pct(hit)} av fallen.</span>`;
+    `<span class="small" style="display:block;margin-top:6px">Går kupongen in vinner du ${sys.omin===sys.omax?kr(Math.round(stake*sys.omin)):kr(Math.round(stake*sys.omin))+" till "+kr(Math.round(stake*sys.omax))} med dagens odds. ${A.length} × ${B.length} = ${rows} ${rows===1?"rad":"rader"} à ${stake} kr = ${kr(rows*stake)}${rows*stake<budget?(fits?`. Det blev billigare än budgeten eftersom fler hästar gjorde kupongen sämre i den här spelstilen`:`. Det blev billigare än budgeten eftersom en häst till inte ryms: då blir det fler rader än budgeten räcker till`):""}. Kupongen träffar i ungefär ${pct(hit)} av fallen.</span>`;
   // hästarna i båda loppen, med modellens chans och hur mycket de är spelade i dubbeln
   $("ddTbl").innerHTML=L.map((l,k)=>{const S=k?B:A;const dq=l.run.map(h=>L[1-k].run.reduce((a,g)=>{const o=k?co(g[0],h[0]):co(h[0],g[0]);return a+(o?1/o:0)},0));const sdq=dq.reduce((a,b)=>a+b,0)||1;
     const idx=l.run.map((h,j)=>j).sort((x,y)=>probs[k][y]-probs[k][x]);
     return `<thead><tr><th>Lopp ${l.race} · ${l.track}</th><th>Chans</th><th>Spelad</th><th>Odds</th></tr></thead><tbody>`+
       idx.map(j=>{const h=l.run[j];return `<tr class="${S.includes(j)?"in":""}"><td><b>${h[0]}</b><small>${h[1]}</small></td><td>${pct(probs[k][j])}</td><td>${pct(dq[j]/sdq)}</td><td>${fmt(h[3],h[3]<10?2:0)}</td></tr>`}).join("")+`</tbody>`}).join("");
   current_dd={A:nums(0,A),B:nums(1,B),rows,stake};
+  // checklistan för dubbelspelen
+  {const items=[freshItem()];let bad=items[0].c!=="ok";
+   if(thin){items.push({c:"warn",t:`Bara ${krShort(dd.turnover)} inlagt hittills, så oddsen ändras mycket.`,s:"Titta igen en halvtimme före start."});bad=true}
+   else if(ret/rows>=0.8)items.push({c:"ok",t:`Väntat tillbaka ${fmt(ret/rows*100)} %. Kupongen träffar i ungefär ${pct(hit)} av fallen.`});
+   else{items.push({c:"warn",t:`Väntat tillbaka bara ${fmt(ret/rows*100)} %.`,s:"Byt till Balans eller Jaga värde, välj högre insats per rad, eller avstå."});bad=true}
+   const bi=budgetItem(budget,10,"ddBudget");items.push(bi);if(bi.c==="warn")bad=true;
+   if(ddMode!=="balans")items.push({c:"info",t:"Balans träffade nästan lika ofta som Max chans och betalade mer i testerna."});
+   $("ddCheck").innerHTML=adviceHTML(items,bad?"wait":"go")}
   // jämförelse: samma budget med olika insats per rad
   const opts=[...$("ddStake").options].map(o=>+o.value).filter(st=>st<=budget);
   $("ddStakeTbl").innerHTML=`<thead><tr><th>Insats</th><th>Rader</th><th>Går in</th><th>Vinst då</th></tr></thead><tbody>`+opts.map(st=>{const sy=buildSys(Math.max(1,Math.floor(budget/st)));
