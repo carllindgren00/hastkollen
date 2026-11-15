@@ -6,37 +6,28 @@
 <title>Travhästarna</title>
 <meta name="description" content="Kupongförslag för V85, V65, V64, GS75, Dagens Dubbel och Lunchdubbel, med data från ATG.">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#f6f7f5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#101411" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#050b08">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Travhästarna">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap">
 <style>
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 img{max-width:100%}
 /* Layout: en kolumn — kupong överst, avdelningar som utfällbara kort, historik och inställningar i egna flikar */
 :root{
-  --bg:#f6f7f5; --surface:#ffffff; --sunk:#eef1ed; --fg:#17201a; --muted:#6b776e; --line:#e3e7e2;
-  --accent:#1e6a46; --accent-ink:#ffffff; --accent-soft:#e3efe7;
-  --gold:#8f6400; --gold-soft:#f7eed9; --warn:#a33b2b; --warn-soft:#f8e4df;
+  --bg:#050b08; --surface:rgba(255,255,255,.055); --sunk:rgba(255,255,255,.065); --fg:#f2f7f4; --muted:#9bb0a5; --line:rgba(255,255,255,.09);
+  --accent:#34d399; --accent-ink:#022c1c; --accent-soft:rgba(52,211,153,.14);
+  --gold:#fbbf24; --gold-soft:rgba(251,191,36,.12); --warn:#fb7185; --warn-soft:rgba(244,63,94,.14);
   --sans:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
-  --r:14px;
+  --mono:"Figtree",system-ui,-apple-system,sans-serif;
+  --r:24px; --g1:#34d399; --g2:#047857; --glow:rgba(52,211,153,.30); color-scheme:dark;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#101411; --surface:#171d19; --sunk:#1e2621; --fg:#e8ede9; --muted:#8e9b92; --line:#252e28;
-  --accent:#56c28a; --accent-ink:#0b1810; --accent-soft:#1c3226;
-  --gold:#e3b552; --gold-soft:#2f2718; --warn:#ef8a78; --warn-soft:#3a2420; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#101411; --surface:#171d19; --sunk:#1e2621; --fg:#e8ede9; --muted:#8e9b92; --line:#252e28;
-  --accent:#56c28a; --accent-ink:#0b1810; --accent-soft:#1c3226;
-  --gold:#e3b552; --gold-soft:#2f2718; --warn:#ef8a78; --warn-soft:#3a2420; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
@@ -264,6 +255,142 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
 #p-dd .tbl td,#p-dd .tbl th{padding:7px 5px}
 #p-dd .tbl td:first-child{white-space:normal}
 @media (max-width:520px){.kpis.four{grid-template-columns:1fr 1fr}.kpis.four div:nth-child(3){border-left:0}.kpis.four div:nth-child(n+3){border-top:1px solid var(--line)}}
+
+/* ===== Ny design: mörk, glas, hemskärm med ikoner och docka ===== */
+body{font-variant-numeric:tabular-nums;background:var(--bg)}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;transition:background .6s;
+  background:radial-gradient(520px 380px at 90% -8%,var(--glow),transparent 70%),radial-gradient(460px 460px at -15% 40%,rgba(59,130,246,.14),transparent 70%),radial-gradient(500px 400px at 50% 110%,rgba(52,211,153,.08),transparent 70%)}
+body[data-tint=V85]{--g1:#34d399;--g2:#047857;--glow:rgba(52,211,153,.32)}
+body[data-tint=V65]{--g1:#60a5fa;--g2:#1d4ed8;--glow:rgba(59,130,246,.38)}
+body[data-tint=V64]{--g1:#a78bfa;--g2:#6d28d9;--glow:rgba(139,92,246,.36)}
+body[data-tint=GS75]{--g1:#fb923c;--g2:#c2410c;--glow:rgba(249,115,22,.32)}
+body[data-tint=DD]{--g1:#2dd4bf;--g2:#0f766e;--glow:rgba(20,184,166,.32)}
+.wrap{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px));padding-top:14px}
+.seg{display:none!important}
+h1,h2,h3{letter-spacing:-.025em}
+h2{font-size:1.25rem;font-weight:800}
+.card,.ccol,.advice,details.race,.info,.ticket{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:none}
+.ticket{overflow:hidden}
+.next{background:var(--gold-soft);border-color:rgba(251,191,36,.3);border-radius:20px}
+.next.jp{background:linear-gradient(150deg,rgba(251,191,36,.2),rgba(251,191,36,.03) 70%);border-color:rgba(251,191,36,.3)}
+.next.jp b{color:#fde68a}
+.btn{border-radius:16px;padding:13px;font-weight:700}
+.btn.primary{background:linear-gradient(135deg,#34d399,#059669);color:#022c1c;box-shadow:0 10px 26px -10px rgba(52,211,153,.8),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn.ghost{background:var(--sunk);border:1px solid var(--line)}
+.btn:active,.app:active,.dock button:active,.tl-row:active{transform:scale(.96)}
+.btn,.app,.dock button,.tl-row{transition:transform .18s cubic-bezier(.3,.7,.4,1.5)}
+.mode{background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:16px;padding:4px}
+.mode button{border-radius:12px;padding:10px 4px;font-weight:700;transition:background .25s,color .25s}
+.mode button[aria-checked="true"]{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;box-shadow:0 6px 18px -6px var(--g1)}
+.presets button{border-color:var(--line);font-weight:700}
+.presets button[aria-pressed="true"]{background:#fff;color:#06110b;border-color:#fff}
+.budget-val{font-weight:800;font-size:1.9rem;letter-spacing:-.03em}
+.kpis span:last-child,.stats span:last-child,.ccol dd{font-weight:800;font-size:1.15rem;letter-spacing:-.02em}
+.num{min-width:34px;height:34px;border-radius:11px;font-weight:800;font-size:.95rem;background:rgba(255,255,255,.07);color:#e6f0ea;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.num.spik{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;box-shadow:0 6px 16px -6px var(--g1),inset 0 1px 0 rgba(255,255,255,.3)}
+.leg .avd{font-weight:800;color:var(--muted);letter-spacing:.04em}
+.horse.in .hnr{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;box-shadow:0 4px 12px -4px var(--g1)}
+.hnr{font-weight:800}
+.avd-badge{background:var(--sunk);font-weight:800}
+.status.spik,.badge.won{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff}
+.track i{background:linear-gradient(90deg,var(--g2),var(--g1))}
+.track u{background:#fff}
+.advice li.ok::before{background:linear-gradient(135deg,#34d399,#059669);color:#022c1c;box-shadow:0 0 10px rgba(52,211,153,.5)}
+.advice h3 span{font-family:var(--sans);font-weight:800}
+.lockscreen form{background:var(--surface);border-radius:28px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.lockscreen button{background:linear-gradient(135deg,#34d399,#059669);color:#022c1c;font-weight:800}
+.tbl td b,.tbl td small{font-family:var(--sans)}
+#ddTbl tr.in td{background:rgba(52,211,153,.1)}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 12px);z-index:50;transform:translateX(-50%);margin:0;max-width:calc(100% - 32px);padding:11px 18px;border-radius:18px;
+  background:rgba(20,30,25,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line);color:#fff;font-weight:700;font-size:.9rem;box-shadow:0 12px 30px rgba(0,0,0,.4);animation:drop .45s cubic-bezier(.3,.8,.2,1.2)}
+.toast:empty{display:none}
+@keyframes drop{from{transform:translate(-50%,-80px)}}
+
+#kMain{display:flex;flex-direction:column;gap:16px}
+/* toppraden på undersidorna */
+.top{align-items:center;min-height:44px}
+.back{display:inline-flex;align-items:center;gap:4px;height:40px;padding:0 14px 0 8px;border-radius:20px;background:var(--sunk);border:1px solid var(--line);color:var(--fg);font-weight:700;font-size:.95rem}
+.toptitle{font-weight:800;font-size:1.05rem;letter-spacing:-.01em;flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fetchnow{background:var(--sunk);border:1px solid var(--line);color:var(--fg);font-weight:700;padding:10px 14px}
+.gamesel{margin-top:0}
+
+/* spelets rubrik */
+.ghead{display:flex;align-items:center;gap:14px}
+.ghead h2{font-size:1.9rem;font-weight:900;letter-spacing:-.035em;line-height:1.05}
+.ghead .sub{margin-top:4px}
+.gic{flex:none;width:64px;height:64px;border-radius:20px;display:grid;place-items:center;font-weight:900;font-size:1.05rem;letter-spacing:-.02em;color:#fff;position:relative;
+  background:linear-gradient(135deg,var(--g1),var(--g2));box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -8px 16px rgba(0,0,0,.18),0 12px 26px -10px var(--g1)}
+.gic::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.22),transparent 50%)}
+.cdpill{display:inline-flex;align-items:center;gap:7px;margin-top:8px;padding:5px 11px;border-radius:99px;font-size:.78rem;font-weight:800;background:var(--accent-soft);color:#6ee7b7;box-shadow:inset 0 0 0 1px rgba(52,211,153,.25)}
+.dot{width:7px;height:7px;border-radius:50%;background:#34d399;animation:pulse 1.8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,211,153,.7)}70%,100%{box-shadow:0 0 0 8px rgba(52,211,153,0)}}
+
+/* hem */
+.hhdr{display:flex;justify-content:space-between;align-items:flex-start}
+.hdate{font-size:.75rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.htitle{margin:4px 0 0;font-size:2.2rem;font-weight:900;letter-spacing:-.04em;line-height:1;background:linear-gradient(180deg,#fff 30%,#a7c4b5);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hstatus{font-size:.8rem;font-weight:700;color:#6ee7b7;margin-top:6px}
+.iconbtn{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--sunk);border:1px solid var(--line);color:var(--fg)}
+.iconbtn.busy svg{animation:spin 1s linear infinite}
+.gcard{display:block;background:var(--surface);border:1px solid var(--line);border-radius:26px;color:inherit;text-decoration:none;position:relative;overflow:hidden;text-align:left;width:100%;font:inherit}
+.hero{padding:20px;cursor:pointer}
+.hero::after{content:"";position:absolute;inset:0;border-radius:26px;padding:1px;pointer-events:none;background:linear-gradient(135deg,rgba(52,211,153,.75),transparent 40%,transparent 60%,rgba(96,165,250,.5));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.k-lbl{font-size:.85rem;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+.k-num{font-size:3rem;font-weight:900;letter-spacing:-.045em;margin:6px 0 2px;line-height:1}
+.k-num small{font-size:1.35rem;font-weight:700;color:var(--muted);margin-left:5px;letter-spacing:0}
+.k-diff{font-weight:800;font-size:.9rem}
+.spark{display:block;width:100%;height:64px;margin-top:12px}
+.spark .l{stroke-dasharray:1000;stroke-dashoffset:1000;animation:draw 1.6s .2s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;font-size:.75rem;font-weight:800;align-self:flex-start}
+.pill.ok{background:var(--accent-soft);color:#6ee7b7;box-shadow:inset 0 0 0 1px rgba(52,211,153,.25)}
+.pill.wait{background:var(--gold-soft);color:#fde68a;box-shadow:inset 0 0 0 1px rgba(251,191,36,.25)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row2.one{grid-template-columns:1fr}
+.nextc{padding:16px;display:flex;flex-direction:column;gap:5px;min-height:156px;cursor:pointer}
+.nextc h3{font-size:1.05rem;font-weight:800;margin-top:4px}
+.nextc .sub{font-size:.8rem;font-weight:600;margin:0}
+.nextc .cd{font-size:2.1rem;font-weight:900;letter-spacing:-.035em;line-height:1;margin-top:auto}
+.nextc .cd small{font-size:1rem;font-weight:700;color:var(--muted);margin-left:3px;letter-spacing:0}
+.nextc.jpc{background:linear-gradient(150deg,rgba(251,191,36,.22),rgba(251,191,36,.03) 60%);border-color:rgba(251,191,36,.28)}
+.nextc.jpc .cd{background:linear-gradient(90deg,#fde68a,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.shine{position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.13) 45%,transparent 60%);transform:translateX(-100%);animation:shine 4.5s 1.2s infinite}
+@keyframes shine{30%,100%{transform:translateX(100%)}}
+.hsec{font-size:.8rem;font-weight:800;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:10px 4px -6px}
+.tl{padding:4px 16px}
+.tl-row{display:grid;grid-template-columns:54px 1fr auto;gap:10px;align-items:center;padding:13px 0;border:0;border-bottom:1px solid var(--line);width:100%;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.tl-row:last-child{border-bottom:0}
+.tl-row b{font-size:.95rem;font-weight:800}
+.tl-row .tt{color:var(--muted);font-weight:700}
+.tl-row .m{font-size:.75rem;color:#62766b;font-weight:700;white-space:nowrap}
+.tl-row .jp{color:#fbbf24}
+.tdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
+.tl p{margin:14px 0;color:var(--muted);font-size:.88rem}
+.appgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 8px}
+.app{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:.75rem;font-weight:700;color:#cfe0d6;background:none;border:0;padding:0;cursor:pointer;font-family:inherit;min-width:0}
+.app>span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ic{width:62px;height:62px;border-radius:19px;display:grid;place-items:center;font-weight:900;font-size:1rem;letter-spacing:-.02em;color:#fff;position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -8px 16px rgba(0,0,0,.18),0 10px 22px -8px var(--c)}
+.ic::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.22),transparent 50%)}
+.ic.g{background:var(--sunk);border:1px solid var(--line);box-shadow:none;color:#d7e7de}
+.ic.g::after{display:none}
+.ic .bdg{position:absolute;z-index:2;top:-5px;right:-5px;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:#f59e0b;color:#1a1000;font-size:.68rem;font-weight:900;display:grid;place-items:center;box-shadow:0 0 0 2px var(--bg)}
+@media (max-width:360px){.ic{width:56px;height:56px;border-radius:17px}.k-num{font-size:2.6rem}}
+
+/* dockan */
+.dock{position:fixed;z-index:40;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));width:min(608px,calc(100% - 28px));height:70px;border-radius:28px;
+  display:grid;grid-auto-flow:column;grid-auto-columns:1fr;align-items:center;background:rgba(18,28,23,.62);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.1);box-shadow:0 20px 40px rgba(0,0,0,.5)}
+.dock button{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;color:#62766b;font:700 .7rem var(--sans);padding:6px 0;height:100%}
+.dock button.on{color:#fff}
+.dock button.on svg{color:#6ee7b7;filter:drop-shadow(0 0 8px rgba(52,211,153,.8))}
+
+/* intro när en sida visas */
+.panel.enter>*{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+.panel.enter>*:nth-child(2){animation-delay:.05s}.panel.enter>*:nth-child(3){animation-delay:.1s}.panel.enter>*:nth-child(4){animation-delay:.15s}
+.panel.enter>*:nth-child(5){animation-delay:.2s}.panel.enter>*:nth-child(6){animation-delay:.25s}.panel.enter>*:nth-child(n+7){animation-delay:.3s}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}.spark .l{stroke-dashoffset:0}}
 </style>
 </head>
 <body>
@@ -280,11 +407,9 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
   </form>
 </section>
 <div class="wrap">
-  <div class="top">
-    <div>
-      <h1>Travhästarna</h1>
-      <p class="sub" id="dateline"></p>
-    </div>
+  <div class="top" id="topbar" hidden>
+    <button type="button" class="back" id="backHome"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Hem</button>
+    <span class="toptitle" id="topTitle"></span>
     <button type="button" class="fetchnow" id="fetchNow">↻ Hämta nu</button>
   </div>
 
@@ -295,7 +420,8 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
     <button type="button" data-g="GS75" role="radio">GS75</button>
   </div>
   <div class="seg" role="tablist">
-    <button role="tab" id="t-spel" aria-selected="true">Spel</button>
+    <button role="tab" id="t-hem" aria-selected="true">Hem</button>
+    <button role="tab" id="t-spel" aria-selected="false">Spel</button>
     <button role="tab" id="t-dd" aria-selected="false">Dubbel</button>
     <button role="tab" id="t-kassa" aria-selected="false">Kassa</button>
     <button role="tab" id="t-andel" aria-selected="false">Andelar</button>
@@ -304,7 +430,24 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
     <button role="tab" id="t-logg" aria-selected="false">Logg</button>
   </div>
 
-  <section class="panel" id="p-spel">
+  <section class="panel" id="p-hem">
+    <div class="hhdr">
+      <div><div class="hdate" id="hDate"></div><h1 class="htitle">Travhästarna</h1><div class="hstatus" id="hStatus"></div></div>
+      <button type="button" class="iconbtn" id="hFetch" aria-label="Hämta nu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg></button>
+    </div>
+    <button type="button" class="gcard hero" id="hKassa"></button>
+    <div class="row2" id="hRow">
+      <button type="button" class="gcard nextc" id="hNext"><span class="pill ok"><span class="dot"></span>Läser in</span><h3>Nästa spel</h3><span class="sub">&nbsp;</span><span class="cd">–</span></button>
+      <button type="button" class="gcard nextc jpc" id="hJp" hidden></button>
+    </div>
+    <div class="hsec">Kommande</div>
+    <div class="gcard tl" id="hList"><p>Läser in spelen…</p></div>
+    <div class="hsec">Spel och verktyg</div>
+    <div class="appgrid"><button type="button" class="app" data-go="V85"><span class="ic" style="background:linear-gradient(135deg,#34d399,#047857);--c:#10b981">V85</span><span>V85</span></button><button type="button" class="app" data-go="V65"><span class="ic" style="background:linear-gradient(135deg,#60a5fa,#1d4ed8);--c:#3b82f6">V65</span><span>V65</span></button><button type="button" class="app" data-go="V64"><span class="ic" style="background:linear-gradient(135deg,#a78bfa,#6d28d9);--c:#8b5cf6">V64</span><span>V64</span></button><button type="button" class="app" data-go="GS75"><span class="ic" style="background:linear-gradient(135deg,#fb923c,#c2410c);--c:#f97316">GS75</span><span>GS75</span></button><button type="button" class="app" data-go="DD"><span class="ic" style="background:linear-gradient(135deg,#2dd4bf,#0f766e);--c:#14b8a6">DD</span><span>Dagens D.</span></button><button type="button" class="app" data-go="LD"><span class="ic" style="background:linear-gradient(135deg,#fbbf24,#b45309);--c:#f59e0b">LD</span><span>Lunch D.</span></button><button type="button" class="app" data-tab="t-kassa"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/><circle cx="16.5" cy="15" r="1.3" fill="currentColor"/></svg></span><span>Kassa</span></button><button type="button" class="app" data-tab="t-andel"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6.5 4.5"/></svg></span><span>Andelar</span></button><button type="button" class="app" data-tab="t-hist"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span>Historik</span></button><button type="button" class="app" data-tab="t-inst"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.4 5 5.6.8-4 3.9.9 5.5L12 14.6 7.1 17.2l.9-5.5-4-3.9 5.6-.8z"/></svg></span><span>Modell</span></button><button type="button" class="app" data-tab="t-logg"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span><span>Logg</span></button><button type="button" class="app" data-tab="t-logg"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span><span>Notiser</span></button></div>
+  </section>
+
+  <section class="panel" id="p-spel" hidden>
+    <div class="ghead"><span class="gic" id="gIc">V85</span><div><h2 id="gTrack">&nbsp;</h2><p class="sub" id="dateline"></p><span class="cdpill" id="gCd" hidden><span class="dot"></span><span></span></span></div></div>
     <div class="next jp" id="jpBox" hidden><b id="jpTitle"></b><span id="jpText"></span></div>
     <div class="next" id="nextBox" hidden><b id="nextTitle"></b><span id="nextText"></span></div>
     <p class="info" id="roundInfo"></p>
@@ -560,6 +703,12 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
     <p>Appen har ingen koppling till ATG. Data hämtas från ATG:s webbplats.</p>
     <p><a href="#" id="logout">Lås appen</a> på den här enheten.</p>
   </footer>
+  <nav class="dock" id="dock" aria-label="Meny">
+    <button type="button" data-tab="t-hem" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Hem</button>
+    <button type="button" data-tab="t-spel"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 6v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-6z"/></svg>Kupong</button>
+    <button type="button" data-tab="t-dd"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="8" height="16" rx="2"/><rect x="13" y="4" width="8" height="16" rx="2"/></svg>Dubbel</button>
+    <button type="button" data-tab="t-kassa"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/></svg>Kassa</button>
+  </nav>
 </div>
 
 <script>
@@ -656,7 +805,105 @@ document.querySelectorAll(".gn").forEach(e=>e.textContent=G.n);document.querySel
 document.getElementById("srcLink").href="https://www.atg.se/"+GAME;
 document.querySelectorAll("#gameSel button").forEach(b=>{b.setAttribute("aria-checked",b.dataset.g===GAME);
   b.addEventListener("click",()=>{if(b.dataset.g===GAME)return;try{localStorage.setItem("v85-game",b.dataset.g);if(window.v85State)sessionStorage.setItem("v85-state",JSON.stringify(v85State()))}catch(e){}location.reload()})});
-unlock().then(pk=>fetch(G.file,{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error(r.status);
+
+// ===== Hemskärmen, dockan och sidbyten =====
+(()=>{
+const el=id=>document.getElementById(id);
+const PANELS={"t-hem":"p-hem","t-spel":"p-spel","t-dd":"p-dd","t-kassa":"p-kassa","t-andel":"p-andel","t-hist":"p-hist","t-inst":"p-inst","t-logg":"p-logg"};
+const TITLE={"t-spel":GAME,"t-dd":"Dubbel","t-kassa":"Spelkassa","t-andel":"Andelar · "+GAME,"t-hist":"Historik · "+GAME,"t-inst":"Modell","t-logg":"Logg och notiser"};
+const COLOR={V85:"#34d399",V65:"#60a5fa",V64:"#a78bfa",GS75:"#fb923c",DD:"#2dd4bf",LD:"#fbbf24"};
+const NAME={V85:"V85",V65:"V65",V64:"V64",GS75:"GS75",DD:"Dagens Dubbel",LD:"Lunchdubbel"};
+document.body.dataset.tint="V85";el("gIc").textContent=GAME;
+el("hDate").textContent=new Date().toLocaleDateString("sv-SE",{weekday:"long",day:"numeric",month:"long"});
+window.goTab=(t,opt={})=>{
+  Object.entries(PANELS).forEach(([b,p])=>{el(b).setAttribute("aria-selected",b===t);el(p).hidden=b!==t});
+  el("topbar").hidden=t==="t-hem";el("topTitle").textContent=TITLE[t]||"";
+  el("gameSel").hidden=!["t-spel","t-andel","t-hist","t-inst"].includes(t);
+  document.querySelectorAll("#dock button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+  el("dock").querySelector('[data-tab="t-dd"]').hidden=el("t-dd").hidden;
+  document.body.dataset.tint=t==="t-dd"?"DD":["t-spel","t-andel","t-hist","t-inst"].includes(t)?GAME:"V85";
+  const p=el(PANELS[t]);p.classList.remove("enter");void p.offsetWidth;p.classList.add("enter");
+  if(t==="t-hem")kassaHero();
+  if(!opt.keepScroll)scrollTo(0,0);
+  if(window.onTabShown)onTabShown(t);
+};
+function openGame(g){
+  if(g==="DD"||g==="LD"){goTab("t-dd");const b=document.querySelector(`#ddKind [data-k="${g.toLowerCase()}"]`);if(b&&!b.hidden)b.click();return}
+  if(g===GAME){goTab("t-spel");return}
+  try{const st=window.v85State?v85State():{};st.tab="t-spel";st.sw=1;localStorage.setItem("v85-game",g);sessionStorage.setItem("v85-state",JSON.stringify(st))}catch(e){}
+  location.reload();
+}
+document.querySelectorAll(".app").forEach(b=>b.addEventListener("click",()=>b.dataset.go?openGame(b.dataset.go):goTab(b.dataset.tab)));
+document.querySelectorAll("#dock button").forEach(b=>b.addEventListener("click",()=>goTab(b.dataset.tab)));
+el("backHome").addEventListener("click",()=>goTab("t-hem"));
+el("hKassa").addEventListener("click",()=>goTab("t-kassa"));
+el("hFetch").addEventListener("click",()=>el("fetchNow").click());
+const fb=el("fetchNow");
+new MutationObserver(()=>{el("hStatus").textContent=fb.disabled?fb.textContent:"";el("hFetch").classList.toggle("busy",fb.disabled)}).observe(fb,{childList:true,characterData:true,subtree:true,attributes:true});
+
+// kassan högst upp: saldo som räknas upp och en kurva över alla spel
+const krf=n=>n.toLocaleString("sv-SE",{minimumFractionDigits:2,maximumFractionDigits:2});
+function countUp(e,to){const t0=performance.now(),dur=1300;const f=t=>{const k=Math.min(1,(t-t0)/dur);e.textContent=krf(to*(1-Math.pow(1-k,4)));if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)}
+function kassaHero(){
+  let k=null;try{k=JSON.parse(localStorage.getItem("trav-kassa"))}catch(e){}
+  const h=el("hKassa");
+  if(!k||!(k.start>0)||!Array.isArray(k.bets)){h.innerHTML=`<div class="k-lbl"><span>Spelkassa</span></div><div class="k-num" style="font-size:1.7rem;margin-top:10px">Starta din spelkassa</div><p class="sub">Bestäm en summa en gång och spela bara på den och det den vinner.</p>`;return}
+  const bets=k.bets.map((b,i)=>[b,i]).sort((x,y)=>String(x[0].d).localeCompare(String(y[0].d))||x[1]-y[1]).map(x=>x[0]);
+  let v=k.start;const pts=[v];bets.forEach(b=>{v+=(b.w||0)-(b.s||0);pts.push(v)});
+  const now=v,diff=now-k.start,ins=bets.reduce((a,b)=>a+(b.s||0),0),won=bets.reduce((a,b)=>a+(b.w||0),0),up=diff>=0,col=up?"#34d399":"#fb7185";
+  const W=320,H=64,mn=Math.min(...pts),mx=Math.max(...pts),rg=mx-mn||1,src=pts.length>1?pts:[pts[0],pts[0]];
+  const line=src.map((y,i)=>(i?"L":"M")+(i/(src.length-1)*W).toFixed(1)+" "+(H-6-(y-mn)/rg*(H-14)).toFixed(1)).join(" ");
+  h.innerHTML=`<div class="k-lbl"><span>Spelkassa</span>${ins?`<span class="pill ${won>=ins?"ok":"wait"}">${won>=ins?'<span class="dot"></span>':""}${Math.round(won/ins*100)} % tillbaka</span>`:""}</div>
+    <div class="k-num"><span id="hKnum">${krf(0)}</span><small>kr</small></div>
+    <div class="k-diff" style="color:${up?"#6ee7b7":"#fda4af"}">${up?"+":"−"}${krf(Math.abs(diff))} kr sedan start · ${bets.length} spel</div>
+    <svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="hsg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".45"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+    <path d="${line} L${W} ${H} L0 ${H}Z" fill="url(#hsg)"/><path class="l" d="${line}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`;
+  countUp(el("hKnum"),now);
+}
+
+// kommande spel: läser alla spelens filer (de är små) och visar dem i tidsordning
+let EV=[];
+const tm=ts=>new Date(ts).toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});
+function day(ts){const d=new Date(ts).toDateString();if(d===new Date().toDateString())return "";if(d===new Date(Date.now()+864e5).toDateString())return "i morgon";return new Date(ts).toLocaleDateString("sv-SE",{weekday:"short"}).replace(".","")}
+function cdHTML(ms){if(ms<=0)return "Nu";const m=Math.floor(ms/60000);
+  if(m<60){const s=Math.floor(ms/1000)%60;return m+":"+String(s).padStart(2,"0")}
+  if(m<1440)return `${Math.floor(m/60)}<small>h</small> ${m%60}<small>min</small>`;
+  const dd=Math.round(m/1440);return dd+`<small>${dd===1?"dag":"dagar"}</small>`}
+const jpTxt=j=>j>=1e6?(j/1e6).toFixed(1).replace(".",",")+"<small>Mkr</small>":Math.round(j/1e3)+"<small>tkr</small>";
+function renderHome(){
+  const L=el("hList"),N=el("hNext"),J=el("hJp");
+  if(!EV.length){L.innerHTML="<p>Inga spel är öppna just nu. De dyker upp här när ATG öppnar dem.</p>";
+    N.innerHTML=`<span class="pill wait">Väntar</span><h3>Inget öppet spel</h3><span class="sub">Kolla igen senare</span><span class="cd">–</span>`;J.hidden=true;el("hRow").classList.add("one");return}
+  L.innerHTML="";
+  EV.slice(0,6).forEach(e=>{const b=document.createElement("button");b.type="button";b.className="tl-row";const d=day(e.ts);
+    const right=e.wait?"öppnar senare":e.jp?`<span class="jp">jackpot${d?" · "+d:""}</span>`:d||"notis "+tm(e.ts-30*60e3);
+    b.innerHTML=`<b>${e.notime?d:tm(e.ts)}</b><span><span class="tdot" style="background:${COLOR[e.g]};box-shadow:0 0 8px ${COLOR[e.g]}"></span><b>${e.g}</b> <span class="tt">${e.track}</span></span><span class="m">${right}</span>`;
+    b.addEventListener("click",()=>openGame(e.g));L.append(b)});
+  const n=EV[0],d=day(n.ts);
+  N.innerHTML=`<span class="pill ${n.open?"ok":"wait"}">${n.open?'<span class="dot"></span>Öppet för spel':"Inte öppet än"}</span><h3>${NAME[n.g]}</h3><span class="sub">${n.track} · ${d?d+" ":""}${n.notime?"":tm(n.ts)}</span><span class="cd" id="hCd">${cdHTML(n.ts-Date.now())}</span>`;
+  N.onclick=()=>openGame(n.g);
+  const j=EV.find(e=>e.jp>0);J.hidden=!j;el("hRow").classList.toggle("one",!j);
+  if(j){const dj=day(j.ts);J.innerHTML=`<div class="shine"></div><span class="pill wait">Jackpot</span><h3>${NAME[j.g]} ${dj||"i dag"}</h3><span class="sub">Extra pengar i potten</span><span class="cd">${jpTxt(j.jp)}</span>`;J.onclick=()=>openGame(j.g)}
+  document.querySelectorAll('.app[data-go] .bdg').forEach(x=>x.remove());
+  EV.filter(e=>e.jp>0).forEach(e=>{const ic=document.querySelector(`.app[data-go="${e.g}"] .ic`);if(ic&&!ic.querySelector(".bdg"))ic.insertAdjacentHTML("beforeend",'<span class="bdg">J</span>')});
+}
+setInterval(()=>{const c=el("hCd");if(c&&EV[0]&&!el("p-hem").hidden)c.innerHTML=cdHTML(EV[0].ts-Date.now())},1000);
+window.homeLoad=pk=>{
+  const get=f=>fetch(f,{cache:"no-cache"}).then(r=>r.ok?r.json():null).then(b=>b&&openBox(pk,b)).catch(()=>null);
+  const games=["V85","V65","V64","GS75"];
+  Promise.all([...games.map(g=>get(`data/${g.toLowerCase()}.enc`)),get("data/dubbel.enc")]).then(res=>{
+    const ev=[];
+    games.forEach((g,i)=>{const d=res[i];if(!d||!d.cur)return;const c=d.cur;
+      if(!c.done)ev.push({g,track:c.track,t:c.start||c.date+"T12:00:00",notime:!c.start,jp:c.jackpot||0,open:c.oddsOpen!==false});
+      else if(d.waiting)ev.push({g,track:d.waiting.track,t:d.waiting.start||d.waiting.date+"T12:00:00",notime:!d.waiting.start,wait:true,open:false})});
+    const dub=res[4]||{};
+    ["dd","ld"].forEach(k=>{const x=dub[k];if(x&&x.legs&&x.legs[0])ev.push({g:k.toUpperCase(),track:x.legs[0].track,t:x.legs[0].start||x.date+"T12:00:00",notime:!x.legs[0].start,open:true})});
+    EV=ev.map(e=>({...e,ts:new Date(e.t).getTime()})).filter(e=>e.ts>Date.now()-5*60e3).sort((a,b)=>a.ts-b.ts);
+    renderHome()});
+};
+goTab("t-hem");
+})();
+unlock().then(pk=>homeLoad(pk)||fetch(G.file,{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error(r.status);
   // svaret kommer från mobilens cache när nätet eller inloggningen inte släppte igenom en färsk hämtning
   if(r.headers.get("x-v85-cache")){const p=document.createElement("p");p.className="info";
     p.textContent="Visar sparad data, eftersom ny data inte gick att hämta. Dra ned för att uppdatera.";document.querySelector(".wrap").prepend(p)}
@@ -790,7 +1037,10 @@ if(JP){const rtp=Math.round(65+JP/TURN*100);
   $("jpTitle").textContent=`Jackpot: ${fmt(JP/1e6,1)} Mkr extra i ${G.n}-rättspotten`;
   $("jpText").textContent=`Räknat på en omsättning runt ${fmt(TURN/1e6,0)} Mkr får spelarna tillbaka cirka ${rtp} % av insatserna i stället för vanliga 65 %. Det är en bra omgång att spela på. Utdelningen i kupongen räknar med jackpoten.`;
   $("jpBox").hidden=false}
-$("dateline").textContent=(cur.done?"Förra: ":"")+cap(dname(cur.date))+" · "+cur.track+" · uppdaterad "+upd;
+$("dateline").textContent=(cur.done?"Förra: ":"")+cap(dname(cur.date))+" · uppdaterad "+upd;
+$("gTrack").textContent=cur.track;
+if(!cur.done&&cur.start){const ts=new Date(cur.start).getTime(),gc=$("gCd");gc.hidden=false;
+  const f=()=>{const m=Math.round((ts-Date.now())/60000);gc.lastChild.textContent=m<=0?"Loppen har startat":m<60?`Start om ${m} min`:m<1440?`Start om ${Math.floor(m/60)} h ${m%60} min`:`Start ${dname(cur.date)} kl ${cur.start.slice(11,16)}`};f();setInterval(f,30000)}
 if(cur.done&&(D.waiting||D.next)){const w=D.waiting;
   $("nextTitle").textContent="Nästa: "+(w?w.track+" ":"")+dname(w?w.date:D.next)+(w&&w.start?" kl "+w.start.slice(11,16):"");
   $("nextText").textContent=w?"Startlistan är klar, men ATG har inte öppnat spelet än. Kupongen byggs när odds och spelprocent finns, oftast några dagar före loppen. Under tiden visas förra omgången, så du kan se hur modellen hade gått.":"Startlistan är inte publicerad än. Under tiden visas förra omgången, så du kan se hur modellen hade gått.";
@@ -1088,8 +1338,9 @@ let tt;function toast(m){$("toast").textContent=m;clearTimeout(tt);tt=setTimeout
 $("budget").addEventListener("input",renderSpel);$("facit").addEventListener("change",renderSpel);
 ["aRows","aShares","aFee"].forEach(id=>$(id).addEventListener("input",renderAndel));
 $("rlist").addEventListener("click",e=>{if(!e.target.closest("#moreRounds"))return;const l=$("rlist");l.dataset.all=l.dataset.all==="1"?"0":"1";renderHist()});
-const tabs={"t-spel":"p-spel","t-dd":"p-dd","t-kassa":"p-kassa","t-andel":"p-andel","t-hist":"p-hist","t-inst":"p-inst","t-logg":"p-logg"};
-Object.keys(tabs).forEach(t=>$(t).addEventListener("click",()=>{Object.entries(tabs).forEach(([b,p])=>{$(b).setAttribute("aria-selected",b===t);$(p).hidden=b!==t});$("gameSel").hidden=t==="t-dd"||t==="t-kassa";if(t==="t-hist"&&histDirty)renderHist()}));
+const tabs={"t-hem":"p-hem","t-spel":"p-spel","t-dd":"p-dd","t-kassa":"p-kassa","t-andel":"p-andel","t-hist":"p-hist","t-inst":"p-inst","t-logg":"p-logg"};
+Object.keys(tabs).forEach(t=>$(t).addEventListener("click",()=>goTab(t)));
+window.onTabShown=t=>{if(t==="t-hist"&&histDirty)renderHist()};
 // läget sparas inför dra-ned-uppdatering och läses in igen efteråt
 // Hämta nu: startar GitHub-hämtningen med en nyckel som bara finns på den här enheten,
 // väntar tills ny data är publicerad och laddar sedan om appen
@@ -1136,10 +1387,11 @@ $("fetchNow").addEventListener("click",async()=>{
 });
 window.v85State=()=>({budget:$("budget").value,mode:MODE,minwin:MINWIN,tab:Object.keys(tabs).find(t=>$(t).getAttribute("aria-selected")==="true")});
 let saved=null;try{saved=JSON.parse(sessionStorage.getItem("v85-state"));sessionStorage.removeItem("v85-state")}catch(e){}
-if(saved){$("budget").value=saved.budget;MODE=saved.mode;V=MODE==="s"?0.8:+MODE;MINWIN=+saved.minwin}
+if(saved&&saved.budget){$("budget").value=saved.budget;MODE=saved.mode;V=MODE==="s"?0.8:+MODE;MINWIN=+saved.minwin}
 renderWeights();renderSpel();renderHist();renderDD();
-if(saved&&saved.tab&&saved.tab!=="t-spel")$(saved.tab).click();
-if(saved)toast("Ny data från ATG, "+$("dateline").textContent.split(" · ").pop());
+document.querySelector('#dock [data-tab="t-dd"]').hidden=$("t-dd").hidden;
+if(saved&&saved.tab)goTab(saved.tab);
+if(saved&&!saved.sw)toast("Ny data från ATG, "+$("dateline").textContent.split(" · ").pop());
 }).catch(err=>{
   // nyckeln på enheten passar inte längre (koderna har bytts): be om koden igen
   if(err&&err.name==="OperationError"&&storedKey()){try{localStorage.removeItem(KEYSTORE)}catch(x){}location.reload();return}
