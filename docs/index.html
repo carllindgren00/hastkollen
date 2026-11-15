@@ -281,6 +281,7 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
   <div class="seg" role="tablist">
     <button role="tab" id="t-spel" aria-selected="true">Spel</button>
     <button role="tab" id="t-dd" aria-selected="false">Dubbel</button>
+    <button role="tab" id="t-kassa" aria-selected="false">Kassa</button>
     <button role="tab" id="t-andel" aria-selected="false">Andelar</button>
     <button role="tab" id="t-hist" aria-selected="false">Historik</button>
     <button role="tab" id="t-inst" aria-selected="false">Modell</button>
@@ -373,6 +374,60 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
       <p><strong>Färre rader med högre insats</strong>, budget 100 kr, 2026: 10 kr per rad gick in i 53–57 % av omgångarna med typisk vinst runt 115 kr. 100 kr på en enda rad gick in i 15 % med typisk vinst runt 575 kr. Totalt kom ungefär lika mycket tillbaka, 86–99 %, lite mer med färre rader.</p>
       <p>Samma ordning gällde 2025. Att väga in vad dubbelspelarna själva satsat gjorde chanserna sämre, så modellen litar på vinnaroddsen. Testet använder slutodds, så verkligheten blir något sämre, och det är ingen garanti att vinna.</p>
       <p>Samma test gjordes på Tvilling, Komb och Plats. Där hittade modellen inget som höjde återbetalningen nämnvärt, så de är inte med här.</p>
+    </div>
+  </section>
+
+  <section class="panel" id="p-kassa" hidden>
+    <div class="card" id="kStart" hidden>
+      <h2>Starta din spelkassa</h2>
+      <p>Bestäm en summa en gång, och spela sedan bara på den och det den vinner. Fyll aldrig på den. När den är slut har det kostat precis det du bestämde.</p>
+      <div class="field"><label for="kStartIn">Startkassa (kr)</label><input type="number" id="kStartIn" min="1" step="1" inputmode="numeric" value="500"></div>
+      <div class="field"><label for="kPctIn">Insats per spel (% av kassan)</label><input type="number" id="kPctIn" min="1" max="25" step="1" inputmode="numeric" value="5"></div>
+      <button class="btn primary" id="kStartBtn" type="button">Starta kassan</button>
+    </div>
+    <div id="kMain" hidden>
+      <div class="ticket">
+        <div class="ticket-head">
+          <div class="budget-row"><label>Kassan nu</label><span class="budget-val" id="kNow"></span></div>
+          <p class="modehint" id="kSub"></p>
+        </div>
+        <div class="kpis four">
+          <div><span>Insatt</span><span id="kIn"></span></div>
+          <div><span>Vunnit</span><span id="kWon"></span></div>
+          <div><span>Tillbaka</span><span id="kRet"></span></div>
+          <div><span>Förslag per spel</span><span id="kSug"></span></div>
+        </div>
+      </div>
+      <div class="next" id="kWarn" hidden><b id="kWarnTitle"></b><span id="kWarnText"></span></div>
+      <div class="card">
+        <h2>Lägg till ett spel</h2>
+        <div class="field"><label for="kGame">Spel</label><select id="kGame"><option>V85</option><option>V65</option><option>V64</option><option>GS75</option><option value="DD">Dagens Dubbel</option><option value="LD">Lunchdubbel</option><option>Annat</option></select></div>
+        <div class="field"><label for="kDate">Datum</label><input type="date" id="kDate" style="width:auto"></div>
+        <div class="field"><label for="kStake">Insats (kr)</label><input type="number" id="kStake" min="0" step="0.5" inputmode="decimal"></div>
+        <div class="field"><label for="kWin">Vinst (kr)</label><input type="number" id="kWin" min="0" step="1" inputmode="decimal" value="0"></div>
+        <button class="btn primary" id="kAdd" type="button">Spara</button>
+      </div>
+      <div class="card">
+        <h2>Per spel</h2>
+        <div class="tbl"><table id="kPer"></table></div>
+      </div>
+      <div class="card">
+        <h2>Dina spel</h2>
+        <div class="rlist" id="kList"></div>
+      </div>
+      <div class="card">
+        <h2>Säkerhetskopia</h2>
+        <p>Kassan sparas bara i den här mobilen. Kopiera säkerhetskopian ibland och spara den, till exempel i Anteckningar. Den kan läsas in igen här eller på en annan enhet.</p>
+        <div class="ticket-foot" style="padding:0;border:0">
+          <button class="btn ghost" id="kExport" type="button">Kopiera säkerhetskopia</button>
+          <button class="btn ghost" id="kImportBtn" type="button">Läs in</button>
+        </div>
+        <textarea id="kImport" hidden rows="3" style="width:100%;font:500 .8rem var(--mono);padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)" placeholder="Klistra in säkerhetskopian här"></textarea>
+        <div class="ticket-foot" style="padding:0;border:0">
+          <button class="btn ghost" id="kSettings" type="button">Ändra startkassa och procent</button>
+          <button class="btn ghost" id="kReset" type="button">Börja om</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -524,6 +579,53 @@ async function openBox(pk,box){
   return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(box.iv)},aes,b64d(box.ct))));
 }
 document.getElementById("logout").addEventListener("click",e=>{e.preventDefault();try{localStorage.removeItem(KEYSTORE)}catch(x){}location.reload()});
+// Spelkassa: sparas bara på enheten. {start, pct, bets:[{d,g,s,w}]}
+(()=>{
+  const KASSA="trav-kassa",$k=id=>document.getElementById(id);
+  const kr=n=>Math.round(n).toLocaleString("sv-SE")+" kr";
+  const NAME={DD:"Dagens Dubbel",LD:"Lunchdubbel"};
+  const load=()=>{try{return JSON.parse(localStorage.getItem(KASSA))}catch(e){return null}};
+  const save=k=>{try{localStorage.setItem(KASSA,JSON.stringify(k))}catch(e){}};
+  const note=m=>{const t=$k("toast");if(t){t.textContent=m;setTimeout(()=>{if(t.textContent===m)t.textContent=""},4000)}};
+  const today=()=>new Date().toLocaleDateString("sv-SE");
+  function render(){
+    const k=load();$k("kStart").hidden=!!k;$k("kMain").hidden=!k;if(!k)return;
+    const ins=k.bets.reduce((a,b)=>a+b.s,0),won=k.bets.reduce((a,b)=>a+b.w,0),now=k.start-ins+won;
+    $k("kNow").textContent=kr(now);$k("kNow").style.color=now>=k.start?"var(--accent)":"";
+    $k("kSub").textContent=`Startade med ${kr(k.start)} · ${now>=k.start?"plus":"minus"} ${kr(Math.abs(now-k.start))} · ${k.bets.length} spel`;
+    $k("kIn").textContent=kr(ins);$k("kWon").textContent=kr(won);
+    $k("kRet").textContent=ins?Math.round(won/ins*100)+" %":"–";
+    const sug=Math.max(0,Math.floor(now*k.pct/100/5)*5);$k("kSug").textContent=now>0?kr(Math.max(sug,Math.min(10,now))):"–";
+    const w=$k("kWarn");w.hidden=true;
+    if(now<=0){w.hidden=false;$k("kWarnTitle").textContent="Kassan är slut";$k("kWarnText").textContent="Det du bestämde att spela för är använt. Fyll inte på direkt. Vänta minst en vecka innan du bestämmer om du vill börja om.";}
+    else if(now<k.start*0.5){w.hidden=false;$k("kWarnTitle").textContent="Kassan är under hälften";$k("kWarnText").textContent="Satsa mindre per spel, och fundera på att pausa några dagar. Jaga inte förlusterna.";}
+    // per spel
+    const per={};k.bets.forEach(b=>{const p=per[b.g]=per[b.g]||{n:0,s:0,w:0,hit:0};p.n++;p.s+=b.s;p.w+=b.w;p.hit+=b.w>0});
+    $k("kPer").innerHTML=`<thead><tr><th>Spel</th><th>Antal</th><th>Insatt</th><th>Tillbaka</th></tr></thead><tbody>`+Object.entries(per).sort((a,b)=>b[1].s-a[1].s).map(([g,p])=>
+      `<tr><td><b>${NAME[g]||g}</b><small>vinst ${p.hit} av ${p.n}</small></td><td>${p.n}</td><td>${kr(p.s)}</td><td><b class="${p.w>=p.s?"good":""}">${p.s?Math.round(p.w/p.s*100):0} %</b><small>${kr(p.w)}</small></td></tr>`).join("")+`</tbody>`;
+    const list=$k("kList");list.textContent="";
+    if(!k.bets.length){const p=document.createElement("p");p.textContent="Inga spel än.";list.append(p)}
+    k.bets.map((b,i)=>[b,i]).sort((x,y)=>y[0].d.localeCompare(x[0].d)||y[1]-x[1]).forEach(([b,i])=>{
+      const row=document.createElement("div");row.className="rrow";
+      const left=document.createElement("div");const h=document.createElement("h3");h.textContent=NAME[b.g]||b.g;
+      const when=document.createElement("span");when.className="when";when.textContent=b.d+" · insats "+kr(b.s);left.append(h,when);
+      const right=document.createElement("div");right.className="pay";right.textContent=b.w?"+"+kr(b.w):"0 kr";right.style.color=b.w>=b.s?"var(--accent)":"";
+      const del=document.createElement("button");del.type="button";del.className="btn ghost";del.textContent="Ta bort";del.style.cssText="grid-column:1/-1;flex:0;min-width:0;padding:4px 10px;font-size:.78rem;justify-self:start";
+      del.addEventListener("click",()=>{const k2=load();k2.bets.splice(i,1);save(k2);render()});
+      row.append(left,right,del);list.append(row)});
+  }
+  $k("kDate").value=today();
+  $k("kStartBtn").addEventListener("click",()=>{const st=+$k("kStartIn").value,pc=+$k("kPctIn").value;if(!(st>0)){note("Skriv en startkassa");return}
+    const old=load();save({start:st,pct:Math.min(25,Math.max(1,pc||5)),bets:old?old.bets:[]});render()});
+  $k("kAdd").addEventListener("click",()=>{const s=+$k("kStake").value,w=+$k("kWin").value||0;if(!(s>0)){note("Skriv insatsen");return}
+    const k=load();k.bets.push({d:$k("kDate").value||today(),g:$k("kGame").value,s,w});save(k);$k("kStake").value="";$k("kWin").value="0";render();note("Spelet är sparat")});
+  $k("kExport").addEventListener("click",()=>{const t=localStorage.getItem(KASSA)||"";try{navigator.clipboard.writeText(t).then(()=>note("Säkerhetskopian är kopierad"),()=>note(t))}catch(e){note(t)}});
+  $k("kImportBtn").addEventListener("click",()=>{const ta=$k("kImport");if(ta.hidden){ta.hidden=false;ta.focus();return}
+    try{const k=JSON.parse(ta.value);if(!(k.start>0)||!Array.isArray(k.bets))throw 0;save({start:k.start,pct:k.pct||5,bets:k.bets});ta.value="";ta.hidden=true;render();note("Säkerhetskopian är inläst")}catch(e){note("Det gick inte att läsa säkerhetskopian")}});
+  $k("kSettings").addEventListener("click",()=>{const k=load();$k("kStartIn").value=k.start;$k("kPctIn").value=k.pct;$k("kStart").hidden=false;$k("kStartBtn").textContent="Spara";$k("kStart").scrollIntoView({behavior:"smooth"})});
+  $k("kReset").addEventListener("click",()=>{if(!confirm("Ta bort kassan och alla sparade spel på den här enheten?"))return;try{localStorage.removeItem(KASSA)}catch(e){}$k("kStartBtn").textContent="Starta kassan";render()});
+  render();
+})();
 // spelformerna: avdelningar, radpris, toppottens andel av omsättningen och lägsta vinstklass.
 // Radpriset för V65, V64 och GS75 är uppskattat ur ATG:s utdelningar (samma metod ger 0,51 kr för V85, där det är 0,50 kr).
 const GAMES={V85:{n:8,price:0.5,top:0.195,low:5},V65:{n:6,price:1,top:0.38,low:5},V64:{n:6,price:1,top:0.359,low:4},GS75:{n:7,price:1,top:0.297,low:5}};
@@ -928,8 +1030,8 @@ let tt;function toast(m){$("toast").textContent=m;clearTimeout(tt);tt=setTimeout
 $("budget").addEventListener("input",renderSpel);$("facit").addEventListener("change",renderSpel);
 ["aRows","aShares","aFee"].forEach(id=>$(id).addEventListener("input",renderAndel));
 $("rlist").addEventListener("click",e=>{if(!e.target.closest("#moreRounds"))return;const l=$("rlist");l.dataset.all=l.dataset.all==="1"?"0":"1";renderHist()});
-const tabs={"t-spel":"p-spel","t-dd":"p-dd","t-andel":"p-andel","t-hist":"p-hist","t-inst":"p-inst","t-logg":"p-logg"};
-Object.keys(tabs).forEach(t=>$(t).addEventListener("click",()=>{Object.entries(tabs).forEach(([b,p])=>{$(b).setAttribute("aria-selected",b===t);$(p).hidden=b!==t});$("gameSel").hidden=t==="t-dd";if(t==="t-hist"&&histDirty)renderHist()}));
+const tabs={"t-spel":"p-spel","t-dd":"p-dd","t-kassa":"p-kassa","t-andel":"p-andel","t-hist":"p-hist","t-inst":"p-inst","t-logg":"p-logg"};
+Object.keys(tabs).forEach(t=>$(t).addEventListener("click",()=>{Object.entries(tabs).forEach(([b,p])=>{$(b).setAttribute("aria-selected",b===t);$(p).hidden=b!==t});$("gameSel").hidden=t==="t-dd"||t==="t-kassa";if(t==="t-hist"&&histDirty)renderHist()}));
 // läget sparas inför dra-ned-uppdatering och läses in igen efteråt
 // Hämta nu: startar GitHub-hämtningen med en nyckel som bara finns på den här enheten,
 // väntar tills ny data är publicerad och laddar sedan om appen
