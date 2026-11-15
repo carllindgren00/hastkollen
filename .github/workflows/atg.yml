@@ -71,13 +71,15 @@ jobs:
         if: steps.plan.outputs.full == '1'
         run: |
           mkdir -p .work
-          for g in V85 V65 DUBBEL; do
+          for g in V85 V65 V64 GS75 DUBBEL; do
             n=$(echo $g | tr A-Z a-z); f=.work/$n.json
             # ett nytt försök efter en minut om ATG svarar fel
             python3 -I scripts/atg_v85.py .cache $f $g || { sleep 60; python3 -I scripts/atg_v85.py .cache $f $g; }
             python3 scripts/seal.py file $f docs/data/$n.enc 2> .work/seal.err || { echo "::error::$(tr '\n' ' ' < .work/seal.err)"; exit 1; }
-            # historiken sparas bara om när en omgång har avgjorts
-            if [ -f .work/$n-hist.json ]; then python3 scripts/seal.py file .work/$n-hist.json docs/data/$n-hist.enc --if-changed; fi
+            # historiken ligger per månad och sparas bara om när en omgång har avgjorts
+            for h in .work/$n-hist*.json; do
+              [ -f "$h" ] && python3 scripts/seal.py file "$h" docs/data/$(basename "$h" .json).enc --if-changed
+            done
           done
 
       # sparar loggade odds även om hämtningen ovan misslyckades

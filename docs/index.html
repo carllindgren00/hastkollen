@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Travhästarna</title>
-<meta name="description" content="Kupongförslag för V85, V65, Dagens Dubbel och Lunchdubbel, med data från ATG.">
+<meta name="description" content="Kupongförslag för V85, V65, V64, GS75, Dagens Dubbel och Lunchdubbel, med data från ATG.">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f6f7f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#101411" media="(prefers-color-scheme: dark)">
@@ -275,6 +275,8 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
   <div class="mode gamesel" id="gameSel" role="radiogroup" aria-label="Spel">
     <button type="button" data-g="V85" role="radio">V85</button>
     <button type="button" data-g="V65" role="radio">V65</button>
+    <button type="button" data-g="V64" role="radio">V64</button>
+    <button type="button" data-g="GS75" role="radio">GS75</button>
   </div>
   <div class="seg" role="tablist">
     <button role="tab" id="t-spel" aria-selected="true">Spel</button>
@@ -464,7 +466,7 @@ input:not([type=range]):not([type=checkbox]),select,textarea{font-size:16px!impo
       <h2>Så tänker modellen</h2>
       <p><strong>Vinstchans</strong> räknas från vinnaroddsen. Där spelar fler proffs, så oddsen är en skarpare bedömning än <span class="gname">V85</span>-procenten.</p>
       <p><strong>Värde</strong> är vinstchansen delad med spelprocenten på <span class="gname">V85</span>. En häst som vinner i 20 % av fallen men bara är spelad av 8 % ger mycket mer pengar när den vinner, eftersom färre delar på potten.</p>
-      <p><strong>Utdelningen</strong> uppskattas från spelprocenten och ATG:s regler: 65 % av insatserna går tillbaka till spelarna, och en fast del går till högsta vinstklassen, 19,5 % av omsättningen för 8 rätt på V85 och 38 % för 6 rätt på V65. Potten delas på alla som har samma vinnare.</p>
+      <p><strong>Utdelningen</strong> uppskattas från spelprocenten och ATG:s regler: 65 % av insatserna går tillbaka till spelarna, och en fast del går till högsta vinstklassen: 19,5 % av omsättningen för 8 rätt på V85, 38 % för 6 rätt på V65, 36 % för 6 rätt på V64 och 30 % för 7 rätt på GS75. Potten delas på alla som har samma vinnare.</p>
       <p><strong>Storvinst</strong> väljer enskilda rader i stället för ett helt system. Varje tänkbar rad får en poäng av chansen gånger värdet, och de rader som skulle betala för lite vid alla rätt tas bort. Rader med bara favoriter försvinner alltså, och pengarna går till rader som betalar stort när de går in. Du träffar mer sällan, men när du träffar är det på riktigt.</p>
       <p><strong>Kalibrering.</strong> På årets 480 lopp vann stora skrällar mer sällan än oddsen säger (1,1 % mot 1,6 %). Därför är oddsvikten 1,1 i stället för 1,0. Underspelade hästar vann ändå klart oftare än spelprocenten antyder, och det är det värdet modellen jagar.</p>
       <p><strong>Värde mot snittet</strong> jämför kupongens förväntade utdelning för <span class="gn">8</span> rätt per krona med vad en genomsnittlig spelare får. Över 1,0 betyder att du får mer tillbaka per krona än snittet när du träffar.</p>
@@ -523,8 +525,9 @@ async function openBox(pk,box){
 }
 document.getElementById("logout").addEventListener("click",e=>{e.preventDefault();try{localStorage.removeItem(KEYSTORE)}catch(x){}location.reload()});
 // spelformerna: avdelningar, radpris, toppottens andel av omsättningen och lägsta vinstklass.
-// V65:s radpris är uppskattat ur ATG:s utdelningar; kontrollera det i ATG-appen.
-const GAMES={V85:{n:8,price:0.5,top:0.195,low:5,file:"data/v85.enc",hist:"data/v85-hist.enc"},V65:{n:6,price:1,top:0.38,low:5,file:"data/v65.enc",hist:"data/v65-hist.enc"}};
+// Radpriset för V65, V64 och GS75 är uppskattat ur ATG:s utdelningar (samma metod ger 0,51 kr för V85, där det är 0,50 kr).
+const GAMES={V85:{n:8,price:0.5,top:0.195,low:5},V65:{n:6,price:1,top:0.38,low:5},V64:{n:6,price:1,top:0.359,low:4},GS75:{n:7,price:1,top:0.297,low:5}};
+for(const k in GAMES){const f=k.toLowerCase();Object.assign(GAMES[k],{file:`data/${f}.enc`,hist:`data/${f}-hist.enc`,histMonth:m=>`data/${f}-hist-${m}.enc`})}
 let GAME="V85";try{GAME=localStorage.getItem("v85-game")||"V85"}catch(e){}if(!GAMES[GAME])GAME="V85";
 const G=GAMES[GAME];
 document.querySelectorAll(".gn").forEach(e=>e.textContent=G.n);document.querySelectorAll(".gname").forEach(e=>e.textContent=GAME);
@@ -538,7 +541,9 @@ unlock().then(pk=>fetch(G.file,{cache:"no-cache"}).then(r=>{if(!r.ok)throw new E
   return r.json()}).then(box=>{
   // aktuell omgång, årets historik och dubbelspelen ligger i var sin fil
   const part=(f,opt)=>fetch(f,{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(b=>openBox(pk,b)).catch(e=>{if(opt)return {};throw e});
-  return Promise.all([openBox(pk,box),part(G.hist),part("data/dubbel.enc",true)]).then(([c,h,d])=>({...c,rounds:h.rounds,dd:d.dd||null,ld:d.ld||null}))})).then(D=>{
+  // historiken ligger per månad; listan över månader finns i hist-filen
+  const hist=part(G.hist).then(ix=>Promise.all([...ix.months].reverse().map(m=>part(G.histMonth(m),true)))).then(ms=>ms.flatMap(m=>m.rounds||[]));
+  return Promise.all([openBox(pk,box),hist,part("data/dubbel.enc",true)]).then(([c,rounds,d])=>({...c,rounds,dd:d.dd||null,ld:d.ld||null}))})).then(D=>{
 const PRICE=G.price, K8=G.top*PRICE; // andel av insatsen som går till högsta vinstklassen, per rad
 const rounds=D.rounds, cur=D.cur;
 // spelprocent normeras över de hästar som startar

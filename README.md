@@ -1,6 +1,6 @@
 # Travhästarna
 
-Webbapp med kupongförslag för V85, V65, Dagens Dubbel och Lunchdubbel, med data från ATG.
+Webbapp med kupongförslag för V85, V65, V64, GS75, Dagens Dubbel och Lunchdubbel, med data från ATG.
 
 Appen: https://carllindgren00.github.io/hastkollen/ (öppna i mobilen och välj "Lägg till på hemskärmen").
 
@@ -11,10 +11,10 @@ Datan är krypterad. Appen frågar efter en kod och låser upp datan i webbläsa
 - `docs/` är det GitHub Pages publicerar. `docs/index.html` är hela appen och läser den krypterade `docs/data/v85.enc` eller `docs/data/v65.enc` och loggen i `docs/data/snapshots/`.
 - `scripts/seal.py` krypterar datan. GitHub Actions har bara den publika nyckeln (`docs/data/pubkey.pem`) och kan kryptera men aldrig läsa. Den privata nyckeln ligger i `docs/data/keys.json`, krypterad en gång per kod (PBKDF2 med 600 000 varv och AES-GCM). Inga koder finns i repot eller i GitHubs inställningar.
 - Byta koder: `printf 'kod1\nkod2\n' | python3 scripts/seal.py keygen docs/data`, och kryptera sedan om datan. Alla enheter får då skriva in en kod på nytt.
-- `scripts/atg_v85.py` hämtar årets V85- eller V65-omgångar och nästa startlista från ATG:s öppna API (spelet anges som tredje argument).
+- `scripts/atg_v85.py` hämtar årets omgångar för V85, V65, V64 eller GS75 och nästa startlista från ATG:s öppna API (spelet anges som tredje argument).
   Den hämtar också jackpot (extra pengar i 8-rättspotten) och närmaste Dagens Dubbel med oddset för varje kombination.
-- `scripts/atg_snapshot.py` sparar oddsen före start för V85, V65, Dagens Dubbel och Lunchdubbel: varje halvtimme de sista 2,5 timmarna, plus en gång tidigare samma dag. Med dem kan modellen testas med de odds man faktiskt hade när man spelade.
-- Datan är uppdelad: `v85.enc`/`v65.enc` (aktuell omgång), `v85-hist.enc`/`v65-hist.enc` (årets avgjorda omgångar, sparas bara om när något ändrats) och `dubbel.enc`.
+- `scripts/atg_snapshot.py` sparar oddsen före start för V85, V65, V64, GS75, Dagens Dubbel och Lunchdubbel: varje halvtimme de sista 2,5 timmarna, plus en gång tidigare samma dag. Med dem kan modellen testas med de odds man faktiskt hade när man spelade.
+- Datan är uppdelad per spel: `v85.enc` (aktuell omgång), `v85-hist.enc` (lista över månader) och `v85-hist-ÅÅÅÅ-MM.enc` (avgjorda omgångar per månad, sparas bara om när något ändrats), samma för v65, v64 och gs75, plus `dubbel.enc`.
 - `scripts/notify.py` schemalägger en notis via ntfy.sh 30 minuter före start för alla fyra spelen. Kanalnamnet ligger som hemligheten `NTFY_TOPIC` i GitHub Actions; utan den skickas inget.
 - `.github/workflows/atg.yml` kör skripten på schema och sparar datan i repot. Den kan också köras för hand under Actions → "Hämta från ATG" → Run workflow.
 

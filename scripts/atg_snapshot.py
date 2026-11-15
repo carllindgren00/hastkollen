@@ -1,11 +1,11 @@
-"""Sparar ATG:s odds före start för dagens V85, V65, Dagens Dubbel och Lunchdubbel.
+"""Sparar ATG:s odds före start för dagens V85, V65, V64, GS75, Dagens Dubbel och Lunchdubbel.
 
 Användning: python3 scripts/atg_snapshot.py .work/snaps [docs/data/snapshots/files.json] [--game <id>]
 (krypteras sedan med scripts/seal.py). Körs varje halvtimme. En omgång loggas när det är högst
 150 minuter kvar till första start, plus en tidig gång samma dag, så att det går att testa
 modellen med de odds man faktiskt hade när man spelade.
 
-V85/V65: "legs" är en text per avdelning, "nr:vinnarodds:spelprocent,...", och "vp" pengarna i
+V-spelen: "legs" är en text per avdelning, "nr:vinnarodds:spelprocent,...", och "vp" pengarna i
 vinnarspelet per lopp. dd/ld: "legs" är "nr:vinnarodds,..." per lopp och "combo" ATG:s odds för
 varje kombination (rad = häst i första loppet).
 """
@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 
 API = "https://www.atg.se/services/racinginfo/v1/api"
 TZ = ZoneInfo("Europe/Stockholm")
-KINDS = ("V85", "V65", "dd", "ld")
+KINDS = ("V85", "V65", "V64", "GS75", "dd", "ld")
 NEAR, EARLY = 150, 600  # minuter före start
 
 

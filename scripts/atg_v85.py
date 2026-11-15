@@ -1,7 +1,8 @@
 """Hämtar V85- eller V65-data från ATG och skriver den JSON som appen Travhästarna läser.
 
-Användning: python3 scripts/atg_v85.py <cachekatalog> .work/v85.json [V85|V65|DUBBEL]  (krypteras sedan med scripts/seal.py)
-V85/V65 skriver två filer: <ut>.json med aktuell omgång och <ut>-hist.json med årets avgjorda omgångar.
+Användning: python3 scripts/atg_v85.py <cachekatalog> .work/v85.json [V85|V65|V64|GS75|DUBBEL]  (krypteras sedan med scripts/seal.py)
+V-spelen skriver <ut>.json med aktuell omgång, <ut>-hist-ÅÅÅÅ-MM.json med avgjorda omgångar per månad
+och <ut>-hist.json med listan över månader. Bara den månad som ändrats behöver sparas om.
 DUBBEL skriver närmaste Dagens Dubbel och Lunchdubbel.
 Avslutade omgångar cachas; kommande/pågående hämtas alltid om.
 """
@@ -10,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 API = "https://www.atg.se/services/racinginfo/v1/api"
 START = dt.date(2026, 1, 1)
-GAME = sys.argv[3] if len(sys.argv) > 3 else "V85"  # spelformen: V85 eller V65
+GAME = sys.argv[3] if len(sys.argv) > 3 else "V85"  # spelformen: V85, V65, V64, GS75 eller DUBBEL
 SEX = {"mare": "sto", "gelding": "valack", "stallion": "hingst"}
 
 
@@ -222,8 +223,12 @@ if __name__ == "__main__":
         print("::error::" + traceback.format_exc().replace("\n", "%0A"))
         raise
     data["game"] = GAME
-    # historiken ändras bara när en omgång avgörs, så den sparas för sig
-    dump({"game": GAME, "rounds": data.pop("rounds")}, out[:-5] + "-hist.json")
+    # historiken sparas per månad: bara månaden där en omgång avgjorts ändras
+    rounds = data.pop("rounds")
+    months = sorted({r["date"][:7] for r in rounds})
+    for m in months:
+        dump({"game": GAME, "rounds": [r for r in rounds if r["date"][:7] == m]}, f"{out[:-5]}-hist-{m}.json")
+    dump({"game": GAME, "months": months}, out[:-5] + "-hist.json")
     dump(data, out)
-    data["rounds"] = json.load(open(out[:-5] + "-hist.json"))["rounds"]
+    data["rounds"] = rounds
     print(out, len(data["rounds"]), "omgångar; aktuell", data["cur"]["id"], data["cur"]["status"], "· nästa", data["next"])
