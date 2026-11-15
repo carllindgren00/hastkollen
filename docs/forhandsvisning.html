@@ -1,265 +1,348 @@
 <!doctype html>
-<html lang="sv"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
+<meta name="theme-color" content="#050b08">
 <title>Förhandsvisning</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap">
 <style>
-body{margin:0;background:#c9d1cb;font-family:Figtree,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:16px;padding:24px 0}
+:root{
+  --bg:#050b08; --ink:#f2f7f4; --mute:#9bb0a5; --dim:#62766b;
+  --glass:rgba(255,255,255,.055); --glass2:rgba(255,255,255,.09); --line:rgba(255,255,255,.09);
+  --em:#34d399; --em2:#059669;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#020604;color:var(--ink);font-family:Figtree,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:18px;padding:28px 16px;
+  background:radial-gradient(1200px 600px at 20% -10%,#0b3b28 0%,transparent 60%),radial-gradient(900px 600px at 100% 100%,#0a2540 0%,transparent 55%),#020604}
 a{color:inherit;text-decoration:none}
-.wrap{display:flex;gap:40px;flex-wrap:wrap;justify-content:center}
-.phone{border-radius:44px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.25);width:390px;height:844px}
-.scr>*{flex-shrink:0}.scr{scrollbar-width:none}.lbl{text-align:center;font-weight:600;color:#33403a;margin-bottom:8px}
-@media(max-width:860px){.screen:not(.on){display:none}body{padding:0}.phone{border-radius:0;box-shadow:none}.lbl,.top{display:none}}
-</style></head><body>
-<div class="top" style="color:#33403a;font-weight:700;font-size:18px">Travhästarna – förslag på ny startvy (bara exempel, inga riktiga siffror)</div>
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.num{font-variant-numeric:tabular-nums}
+.top{font-weight:600;color:var(--mute);font-size:14px;letter-spacing:.02em;text-align:center}
+.wrap{display:flex;gap:48px;flex-wrap:wrap;justify-content:center}
+.lbl{text-align:center;font-weight:600;color:var(--mute);margin-bottom:10px;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+
+/* telefonen */
+.phone{position:relative;width:390px;height:844px;border-radius:48px;overflow:hidden;background:var(--bg);
+  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 0 0 10px #0d1411,0 0 0 11px rgba(255,255,255,.07),0 40px 100px rgba(0,0,0,.7)}
+.phone::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(420px 320px at 85% -5%,var(--glowA,rgba(52,211,153,.35)),transparent 70%),radial-gradient(380px 380px at -10% 45%,var(--glowB,rgba(59,130,246,.18)),transparent 70%)}
+.scroll{position:relative;z-index:1;height:100%;overflow-y:auto;padding:22px 18px 130px;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+
+/* glas */
+.card{background:var(--glass);border:1px solid var(--line);border-radius:26px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;font-size:12px;font-weight:700}
+.ok{background:rgba(52,211,153,.14);color:#6ee7b7;box-shadow:inset 0 0 0 1px rgba(52,211,153,.25)}
+.dot{width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 0 0 rgba(52,211,153,.7);animation:pulse 1.8s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 8px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+
+/* intro */
+.rise{animation:rise .7s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*70ms)}
+@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.98)}}
+
+/* hem */
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+.date{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.title{margin:4px 0 0;font-size:34px;font-weight:900;letter-spacing:-.035em;line-height:1;
+  background:linear-gradient(180deg,#fff 30%,#a7c4b5);-webkit-background-clip:text;background-clip:text;color:transparent}
+.iconbtn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--glass2);border:1px solid var(--line);transition:transform .15s}
+.iconbtn:active{transform:scale(.9)}
+.spin svg{animation:spin 1s linear}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.hero{position:relative;padding:20px;overflow:hidden;margin-bottom:12px}
+.hero::after{content:"";position:absolute;inset:-1px;border-radius:26px;padding:1px;pointer-events:none;
+  background:linear-gradient(135deg,rgba(52,211,153,.7),transparent 40%,transparent 60%,rgba(96,165,250,.5));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.k-lbl{font-size:13px;font-weight:600;color:var(--mute);display:flex;justify-content:space-between;align-items:center}
+.k-num{font-size:46px;font-weight:800;letter-spacing:-.04em;margin:6px 0 2px;line-height:1}
+.k-num small{font-size:22px;font-weight:700;color:var(--mute);margin-left:4px}
+.up{color:#6ee7b7;font-weight:700;font-size:14px}
+.spark{display:block;width:100%;height:64px;margin-top:10px}
+.spark path.l{stroke-dasharray:600;stroke-dashoffset:600;animation:draw 1.6s .3s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.next{padding:16px;display:flex;flex-direction:column;gap:6px;min-height:150px;position:relative;overflow:hidden}
+.next .cd{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1;margin-top:auto}
+.next .sub{font-size:12px;color:var(--mute);font-weight:600}
+.next h3{margin:0;font-size:16px;font-weight:800;letter-spacing:-.01em}
+.jp{background:linear-gradient(150deg,rgba(251,191,36,.22),rgba(251,191,36,.03) 60%);border-color:rgba(251,191,36,.25)}
+.jp .cd{background:linear-gradient(90deg,#fde68a,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.shine{position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.12) 45%,transparent 60%);transform:translateX(-100%);animation:shine 4s 1.2s infinite}
+@keyframes shine{30%,100%{transform:translateX(100%)}}
+
+.sec{font-size:13px;font-weight:700;color:var(--mute);letter-spacing:.08em;text-transform:uppercase;margin:22px 4px 12px}
+.timeline{padding:6px 16px}
+.tl{display:grid;grid-template-columns:52px 1fr auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.tl:last-child{border:0}
+.tl b{font-size:15px;font-weight:800}
+.tl .t{font-size:15px;font-weight:700;color:var(--mute)}
+.tl .m{font-size:12px;color:var(--dim);font-weight:600}
+.tag{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px;vertical-align:1px}
+
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 10px}
+.app{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#cfe0d6;transition:transform .18s cubic-bezier(.3,.7,.4,1.5)}
+.app:active{transform:scale(.88)}
+.ic{width:64px;height:64px;border-radius:19px;display:grid;place-items:center;font-weight:900;font-size:17px;letter-spacing:-.02em;color:#fff;position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -8px 16px rgba(0,0,0,.18),0 10px 24px -8px var(--c)}
+.ic::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.22),transparent 50%)}
+.ic.g{background:var(--glass2);border:1px solid var(--line);box-shadow:none;color:#d7e7de}
+.ic.g::after{display:none}
+.badge{position:absolute;top:-5px;right:-5px;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:#f43f5e;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;z-index:2;box-shadow:0 0 0 2px var(--bg)}
+
+/* dock */
+.dock{position:absolute;z-index:5;left:16px;right:16px;bottom:20px;height:74px;border-radius:30px;display:grid;grid-template-columns:repeat(4,1fr);align-items:center;
+  background:rgba(20,30,25,.6);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.1);box-shadow:0 20px 40px rgba(0,0,0,.5)}
+.dock a{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--dim);transition:color .2s}
+.dock a.on{color:#fff}
+.dock a.on svg{filter:drop-shadow(0 0 8px rgba(52,211,153,.8));color:#6ee7b7}
+
+/* spel */
+.s2{--glowA:rgba(59,130,246,.45);--glowB:rgba(52,211,153,.14)}
+.bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.back{display:inline-flex;align-items:center;gap:4px;height:40px;padding:0 14px 0 8px;border-radius:20px;background:var(--glass2);border:1px solid var(--line);font-weight:700;font-size:15px}
+.ghead{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.ghead .ic{width:68px;height:68px;border-radius:21px;font-size:19px}
+.ghead h1{margin:0;font-size:32px;font-weight:900;letter-spacing:-.035em;line-height:1}
+.ghead p{margin:6px 0 0;color:var(--mute);font-weight:600;font-size:14px}
+.ringcard{display:grid;grid-template-columns:128px 1fr;gap:16px;align-items:center;padding:18px}
+.ring{position:relative;width:128px;height:128px}
+.ring svg{transform:rotate(-90deg)}
+.ring .arc{transition:stroke-dashoffset 1s cubic-bezier(.3,.8,.2,1)}
+.ring .c{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring .c b{font-size:28px;font-weight:900;letter-spacing:-.03em;display:block;line-height:1}
+.ring .c span{font-size:11px;font-weight:700;color:var(--mute);letter-spacing:.06em;text-transform:uppercase}
+.stats{display:flex;flex-direction:column;gap:12px}
+.stat span{display:block;font-size:12px;color:var(--mute);font-weight:600}
+.stat b{font-size:20px;font-weight:800;letter-spacing:-.02em}
+.seg{position:relative;display:grid;grid-template-columns:repeat(3,1fr);padding:4px;border-radius:18px;background:rgba(0,0,0,.35);border:1px solid var(--line);margin:12px 0}
+.seg .ind{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/3);border-radius:14px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);box-shadow:0 6px 20px -4px rgba(59,130,246,.7);transition:transform .35s cubic-bezier(.3,.8,.2,1.15)}
+.seg button{position:relative;z-index:1;height:42px;font-weight:700;font-size:14px;color:var(--mute);transition:color .25s}
+.seg button.on{color:#fff}
+.check{padding:16px 18px}
+.check h4{margin:0 0 12px;font-size:15px;font-weight:800;display:flex;justify-content:space-between;align-items:center}
+.ci{display:grid;grid-template-columns:24px 1fr;gap:10px;font-size:14px;line-height:1.4;color:#d5e4db;margin-top:10px}
+.ci i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#34d399,#059669);box-shadow:0 0 12px rgba(52,211,153,.5);font-style:normal}
+.legs{padding:4px 14px}
+.leg{display:grid;grid-template-columns:40px 1fr;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.leg:last-child{border:0}
+.leg .n{font-size:12px;font-weight:800;color:var(--dim);letter-spacing:.06em}
+.leg .n b{display:block;font-size:20px;color:var(--ink);letter-spacing:-.02em}
+.horses{display:flex;flex-wrap:wrap;gap:8px}
+.h{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-weight:800;font-size:16px;background:rgba(96,165,250,.12);color:#bfdbfe;box-shadow:inset 0 0 0 1px rgba(96,165,250,.25);position:relative}
+.h.spik{width:auto;padding:0 12px 0 10px;gap:6px;display:flex;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;box-shadow:0 8px 20px -6px rgba(59,130,246,.8),inset 0 1px 0 rgba(255,255,255,.3)}
+.h.spik small{font-size:10px;font-weight:800;letter-spacing:.08em;opacity:.85}
+.h.val::after{content:"";position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:#fbbf24;box-shadow:0 0 0 2px var(--bg),0 0 10px #fbbf24}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--mute);font-weight:600;margin:10px 4px 0}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#fbbf24;margin-right:6px;box-shadow:0 0 8px #fbbf24}
+.cta{position:relative;margin-top:18px;width:100%;height:58px;border-radius:20px;overflow:hidden;
+  background:linear-gradient(135deg,#34d399,#059669);color:#022c1c;font-weight:800;font-size:17px;box-shadow:0 14px 34px -8px rgba(52,211,153,.7),inset 0 1px 0 rgba(255,255,255,.4);transition:transform .15s}
+.cta:active{transform:scale(.97)}
+.cta span{position:relative;z-index:1}
+.cta .shine{background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.45) 45%,transparent 60%)}
+.toast{position:absolute;z-index:9;left:50%;top:22px;transform:translate(-50%,-90px);padding:12px 18px;border-radius:18px;background:rgba(20,30,25,.85);backdrop-filter:blur(20px);border:1px solid var(--line);font-weight:700;font-size:14px;display:flex;gap:8px;align-items:center;transition:transform .45s cubic-bezier(.3,.8,.2,1.2)}
+.toast.show{transform:translate(-50%,0)}
+
+/* mobil: en skärm i taget, hela skärmen */
+@media(max-width:880px){
+  body{padding:0;gap:0}
+  .top,.lbl{display:none}
+  .screen:not(.on){display:none}
+  .phone{width:100vw;height:100vh;height:100dvh;border-radius:0;box-shadow:none}
+  .scroll{padding-top:max(22px,env(safe-area-inset-top))}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.spark path.l{stroke-dashoffset:0}}
+</style>
+</head>
+<body>
+<div class="top">Travhästarna · förslag på ny design · exempelsiffror</div>
 <div class="wrap">
-<div class="screen on" id="s-hem"><div class="lbl">Hem</div><div class="phone">
-<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 28px 16px 0; background: #eef1ed; font-family: Figtree, system-ui, sans-serif; color: #17201a; display: flex; flex-direction: column; gap: 18px; position: relative; overflow: hidden">
 
-  <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 4px">
-    <div style="display: flex; flex-direction: column; gap: 2px">
-      <span style="font-size: 13px; font-weight: 600; color: #4f5b53; text-transform: uppercase; letter-spacing: 0.06em">Söndag 15 november</span>
-      <h1 style="margin: 0; font-size: 30px; font-weight: 700; letter-spacing: -0.02em">Travhästarna</h1>
-    </div>
-    <button type="button" aria-label="Hämta nu" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: #ffffff; color: #1e6a46; display: grid; place-items: center; box-shadow: 0 1px 3px rgba(20,40,28,0.12)">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"></path><path d="M20 4v5h-5"></path></svg>
-    </button>
+<!-- ================= HEM ================= -->
+<div class="screen on" id="s-hem">
+<div class="lbl">Hem</div>
+<div class="phone">
+ <div class="scroll">
+  <div class="hdr rise" style="--i:0">
+   <div><div class="date" id="today">Söndag 15 november</div><h1 class="title">Travhästarna</h1></div>
+   <button class="iconbtn" aria-label="Hämta nu" onclick="this.classList.remove('spin');void this.offsetWidth;this.classList.add('spin')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg>
+   </button>
   </div>
 
-  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
-    <div style="height: 168px; box-sizing: border-box; border-radius: 24px; background: #1e6a46; color: #ffffff; padding: 16px; display: flex; flex-direction: column; justify-content: space-between">
-      <span style="font-size: 13px; font-weight: 600; opacity: 0.85">Kassan</span>
-      <div style="display: flex; flex-direction: column; gap: 4px">
-        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 26px; font-weight: 600; letter-spacing: -0.02em">200,00 kr</span>
-        <span style="font-size: 13px; font-weight: 500">+20,00 kr · 111 %</span>
-      </div>
-      <div style="display: flex; align-items: flex-end; gap: 4px; height: 26px" aria-hidden="true">
-        <span style="flex: 1; height: 30%; background: rgba(255,255,255,0.35); border-radius: 3px"></span>
-        <span style="flex: 1; height: 100%; background: rgba(255,255,255,0.9); border-radius: 3px"></span>
-        <span style="flex: 1; height: 20%; background: rgba(255,255,255,0.35); border-radius: 3px"></span>
-        <span style="flex: 1; height: 45%; background: rgba(255,255,255,0.35); border-radius: 3px"></span>
-        <span style="flex: 1; height: 10%; background: rgba(255,255,255,0.35); border-radius: 3px"></span>
-        <span style="flex: 1; height: 60%; background: rgba(255,255,255,0.6); border-radius: 3px"></span>
-        <span style="flex: 1; height: 15%; background: rgba(255,255,255,0.35); border-radius: 3px"></span>
-      </div>
-    </div>
-    <div style="height: 168px; box-sizing: border-box; border-radius: 24px; background: #ffffff; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 2px rgba(20,40,28,0.06)">
-      <span style="font-size: 13px; font-weight: 600; color: #4f5b53">Snart</span>
-      <div style="display: flex; flex-direction: column; gap: 2px">
-        <span style="font-size: 18px; font-weight: 700">Dagens Dubbel</span>
-        <span style="font-size: 13px; color: #4f5b53">Bergsåker · 16:48</span>
-      </div>
-      <span style="align-self: flex-start; font-size: 12px; font-weight: 600; color: #1e6a46; background: #e3efe7; padding: 5px 10px; border-radius: 99px">Ser bra ut</span>
-    </div>
+  <div class="card hero rise" style="--i:1">
+   <div class="k-lbl"><span>Spelkassa</span><span class="pill ok"><span class="dot"></span>+11 %</span></div>
+   <div class="k-num num"><span id="kassa">0,00</span><small>kr</small></div>
+   <div class="up">+20,00 kr sedan start</div>
+   <svg class="spark" viewBox="0 0 320 64" preserveAspectRatio="none">
+    <defs><linearGradient id="sg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#34d399" stop-opacity=".45"/><stop offset="1" stop-color="#34d399" stop-opacity="0"/></linearGradient></defs>
+    <path d="M0 50 L30 46 L60 52 L90 40 L120 44 L150 30 L180 36 L210 24 L240 32 L270 14 L300 18 L320 8 L320 64 L0 64Z" fill="url(#sg)"/>
+    <path class="l" d="M0 50 L30 46 L60 52 L90 40 L120 44 L150 30 L180 36 L210 24 L240 32 L270 14 L300 18 L320 8" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="320" cy="8" r="4" fill="#34d399"/>
+   </svg>
   </div>
 
-  <div style="border-radius: 24px; background: #ffffff; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 2px rgba(20,40,28,0.06)">
-    <span style="font-size: 13px; font-weight: 600; color: #4f5b53">I dag och i veckan</span>
-    <div style="display: grid; grid-template-columns: 56px 1fr auto; align-items: center; gap: 10px">
-      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600">16:48</span>
-      <span style="font-size: 15px; font-weight: 600">Dagens Dubbel <span style="font-weight: 400; color: #4f5b53">· Bergsåker</span></span>
-      <span style="font-size: 12px; color: #4f5b53">notis 16:18</span>
-    </div>
-    <div style="display: grid; grid-template-columns: 56px 1fr auto; align-items: center; gap: 10px">
-      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600">18:15</span>
-      <span style="font-size: 15px; font-weight: 600">V65 <span style="font-weight: 400; color: #4f5b53">· Orkla</span></span>
-      <span style="font-size: 12px; color: #4f5b53">notis 17:45</span>
-    </div>
-    <div style="display: grid; grid-template-columns: 56px 1fr auto; align-items: center; gap: 10px">
-      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600">lör</span>
-      <span style="font-size: 15px; font-weight: 600">V85 <span style="font-weight: 400; color: #4f5b53">· 15:00</span></span>
-      <span style="font-size: 12px; font-weight: 600; color: #8f6400">jackpot</span>
-    </div>
+  <div class="row2">
+   <a href="#spel" class="card next rise" style="--i:2">
+    <span class="pill ok" style="align-self:flex-start"><span class="dot"></span>Ser bra ut</span>
+    <h3>Dagens Dubbel</h3>
+    <span class="sub">Bergsåker · 16:48</span>
+    <span class="cd num" id="cd1">42:00</span>
+   </a>
+   <div class="card next jp rise" style="--i:3">
+    <div class="shine"></div>
+    <span class="pill" style="align-self:flex-start;background:rgba(251,191,36,.18);color:#fde68a">Jackpot</span>
+    <h3>V85 lördag</h3>
+    <span class="sub">Extra i potten</span>
+    <span class="cd num">12 Mkr</span>
+   </div>
   </div>
 
-  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 16px; column-gap: 8px; padding: 2px 4px 0">
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 6px">
-      <span style="width: 62px; height: 62px; border-radius: 16px; background: #1e6a46; color: #ffffff; display: grid; place-items: center; font-weight: 700; font-size: 17px; letter-spacing: -0.02em">V85</span>
-      <span style="font-size: 12px; font-weight: 500">V85</span>
-    </a>
-    <a href="#spel" style="display: flex; flex-direction: column; align-items: center; gap: 6px">
-      <span style="width: 62px; height: 62px; border-radius: 16px; background: #2b5c8a; color: #ffffff; display: grid; place-items: center; font-weight: 700; font-size: 17px; letter-spacing: -0.02em">V65</span>
-      <span style="font-size: 12px; font-weight: 500">V65</span>
-    </a>
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 6px">
-      <span style="width: 62px; height: 62px; border-radius: 16px; background: #5c4590; color: #ffffff; display: grid; place-items: center; font-weight: 700; font-size: 17px; letter-spacing: -0.02em">V64</span>
-      <span style="font-size: 12px; font-weight: 500">V64</span>
-    </a>
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 6px">
-      <span style="width: 62px; height: 62px; border-radius: 16px; background: #8a4a1c; color: #ffffff; display: grid; place-items: center; font-weight: 700; font-size: 15px; letter-spacing: -0.02em">GS75</span>
-      <span style="font-size: 12px; font-weight: 500">GS75</span>
-    </a>
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 6px">
-      <span style="width: 62px; height: 62px; border-radius: 16px; background: #0f6363; color: #ffffff; display: grid; place-items: center; font-weight: 700; font-size: 17px">DD</span>
-      <span style="font-size: 12px; font-weight: 500">Dagens Dubbel</span>
-    </a>
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 6px">
-      <span style="width: 62px; height: 62px; border-radius: 16px; background: #8f5a00; color: #ffffff; display: grid; place-items: center; font-weight: 700; font-size: 17px">LD</span>
-      <span style="font-size: 12px; font-weight: 500">Lunchdubbel</span>
-    </a>
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 6px">
-      <span style="width: 62px; height: 62px; border-radius: 16px; background: #ffffff; color: #1e6a46; display: grid; place-items: center; box-shadow: 0 1px 2px rgba(20,40,28,0.08)">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v12H3z"></path><path d="M3 7l2-3h14l2 3"></path><circle cx="16" cy="13" r="1.6"></circle></svg>
-      </span>
-      <span style="font-size: 12px; font-weight: 500">Kassa</span>
-    </a>
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 6px">
-      <span style="width: 62px; height: 62px; border-radius: 16px; background: #ffffff; color: #1e6a46; display: grid; place-items: center; box-shadow: 0 1px 2px rgba(20,40,28,0.08)">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 7h12M8 12h12M8 17h12"></path><circle cx="4" cy="7" r="1"></circle><circle cx="4" cy="12" r="1"></circle><circle cx="4" cy="17" r="1"></circle></svg>
-      </span>
-      <span style="font-size: 12px; font-weight: 500">Andelar</span>
-    </a>
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 6px">
-      <span style="width: 62px; height: 62px; border-radius: 16px; background: #ffffff; color: #1e6a46; display: grid; place-items: center; box-shadow: 0 1px 2px rgba(20,40,28,0.08)">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>
-      </span>
-      <span style="font-size: 12px; font-weight: 500">Historik</span>
-    </a>
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 6px">
-      <span style="width: 62px; height: 62px; border-radius: 16px; background: #ffffff; color: #1e6a46; display: grid; place-items: center; box-shadow: 0 1px 2px rgba(20,40,28,0.08)">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
-      </span>
-      <span style="font-size: 12px; font-weight: 500">Modell</span>
-    </a>
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 6px">
-      <span style="width: 62px; height: 62px; border-radius: 16px; background: #ffffff; color: #1e6a46; display: grid; place-items: center; box-shadow: 0 1px 2px rgba(20,40,28,0.08)">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"></path><path d="M9 11h6M9 15h6"></path></svg>
-      </span>
-      <span style="font-size: 12px; font-weight: 500">Logg</span>
-    </a>
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 6px">
-      <span style="width: 62px; height: 62px; border-radius: 16px; background: #ffffff; color: #1e6a46; display: grid; place-items: center; box-shadow: 0 1px 2px rgba(20,40,28,0.08)">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"></path><path d="M10.3 20a2 2 0 0 0 3.4 0"></path></svg>
-      </span>
-      <span style="font-size: 12px; font-weight: 500">Notiser</span>
-    </a>
+  <div class="sec rise" style="--i:4">I dag</div>
+  <div class="card timeline rise" style="--i:5">
+   <div class="tl"><b class="num">16:48</b><span><span class="tag" style="background:#2dd4bf;box-shadow:0 0 8px #2dd4bf"></span><b>DD</b> <span class="t">Bergsåker</span></span><span class="m">notis 16:18</span></div>
+   <div class="tl"><b class="num">18:15</b><span><span class="tag" style="background:#60a5fa;box-shadow:0 0 8px #60a5fa"></span><b>V65</b> <span class="t">Orkla</span></span><span class="m">notis 17:45</span></div>
+   <div class="tl"><b class="num">lör</b><span><span class="tag" style="background:#34d399;box-shadow:0 0 8px #34d399"></span><b>V85</b> <span class="t">Solvalla</span></span><span class="m" style="color:#fbbf24">jackpot</span></div>
   </div>
 
-  <div style="position: absolute; left: 16px; right: 16px; bottom: 22px; height: 76px; border-radius: 28px; background: rgba(255,255,255,0.78); box-shadow: 0 4px 18px rgba(20,40,28,0.10); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: center">
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #1e6a46">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9H3z"></path><path d="M9 20v-6h6v6"></path></svg>
-      <span style="font-size: 11px; font-weight: 600">Hem</span>
-    </a>
-    <a href="#spel" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #4f5b53">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg>
-      <span style="font-size: 11px; font-weight: 600">Kupong</span>
-    </a>
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #4f5b53">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v12H3z"></path><path d="M3 7l2-3h14l2 3"></path><circle cx="16" cy="13" r="1.6"></circle></svg>
-      <span style="font-size: 11px; font-weight: 600">Kassa</span>
-    </a>
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #4f5b53">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle></svg>
-      <span style="font-size: 11px; font-weight: 600">Mer</span>
-    </a>
+  <div class="sec rise" style="--i:6">Spel</div>
+  <div class="grid rise" style="--i:7">
+   <a class="app"><span class="ic" style="background:linear-gradient(135deg,#34d399,#047857);--c:#10b981">V85<span class="badge">J</span></span>V85</a>
+   <a class="app" href="#spel"><span class="ic" style="background:linear-gradient(135deg,#60a5fa,#1d4ed8);--c:#3b82f6">V65</span>V65</a>
+   <a class="app"><span class="ic" style="background:linear-gradient(135deg,#a78bfa,#6d28d9);--c:#8b5cf6">V64</span>V64</a>
+   <a class="app"><span class="ic" style="background:linear-gradient(135deg,#fb923c,#c2410c);--c:#f97316">GS75</span>GS75</a>
+   <a class="app" href="#spel"><span class="ic" style="background:linear-gradient(135deg,#2dd4bf,#0f766e);--c:#14b8a6">DD<span class="badge">1</span></span>Dagens D.</a>
+   <a class="app"><span class="ic" style="background:linear-gradient(135deg,#fbbf24,#b45309);--c:#f59e0b">LD</span>Lunch D.</a>
+   <a class="app"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/><circle cx="16.5" cy="15" r="1.4" fill="currentColor"/></svg></span>Kassa</a>
+   <a class="app"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v9l6.5 4.5"/><circle cx="12" cy="12" r="9"/></svg></span>Andelar</a>
+   <a class="app"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Historik</a>
+   <a class="app"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 5 5.6.8-4 3.9.9 5.5L12 14.6 7.1 17.2l.9-5.5-4-3.9 5.6-.8z"/></svg></span>Modell</a>
+   <a class="app"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span>Logg</a>
+   <a class="app"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>Notiser</a>
   </div>
+  <p style="text-align:center;font-size:11px;color:var(--dim);margin:26px 0 0">Spela bara för pengar du har råd att förlora · 18 år</p>
+ </div>
+ <nav class="dock">
+  <a href="#hem" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Hem</a>
+  <a href="#spel"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 6v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-6z"/></svg>Kupong</a>
+  <a><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/></svg>Kassa</a>
+  <a><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>Mer</a>
+ </nav>
 </div>
-</div></div>
-<div class="screen" id="s-spel"><div class="lbl">Efter tryck på V65 (skrolla)</div><div class="phone">
-<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 20px 16px 0; background: #eef1ed; font-family: Figtree, system-ui, sans-serif; color: #17201a; display: flex; flex-direction: column; gap: 14px; position: relative; overflow-y: auto" class="scr">
-
-  <div style="display: flex; justify-content: space-between; align-items: center">
-    <a href="#hem" style="display: flex; align-items: center; gap: 4px; color: #1e6a46; font-size: 16px; font-weight: 600; min-height: 44px">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
-      Hem
-    </a>
-    <button type="button" aria-label="Hämta nu" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: #ffffff; color: #1e6a46; display: grid; place-items: center; box-shadow: 0 1px 3px rgba(20,40,28,0.12)">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"></path><path d="M20 4v5h-5"></path></svg>
-    </button>
-  </div>
-
-  <div style="display: flex; align-items: center; gap: 12px">
-    <span style="width: 52px; height: 52px; border-radius: 14px; background: #2b5c8a; color: #ffffff; display: grid; place-items: center; font-weight: 700; font-size: 15px">V65</span>
-    <div style="display: flex; flex-direction: column; gap: 2px">
-      <h1 style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em">Orkla</h1>
-      <span style="font-size: 14px; color: #4f5b53">I dag 18:15 · uppdaterad 15:44</span>
-    </div>
-  </div>
-
-  <div style="border-radius: 20px; background: #ffffff; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 2px rgba(20,40,28,0.06)">
-    <div style="display: flex; justify-content: space-between; align-items: center">
-      <span style="font-size: 15px; font-weight: 700">Innan du spelar</span>
-      <span style="font-size: 12px; font-weight: 600; color: #1e6a46; background: #e3efe7; padding: 4px 10px; border-radius: 99px">Ser bra ut</span>
-    </div>
-    <div style="display: grid; grid-template-columns: 20px 1fr; gap: 8px; font-size: 14px; line-height: 1.4">
-      <span style="width: 18px; height: 18px; border-radius: 9px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font-size: 11px; font-weight: 700">✓</span>
-      <span>Oddsen är färska, uppdaterade för 4 minuter sedan.</span>
-      <span style="width: 18px; height: 18px; border-radius: 9px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font-size: 11px; font-weight: 700">✓</span>
-      <span>Kupongen betalar 1,3 gånger snittet när den går in.</span>
-      <span style="width: 18px; height: 18px; border-radius: 9px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font-size: 11px; font-weight: 700">✓</span>
-      <span>Insatsen passar kassan på 200 kr.</span>
-    </div>
-  </div>
-
-  <div style="border-radius: 20px; background: #ffffff; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 1px 2px rgba(20,40,28,0.06)">
-    <div style="display: flex; justify-content: space-between; align-items: baseline">
-      <span style="font-size: 14px; color: #4f5b53">Din budget</span>
-      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; font-weight: 600">50 kr</span>
-    </div>
-    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; background: #eef1ed; border-radius: 12px; padding: 4px">
-      <button type="button" style="border: 0; border-radius: 9px; background: transparent; color: #4f5b53; font: 600 14px Figtree, sans-serif; min-height: 40px">Max chans</button>
-      <button type="button" style="border: 0; border-radius: 9px; background: #ffffff; color: #17201a; font: 600 14px Figtree, sans-serif; min-height: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.08)">Balans</button>
-      <button type="button" style="border: 0; border-radius: 9px; background: transparent; color: #4f5b53; font: 600 14px Figtree, sans-serif; min-height: 40px">Jaga värde</button>
-    </div>
-    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
-      <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #4f5b53">Chans 6 rätt</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 600">7,8 %</span></div>
-      <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #4f5b53">Snittvinst</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 600">1 240 kr</span></div>
-      <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #4f5b53">Rader</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 600">48</span></div>
-    </div>
-  </div>
-
-  <div style="border-radius: 20px; background: #ffffff; padding: 8px 12px; display: flex; flex-direction: column; box-shadow: 0 1px 2px rgba(20,40,28,0.06)">
-    <div style="display: grid; grid-template-columns: 54px 1fr; align-items: center; gap: 8px; min-height: 40px; border-bottom: 1px solid #e3e7e2">
-      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #4f5b53">Avd 1</span>
-      <span style="display: flex; gap: 6px"><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">3</span><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">5</span></span>
-    </div>
-    <div style="display: grid; grid-template-columns: 54px 1fr; align-items: center; gap: 8px; min-height: 40px; border-bottom: 1px solid #e3e7e2">
-      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #4f5b53">Avd 2</span>
-      <span style="display: flex; gap: 6px"><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #1e6a46; color: #ffffff; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">7</span></span>
-    </div>
-    <div style="display: grid; grid-template-columns: 54px 1fr; align-items: center; gap: 8px; min-height: 40px; border-bottom: 1px solid #e3e7e2">
-      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #4f5b53">Avd 3</span>
-      <span style="display: flex; gap: 6px"><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">1</span><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">4</span><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">8</span></span>
-    </div>
-    <div style="display: grid; grid-template-columns: 54px 1fr; align-items: center; gap: 8px; min-height: 40px; border-bottom: 1px solid #e3e7e2">
-      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #4f5b53">Avd 4</span>
-      <span style="display: flex; gap: 6px"><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">2</span><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">6</span></span>
-    </div>
-    <div style="display: grid; grid-template-columns: 54px 1fr; align-items: center; gap: 8px; min-height: 40px; border-bottom: 1px solid #e3e7e2">
-      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #4f5b53">Avd 5</span>
-      <span style="display: flex; gap: 6px"><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">1</span><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">3</span><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">9</span></span>
-    </div>
-    <div style="display: grid; grid-template-columns: 54px 1fr; align-items: center; gap: 8px; min-height: 40px">
-      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #4f5b53">Avd 6</span>
-      <span style="display: flex; gap: 6px"><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">4</span><span style="min-width: 30px; height: 30px; border-radius: 8px; background: #e3efe7; color: #1e6a46; display: grid; place-items: center; font: 600 14px 'IBM Plex Mono', monospace">7</span></span>
-    </div>
-  </div>
-
-  <button type="button" style="border: 0; border-radius: 14px; background: #1e6a46; color: #ffffff; font: 600 16px Figtree, sans-serif; min-height: 52px">Kopiera kupong</button>
-
-  <div style="position: sticky; bottom: 22px; margin-top: auto; margin-bottom: 22px; height: 76px; border-radius: 28px; background: rgba(255,255,255,0.78); box-shadow: 0 4px 18px rgba(20,40,28,0.10); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: center">
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #4f5b53">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9H3z"></path><path d="M9 20v-6h6v6"></path></svg>
-      <span style="font-size: 11px; font-weight: 600">Hem</span>
-    </a>
-    <a href="#spel" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #1e6a46">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg>
-      <span style="font-size: 11px; font-weight: 600">Kupong</span>
-    </a>
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #4f5b53">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v12H3z"></path><path d="M3 7l2-3h14l2 3"></path><circle cx="16" cy="13" r="1.6"></circle></svg>
-      <span style="font-size: 11px; font-weight: 600">Kassa</span>
-    </a>
-    <a href="#hem" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #4f5b53">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle></svg>
-      <span style="font-size: 11px; font-weight: 600">Mer</span>
-    </a>
-  </div>
 </div>
-</div></div>
+
+<!-- ================= SPEL ================= -->
+<div class="screen" id="s-spel">
+<div class="lbl">Efter tryck på V65</div>
+<div class="phone s2">
+ <div class="toast" id="toast"><span class="ci" style="margin:0;grid-template-columns:22px"><i>✓</i></span>Kupongen kopierad</div>
+ <div class="scroll" id="spelScroll">
+  <div class="bar rise" style="--i:0">
+   <a href="#hem" class="back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Hem</a>
+   <button class="iconbtn" aria-label="Hämta nu" onclick="this.classList.remove('spin');void this.offsetWidth;this.classList.add('spin')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg></button>
+  </div>
+
+  <div class="ghead rise" style="--i:1">
+   <span class="ic" style="background:linear-gradient(135deg,#60a5fa,#1d4ed8);--c:#3b82f6">V65</span>
+   <div><h1>Orkla</h1><p>Start 18:15 · om <span class="num" id="cd2">2:31:00</span></p></div>
+  </div>
+
+  <div class="card ringcard rise" style="--i:2">
+   <div class="ring">
+    <svg width="128" height="128" viewBox="0 0 128 128">
+     <defs><linearGradient id="rg" x1="0" x2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs>
+     <circle cx="64" cy="64" r="54" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="12"/>
+     <circle class="arc" id="arc" cx="64" cy="64" r="54" fill="none" stroke="url(#rg)" stroke-width="12" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="339.3" style="filter:drop-shadow(0 0 6px rgba(96,165,250,.6))"/>
+    </svg>
+    <div class="c"><div><b class="num" id="pct">7,8%</b><span>6 rätt</span></div></div>
+   </div>
+   <div class="stats">
+    <div class="stat"><span>Snittvinst om träff</span><b class="num" id="avg">1 240 kr</b></div>
+    <div class="stat"><span>Rader · insats</span><b class="num" id="rows">48 · 48 kr</b></div>
+    <div class="stat"><span>Väntat tillbaka</span><b class="num" id="ret" style="color:#6ee7b7">84 %</b></div>
+   </div>
+  </div>
+
+  <div class="seg rise" style="--i:3" id="seg">
+   <span class="ind" id="ind"></span>
+   <button data-m="0">Max chans</button><button data-m="1" class="on">Balans</button><button data-m="2">Jaga värde</button>
+  </div>
+
+  <div class="card check rise" style="--i:4">
+   <h4>Innan du spelar <span class="pill ok"><span class="dot"></span>Redo</span></h4>
+   <div class="ci"><i>✓</i><span>Oddsen är färska, uppdaterade för 4 min sedan</span></div>
+   <div class="ci"><i>✓</i><span>Väntat tillbaka är över 80 %</span></div>
+   <div class="ci"><i>✓</i><span>Insatsen är under 25 % av kassan</span></div>
+  </div>
+
+  <div class="sec rise" style="--i:5">Din kupong</div>
+  <div class="card legs rise" style="--i:6">
+   <div class="leg"><span class="n">AVD<b>1</b></span><div class="horses"><span class="h">3</span><span class="h val">5</span></div></div>
+   <div class="leg"><span class="n">AVD<b>2</b></span><div class="horses"><span class="h spik">7 <small>SPIK</small></span></div></div>
+   <div class="leg"><span class="n">AVD<b>3</b></span><div class="horses"><span class="h">1</span><span class="h">4</span><span class="h val">8</span></div></div>
+   <div class="leg"><span class="n">AVD<b>4</b></span><div class="horses"><span class="h">2</span><span class="h">6</span></div></div>
+   <div class="leg"><span class="n">AVD<b>5</b></span><div class="horses"><span class="h">1</span><span class="h">3</span><span class="h val">9</span></div></div>
+   <div class="leg"><span class="n">AVD<b>6</b></span><div class="horses"><span class="h">4</span><span class="h">7</span></div></div>
+  </div>
+  <div class="legend"><span><i></i>Spelas för lite = värde</span></div>
+
+  <button class="cta" id="cta"><div class="shine"></div><span>Kopiera kupong · <span id="ctaRows">48 kr</span></span></button>
+ </div>
+ <nav class="dock">
+  <a href="#hem"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Hem</a>
+  <a href="#spel" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 6v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-6z"/></svg>Kupong</a>
+  <a><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/></svg>Kassa</a>
+  <a><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>Mer</a>
+ </nav>
+</div>
+</div>
+
 </div>
 <script>
-function show(){const t=location.hash==='#spel'?'spel':'hem';document.querySelectorAll('.screen').forEach(e=>e.classList.toggle('on',e.id==='s-'+t));scrollTo(0,0)}
+// datum
+try{const d=new Date().toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'long'});document.getElementById('today').textContent=d}catch(e){}
+
+// kassan räknas upp
+function countUp(el,to){const t0=performance.now(),dur=1400;(function f(t){const k=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-k,4);el.textContent=(to*e).toFixed(2).replace('.',',');if(k<1)requestAnimationFrame(f)})(t0)}
+
+// nedräkningar (exempel: räknat från när sidan öppnas)
+const t1=Date.now()+42*60e3, t2=Date.now()+151*60e3;
+const pad=n=>String(n).padStart(2,'0');
+function tick(){const a=Math.max(0,t1-Date.now())/1e3,b=Math.max(0,t2-Date.now())/1e3;
+  document.getElementById('cd1').textContent=pad(Math.floor(a/60))+':'+pad(Math.floor(a%60));
+  document.getElementById('cd2').textContent=Math.floor(b/3600)+':'+pad(Math.floor(b%3600/60))+':'+pad(Math.floor(b%60))}
+setInterval(tick,1000);tick();
+
+// spelstil ändrar siffrorna
+const M=[{p:14.2,avg:'610 kr',rows:'96 · 96 kr',r:'71 %'},{p:7.8,avg:'1 240 kr',rows:'48 · 48 kr',r:'84 %'},{p:3.1,avg:'4 900 kr',rows:'36 · 36 kr',r:'97 %'}];
+const C=339.3;
+function setMode(i,first){
+  document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',+b.dataset.m===i));
+  document.getElementById('ind').style.transform='translateX('+i*100+'%)';
+  const m=M[i];document.getElementById('arc').style.strokeDashoffset=C*(1-Math.min(1,m.p/20));
+  document.getElementById('pct').textContent=String(m.p).replace('.',',')+'%';
+  document.getElementById('avg').textContent=m.avg;document.getElementById('rows').textContent=m.rows;
+  document.getElementById('ret').textContent=m.r;document.getElementById('ret').style.color=parseInt(m.r)>=80?'#6ee7b7':'#fbbf24';
+  document.getElementById('ctaRows').textContent=m.rows.split('· ')[1];
+}
+document.getElementById('seg').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMode(+b.dataset.m)});
+
+document.getElementById('cta').addEventListener('click',()=>{const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)});
+
+// visa rätt skärm (mobil visar en i taget)
+let started={};
+function show(){const t=location.hash==='#spel'?'spel':'hem';const wide=innerWidth>880;
+  document.querySelectorAll('.screen').forEach(e=>e.classList.toggle('on',e.id==='s-'+t));
+  if(!wide){document.querySelectorAll('#s-'+t+' .rise').forEach(e=>{e.style.animation='none';void e.offsetWidth;e.style.animation=''})}
+  if(t==='hem'||wide){countUp(document.getElementById('kassa'),200)}
+  if(t==='spel'||wide){const a=document.getElementById('arc');a.style.strokeDashoffset=C;setTimeout(()=>setMode(document.querySelector('#seg .on')?+document.querySelector('#seg .on').dataset.m:1),300)}
+  scrollTo(0,0)}
 addEventListener('hashchange',show);show();
-</script></body></html>
+</script>
+</body>
+</html>
