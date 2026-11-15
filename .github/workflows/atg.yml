@@ -78,7 +78,7 @@ jobs:
             python3 scripts/seal.py file $f docs/data/$n.enc 2> .work/seal.err || { echo "::error::$(tr '\n' ' ' < .work/seal.err)"; exit 1; }
             # historiken ligger per månad och sparas bara om när en omgång har avgjorts
             for h in .work/$n-hist*.json; do
-              [ -f "$h" ] && python3 scripts/seal.py file "$h" docs/data/$(basename "$h" .json).enc --if-changed
+              if [ -f "$h" ]; then python3 scripts/seal.py file "$h" docs/data/$(basename "$h" .json).enc --if-changed; fi
             done
           done
 
