@@ -8,5 +8,15 @@
 "picked": "2026-11-18T12:51+01:00",
 "minsToStart": 13,
 "settled": true
+},
+{
+"id": "V65_2026-11-18_54_1",
+"kind": "V65",
+"date": "2026-11-18",
+"track": "Ålborg",
+"start": "2026-11-18T17:00:00",
+"picked": "2026-11-18T16:29+01:00",
+"minsToStart": 31,
+"settled": false
 }
 ]
