@@ -49,6 +49,16 @@ jobs:
           echo "taken=$n" >> "$GITHUB_OUTPUT"
           python3 scripts/seal.py snapshots .work/snaps docs/data/snapshots
 
+      # Provspel: väljer kuponger med flera strategier en halvtimme före start och rättar dem efteråt.
+      # Inga riktiga spel. Kupongerna och resultaten krypteras, index.json har bara spel och datum.
+      - name: Provspel
+        continue-on-error: true
+        run: |
+          python3 -I scripts/provspel.py .work/prov docs/data/prov/index.json
+          for f in .work/prov/*.json; do
+            if [ -f "$f" ]; then python3 scripts/seal.py file "$f" "docs/data/prov/$(basename "$f" .json).enc"; fi
+          done
+
       # Notis 30 minuter före start, om kanalnamnet finns som hemlighet (NTFY_TOPIC)
       - name: Schemalägg notiser
         continue-on-error: true

@@ -428,6 +428,7 @@ h2{font-size:1.25rem;font-weight:800}
     <button role="tab" id="t-hist" aria-selected="false">Historik</button>
     <button role="tab" id="t-inst" aria-selected="false">Modell</button>
     <button role="tab" id="t-logg" aria-selected="false">Logg</button>
+    <button role="tab" id="t-prov" aria-selected="false">Provspel</button>
   </div>
 
   <section class="panel" id="p-hem">
@@ -443,7 +444,7 @@ h2{font-size:1.25rem;font-weight:800}
     <div class="hsec">Kommande</div>
     <div class="gcard tl" id="hList"><p>Läser in spelen…</p></div>
     <div class="hsec">Spel och verktyg</div>
-    <div class="appgrid"><button type="button" class="app" data-go="V85"><span class="ic" style="background:linear-gradient(135deg,#34d399,#047857);--c:#10b981">V85</span><span>V85</span></button><button type="button" class="app" data-go="V65"><span class="ic" style="background:linear-gradient(135deg,#60a5fa,#1d4ed8);--c:#3b82f6">V65</span><span>V65</span></button><button type="button" class="app" data-go="V64"><span class="ic" style="background:linear-gradient(135deg,#a78bfa,#6d28d9);--c:#8b5cf6">V64</span><span>V64</span></button><button type="button" class="app" data-go="GS75"><span class="ic" style="background:linear-gradient(135deg,#fb923c,#c2410c);--c:#f97316">GS75</span><span>GS75</span></button><button type="button" class="app" data-go="DD"><span class="ic" style="background:linear-gradient(135deg,#2dd4bf,#0f766e);--c:#14b8a6">DD</span><span>Dagens D.</span></button><button type="button" class="app" data-go="LD"><span class="ic" style="background:linear-gradient(135deg,#fbbf24,#b45309);--c:#f59e0b">LD</span><span>Lunch D.</span></button><button type="button" class="app" data-tab="t-kassa"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/><circle cx="16.5" cy="15" r="1.3" fill="currentColor"/></svg></span><span>Kassa</span></button><button type="button" class="app" data-tab="t-andel"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6.5 4.5"/></svg></span><span>Andelar</span></button><button type="button" class="app" data-tab="t-hist"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span>Historik</span></button><button type="button" class="app" data-tab="t-inst"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.4 5 5.6.8-4 3.9.9 5.5L12 14.6 7.1 17.2l.9-5.5-4-3.9 5.6-.8z"/></svg></span><span>Modell</span></button><button type="button" class="app" data-tab="t-logg"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span><span>Logg</span></button><button type="button" class="app" data-tab="t-logg"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span><span>Notiser</span></button></div>
+    <div class="appgrid"><button type="button" class="app" data-go="V85"><span class="ic" style="background:linear-gradient(135deg,#34d399,#047857);--c:#10b981">V85</span><span>V85</span></button><button type="button" class="app" data-go="V65"><span class="ic" style="background:linear-gradient(135deg,#60a5fa,#1d4ed8);--c:#3b82f6">V65</span><span>V65</span></button><button type="button" class="app" data-go="V64"><span class="ic" style="background:linear-gradient(135deg,#a78bfa,#6d28d9);--c:#8b5cf6">V64</span><span>V64</span></button><button type="button" class="app" data-go="GS75"><span class="ic" style="background:linear-gradient(135deg,#fb923c,#c2410c);--c:#f97316">GS75</span><span>GS75</span></button><button type="button" class="app" data-go="DD"><span class="ic" style="background:linear-gradient(135deg,#2dd4bf,#0f766e);--c:#14b8a6">DD</span><span>Dagens D.</span></button><button type="button" class="app" data-go="LD"><span class="ic" style="background:linear-gradient(135deg,#fbbf24,#b45309);--c:#f59e0b">LD</span><span>Lunch D.</span></button><button type="button" class="app" data-tab="t-kassa"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/><circle cx="16.5" cy="15" r="1.3" fill="currentColor"/></svg></span><span>Kassa</span></button><button type="button" class="app" data-tab="t-andel"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6.5 4.5"/></svg></span><span>Andelar</span></button><button type="button" class="app" data-tab="t-hist"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span>Historik</span></button><button type="button" class="app" data-tab="t-inst"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.4 5 5.6.8-4 3.9.9 5.5L12 14.6 7.1 17.2l.9-5.5-4-3.9 5.6-.8z"/></svg></span><span>Modell</span></button><button type="button" class="app" data-tab="t-logg"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span><span>Logg och notiser</span></button><button type="button" class="app" data-tab="t-prov"><span class="ic g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v6l-5.5 9.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7.5 15h9"/></svg></span><span>Provspel</span></button></div>
   </section>
 
   <section class="panel" id="p-spel" hidden>
@@ -697,6 +698,18 @@ h2{font-size:1.25rem;font-weight:800}
       <p class="src">Källa: <a id="srcLink" href="https://www.atg.se/V85" target="_blank" rel="noopener">atg.se</a></p>
     </div>
   </section>
+  <section class="panel" id="p-prov" hidden>
+    <div class="card">
+      <h2>Provspel</h2>
+      <p>Varje omgång spelar appen på låtsas ungefär en halvtimme före start, med flera strategier och 100 kr per strategi. Inga riktiga pengar. Kupongerna väljs med de odds som gäller då, precis som när du spelar själv, och rättas automatiskt när loppen är klara.</p>
+      <p class="small" id="provStatus">Läser provspelen…</p>
+    </div>
+    <div class="card"><h2>Dagens Dubbel och Lunchdubbel</h2><div class="tbl"><table id="provDD"></table></div></div>
+    <div class="card"><h2>V85, V65, V64 och GS75</h2><div class="tbl"><table id="provV"></table></div><p class="small">Kupongerna kostar upp till 100 kr. Max chans tar de hästar som oftast vinner, Värde väger in hästar som är spelade för lite.</p></div>
+    <div class="card"><h2>Senaste omgångarna</h2><div class="rlist" id="provList"></div></div>
+    <div class="card"><p>Skillnaderna betyder lite förrän det finns minst 100–200 rättade omgångar per spelform, så ge det några veckor. 100 % betyder att strategin fått tillbaka lika mycket som den satsat.</p><p>Det är lagligt: appen läser bara ATG:s öppna odds och resultat och spelar ingenting på riktigt.</p></div>
+  </section>
+
   <footer class="disclaimer">
     <p><strong>Spela bara för pengar du har råd att förlora.</strong> Travhästarna är ett privat analysverktyg, inga speltips. Modellen bygger på historisk data och ger ingen garanti att vinna. Det mesta som satsas på V85 går förlorat, och i snitt betalas 65 % av insatsen tillbaka.</p>
     <p>18-årsgräns för spel. Behöver du pausa allt spel: <a href="https://www.spelpaus.se" target="_blank" rel="noopener">spelpaus.se</a>. Stöd och råd: <a href="https://www.stodlinjen.se" target="_blank" rel="noopener">Stödlinjen</a>, 020-81 91 00.</p>
@@ -809,8 +822,8 @@ document.querySelectorAll("#gameSel button").forEach(b=>{b.setAttribute("aria-ch
 // ===== Hemskärmen, dockan och sidbyten =====
 (()=>{
 const el=id=>document.getElementById(id);
-const PANELS={"t-hem":"p-hem","t-spel":"p-spel","t-dd":"p-dd","t-kassa":"p-kassa","t-andel":"p-andel","t-hist":"p-hist","t-inst":"p-inst","t-logg":"p-logg"};
-const TITLE={"t-spel":GAME,"t-dd":"Dubbel","t-kassa":"Spelkassa","t-andel":"Andelar · "+GAME,"t-hist":"Historik · "+GAME,"t-inst":"Modell","t-logg":"Logg och notiser"};
+const PANELS={"t-hem":"p-hem","t-spel":"p-spel","t-dd":"p-dd","t-kassa":"p-kassa","t-andel":"p-andel","t-hist":"p-hist","t-inst":"p-inst","t-logg":"p-logg","t-prov":"p-prov"};
+const TITLE={"t-spel":GAME,"t-dd":"Dubbel","t-kassa":"Spelkassa","t-andel":"Andelar · "+GAME,"t-hist":"Historik · "+GAME,"t-inst":"Modell","t-logg":"Logg och notiser","t-prov":"Provspel"};
 const COLOR={V85:"#34d399",V65:"#60a5fa",V64:"#a78bfa",GS75:"#fb923c",DD:"#2dd4bf",LD:"#fbbf24"};
 const NAME={V85:"V85",V65:"V65",V64:"V64",GS75:"GS75",DD:"Dagens Dubbel",LD:"Lunchdubbel"};
 document.body.dataset.tint="V85";el("gIc").textContent=GAME;
@@ -824,6 +837,7 @@ window.goTab=(t,opt={})=>{
   document.body.dataset.tint=t==="t-dd"?"DD":["t-spel","t-andel","t-hist","t-inst"].includes(t)?GAME:"V85";
   const p=el(PANELS[t]);p.classList.remove("enter");void p.offsetWidth;p.classList.add("enter");
   if(t==="t-hem")kassaHero();
+  if(t==="t-prov")renderProv();
   if(!opt.keepScroll)scrollTo(0,0);
   if(window.onTabShown)onTabShown(t);
 };
@@ -889,6 +903,7 @@ function renderHome(){
 }
 setInterval(()=>{const c=el("hCd");if(c&&EV[0]&&!el("p-hem").hidden)c.innerHTML=cdHTML(EV[0].ts-Date.now())},1000);
 window.homeLoad=pk=>{
+  window.__pk=pk;
   const get=f=>fetch(f,{cache:"no-cache"}).then(r=>r.ok?r.json():null).then(b=>b&&openBox(pk,b)).catch(()=>null);
   const games=["V85","V65","V64","GS75"];
   Promise.all([...games.map(g=>get(`data/${g.toLowerCase()}.enc`)),get("data/dubbel.enc")]).then(res=>{
@@ -901,6 +916,65 @@ window.homeLoad=pk=>{
     EV=ev.map(e=>({...e,ts:new Date(e.t).getTime()})).filter(e=>e.ts>Date.now()-5*60e3).sort((a,b)=>a.ts-b.ts);
     renderHome()});
 };
+// provspel: läser låtsaskupongerna och resultaten och räknar ut hur varje strategi har gått
+const PNAME={favfav:"Favorit-favorit, 1 rad",balans4:"Balans, 4 rader",balans10:"Balans, 10 rader",varde4:"Jaga värde, 4 rader",basta3:"Bästa värde, 3 rader",spikalla:"Spik favorit + alla",chans:"Max chans",varde:"Värde"};
+const PORDER=["favfav","balans4","balans10","varde4","basta3","spikalla","chans","varde"];
+const provCache=new Map();let provBusy=false;
+function provScore(pk,rs){
+  // vad varje strategi fick tillbaka: {namn:{cost,back}}
+  const out={};
+  for(const [n,s] of Object.entries(pk.strategies||{})){
+    if(pk.kind==="dd"||pk.kind==="ld"){
+      const per=100/s.rows.length;let back=0;
+      (rs.winners||[]).forEach(([a,b,o])=>{if(s.rows.some(r=>r[0]===a&&r[1]===b))back+=o*per});
+      out[n]={cost:100,back};
+    }else{
+      let c=[1];
+      s.legs.forEach((L,i)=>{const w=rs.winners[i]||[],h=L.filter(x=>w.includes(x)).length,m=L.length-h;
+        const nx=Array(c.length+1).fill(0);c.forEach((x,k)=>{nx[k]+=x*m;nx[k+1]+=x*h});c=nx});
+      let back=0;c.forEach((x,k)=>{back+=x*((rs.pay||{})[k]||0)});
+      out[n]={cost:s.cost,back};
+    }
+  }
+  return out}
+function provTable(id,rounds){
+  const agg={};
+  rounds.forEach(r=>Object.entries(r.score).forEach(([n,v])=>{const a=agg[n]=agg[n]||{n:0,cost:0,back:0,hit:0};a.n++;a.cost+=v.cost;a.back+=v.back;a.hit+=v.back>0}));
+  const keys=PORDER.filter(k=>agg[k]);
+  el(id).innerHTML=!keys.length?"<tbody><tr><td>Inga rättade omgångar än.</td></tr></tbody>":
+    `<thead><tr><th>Strategi</th><th>Omg</th><th>Träff</th><th>Tillbaka</th></tr></thead><tbody>`+
+    keys.map(k=>{const a=agg[k],pct=a.cost?Math.round(a.back/a.cost*100):0;
+      return `<tr><td><b>${PNAME[k]}</b><small>${Math.round(a.cost)} kr in · ${Math.round(a.back)} kr ut</small></td><td>${a.n}</td><td>${Math.round(a.hit/a.n*100)} %</td><td><b class="${pct>=100?"good":""}">${pct} %</b></td></tr>`}).join("")+"</tbody>"}
+async function renderProv(){
+  if(provBusy)return;provBusy=true;
+  const st=el("provStatus");
+  try{
+    const pk=window.__pk;if(!pk){st.textContent="Provspelen visas när appen har läst in datan.";return}
+    const idx=await fetch("data/prov/index.json",{cache:"no-cache"}).then(r=>r.ok?r.json():[]).catch(()=>[]);
+    const done=idx.filter(x=>x.settled===true).slice(-400),wait=idx.filter(x=>!x.settled);
+    const get=f=>fetch(f,{cache:"no-cache"}).then(r=>r.ok?r.json():null).then(b=>b&&openBox(pk,b)).catch(()=>null);
+    const rounds=[];
+    await Promise.all(done.map(async x=>{
+      if(!provCache.has(x.id)){const [p,r]=await Promise.all([get(`data/prov/${x.id}.enc`),get(`data/prov/${x.id}-res.enc`)]);
+        if(p&&r)provCache.set(x.id,{...x,jackpot:p.jackpot||0,score:provScore(p,r)})}
+      const v=provCache.get(x.id);if(v)rounds.push(v)}));
+    rounds.sort((a,b)=>a.start.localeCompare(b.start));
+    const dub=rounds.filter(r=>r.kind==="dd"||r.kind==="ld"),vs=rounds.filter(r=>!(r.kind==="dd"||r.kind==="ld"));
+    provTable("provDD",dub);provTable("provV",vs);
+    st.textContent=idx.length?`${rounds.length} omgångar rättade${wait.length?`, ${wait.length} väntar på resultat`:""}. Första provspelet: ${idx[0].date}.`
+      :"Inga provspel än. Det första väljs ungefär en halvtimme före nästa start.";
+    const L=el("provList");L.textContent="";
+    rounds.slice(-15).reverse().forEach(r=>{
+      const best=Object.entries(r.score).filter(([n,v])=>v.back>0).sort((a,b)=>(b[1].back-b[1].cost)-(a[1].back-a[1].cost));
+      const row=document.createElement("div");row.className="rrow";
+      const left=document.createElement("div");const h=document.createElement("h3");h.textContent=(NAME[r.kind.toUpperCase()]||r.kind)+" · "+r.track;
+      const w=document.createElement("span");w.className="when";
+      w.textContent=new Date(r.start).toLocaleDateString("sv-SE",{weekday:"short",day:"numeric",month:"short"})+(best.length?" · träff: "+best.map(([n])=>PNAME[n]).join(", "):" · ingen strategi träffade");
+      left.append(h,w);const right=document.createElement("div");right.className="pay";
+      if(best.length){const [n,v]=best[0];const d=Math.round(v.back-v.cost);right.textContent=(d>=0?"+":"")+d+" kr";right.style.color=d>=0?"var(--accent)":""}else right.textContent="–";
+      row.append(left,right);L.append(row)});
+  }finally{provBusy=false}
+}
 goTab("t-hem");
 })();
 unlock().then(pk=>homeLoad(pk)||fetch(G.file,{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error(r.status);
@@ -1338,7 +1412,7 @@ let tt;function toast(m){$("toast").textContent=m;clearTimeout(tt);tt=setTimeout
 $("budget").addEventListener("input",renderSpel);$("facit").addEventListener("change",renderSpel);
 ["aRows","aShares","aFee"].forEach(id=>$(id).addEventListener("input",renderAndel));
 $("rlist").addEventListener("click",e=>{if(!e.target.closest("#moreRounds"))return;const l=$("rlist");l.dataset.all=l.dataset.all==="1"?"0":"1";renderHist()});
-const tabs={"t-hem":"p-hem","t-spel":"p-spel","t-dd":"p-dd","t-kassa":"p-kassa","t-andel":"p-andel","t-hist":"p-hist","t-inst":"p-inst","t-logg":"p-logg"};
+const tabs={"t-prov":"p-prov","t-hem":"p-hem","t-spel":"p-spel","t-dd":"p-dd","t-kassa":"p-kassa","t-andel":"p-andel","t-hist":"p-hist","t-inst":"p-inst","t-logg":"p-logg"};
 Object.keys(tabs).forEach(t=>$(t).addEventListener("click",()=>goTab(t)));
 window.onTabShown=t=>{if(t==="t-hist"&&histDirty)renderHist()};
 // läget sparas inför dra-ned-uppdatering och läses in igen efteråt
