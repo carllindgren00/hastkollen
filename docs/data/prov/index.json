@@ -28,5 +28,15 @@
 "picked": "2026-11-18T21:29+01:00",
 "minsToStart": 10,
 "settled": true
+},
+{
+"id": "V64_2026-11-19_6_4",
+"kind": "V64",
+"date": "2026-11-19",
+"track": "Åby",
+"start": "2026-11-19T19:30:00",
+"picked": "2026-11-19T18:55+01:00",
+"minsToStart": 34,
+"settled": false
 }
 ]
