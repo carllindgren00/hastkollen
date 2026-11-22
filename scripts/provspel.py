@@ -2,9 +2,10 @@
 
 Användning: python3 scripts/provspel.py .work/prov docs/data/prov/index.json
 Körs varje halvtimme av GitHub Actions. Två steg:
-  1. Välj: för dagens V85, V65, V64, GS75, Dagens Dubbel och Lunchdubbel som startar om 8–45 minuter
+  1. Välj: för dagens V85, V65, V64, GS75, Dagens Dubbel och Lunchdubbel som startar inom 2,5 timmar
      väljs en kupong per strategi med de odds som gäller just då, alltså samma odds som man själv har
-     när man spelar. Sparas som <id>.json.
+     när man spelar. Sparas som <id>.json. GitHubs schema körs ojämnt, så kupongen väljs om vid varje
+     körning fram till start; den sista före start är den som räknas.
   2. Rätta: när omgången är avgjord sparas vinnarna och utdelningen som <id>-res.json.
 Båda filerna krypteras sedan med scripts/seal.py. index.json är klartext och innehåller bara
 spel, bana, datum och om omgången är rättad, inga kuponger eller odds.
@@ -17,7 +18,7 @@ API = "https://www.atg.se/services/racinginfo/v1/api"
 TZ = ZoneInfo("Europe/Stockholm")
 KINDS = ("V85", "V65", "V64", "GS75", "dd", "ld")
 PRICE = {"V85": 0.5, "V65": 1, "V64": 1, "GS75": 1}  # kr per rad, samma som i appen
-WINDOW = (8, 45)  # minuter före första start då kupongerna väljs
+WINDOW = (5, 150)  # minuter före första start då kupongerna väljs (och väljs om)
 BUDGET = 100      # kr per omgång och strategi
 ALPHA = 1.1       # oddsvikten från kalibreringen
 
@@ -207,7 +208,7 @@ def main(out, idx_path):
     os.makedirs(out, exist_ok=True)
     os.makedirs(os.path.dirname(idx_path), exist_ok=True)
     idx = json.load(open(idx_path)) if os.path.exists(idx_path) else []
-    have = {x["id"] for x in idx}
+    have = {x["id"]: x for x in idx}
     now = dt.datetime.now(TZ)
 
     # 1. välj kuponger för spel som startar snart
@@ -219,7 +220,7 @@ def main(out, idx_path):
     for kind in KINDS:
         for c in cal.get("games", {}).get(kind, []):
             gid = c.get("id")
-            if not gid or gid in have or c.get("status") != "bettable" or not c.get("startTime"):
+            if not gid or (gid in have and have[gid].get("settled")) or c.get("status") != "bettable" or not c.get("startTime"):
                 continue
             mins = (dt.datetime.fromisoformat(c["startTime"]).replace(tzinfo=TZ) - now).total_seconds() / 60
             if not WINDOW[0] <= mins <= WINDOW[1]:
@@ -237,8 +238,11 @@ def main(out, idx_path):
             meta = {"id": gid, "kind": kind, "date": r0["date"][:10], "track": r0["track"]["name"],
                     "start": c["startTime"], "picked": now.isoformat(timespec="minutes"), "minsToStart": round(mins)}
             json.dump({**meta, **pick}, open(os.path.join(out, gid + ".json"), "w"), ensure_ascii=False)
-            idx.append({**meta, "settled": False})
-            have.add(gid)
+            if gid in have:
+                have[gid].update(picked=meta["picked"], minsToStart=meta["minsToStart"])
+            else:
+                have[gid] = {**meta, "settled": False}
+                idx.append(have[gid])
             print("Provspel valt:", gid, round(mins), "min före start")
 
     # 2. rätta omgångar som är avgjorda

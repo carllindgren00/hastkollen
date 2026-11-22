@@ -3,7 +3,7 @@ name: Hämta från ATG
 # GitHubs schema går i UTC. Svensk vintertid är UTC+1, sommartid UTC+2.
 on:
   schedule:
-    - cron: "7,37 8-20 * * *"   # varje halvtimme 09:07–21:37 vintertid, alla dagar
+    - cron: "7,22,37,52 8-20 * * *"   # var 15:e minut 09:07–21:52 vintertid. GitHub hoppar ofta över körningar, därför tätt
   workflow_dispatch:
     inputs:
       snapshot:
