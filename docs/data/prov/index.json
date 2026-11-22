@@ -57,6 +57,6 @@
 "start": "2026-11-22T18:15:00",
 "picked": "2026-11-22T18:04+01:00",
 "minsToStart": 10,
-"settled": false
+"settled": true
 }
 ]
