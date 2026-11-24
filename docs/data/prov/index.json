@@ -58,5 +58,15 @@
 "picked": "2026-11-22T18:04+01:00",
 "minsToStart": 10,
 "settled": true
+},
+{
+"id": "dd_2026-11-24_14_8",
+"kind": "dd",
+"date": "2026-11-24",
+"track": "Eskilstuna",
+"start": "2026-11-24T20:56:00",
+"picked": "2026-11-24T20:28+01:00",
+"minsToStart": 27,
+"settled": false
 }
 ]
