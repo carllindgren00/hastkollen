@@ -68,5 +68,15 @@
 "picked": "2026-11-24T20:28+01:00",
 "minsToStart": 27,
 "settled": true
+},
+{
+"id": "dd_2026-11-25_40_7",
+"kind": "dd",
+"date": "2026-11-25",
+"track": "Åby",
+"start": "2026-11-25T21:40:00",
+"picked": "2026-11-25T19:37+01:00",
+"minsToStart": 122,
+"settled": false
 }
 ]
