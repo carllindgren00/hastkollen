@@ -78,5 +78,25 @@
 "picked": "2026-11-25T19:37+01:00",
 "minsToStart": 122,
 "settled": true
+},
+{
+"id": "V64_2026-11-26_18_4",
+"kind": "V64",
+"date": "2026-11-26",
+"track": "Halmstad",
+"start": "2026-11-26T19:30:00",
+"picked": "2026-11-26T19:22+01:00",
+"minsToStart": 8,
+"settled": false
+},
+{
+"id": "dd_2026-11-26_18_8",
+"kind": "dd",
+"date": "2026-11-26",
+"track": "Halmstad",
+"start": "2026-11-26T20:56:00",
+"picked": "2026-11-26T19:22+01:00",
+"minsToStart": 94,
+"settled": false
 }
 ]
