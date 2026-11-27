@@ -87,7 +87,7 @@
 "start": "2026-11-26T19:30:00",
 "picked": "2026-11-26T19:22+01:00",
 "minsToStart": 8,
-"settled": false
+"settled": true
 },
 {
 "id": "dd_2026-11-26_18_8",
@@ -97,6 +97,6 @@
 "start": "2026-11-26T20:56:00",
 "picked": "2026-11-26T19:22+01:00",
 "minsToStart": 94,
-"settled": false
+"settled": true
 }
 ]
